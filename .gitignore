@@ -1,0 +1,30 @@
+# alignment file
+*.psl
+*.sam
+*.bam
+*.bai
+
+*.gtf
+*.gff
+*.fasta
+*.fastq
+
+# eclipse project file
+.*project
+
+*.pyc
+
+
+*.stats
+
+
+
+.~*
+
+
+*.o
+*.a
+*.so
+
+
+
