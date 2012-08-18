@@ -27,9 +27,10 @@ def get_node_fasta(dot_file, out_fasta):
     name = g.graph['name']
     
     with open(out_fasta, 'w') as fout:
-        for n, n_info in g.node:
+        for n, n_info in g.node.iteritems():
             fout.write(">%s:%s\n%s\n" % 
-                       (name, n, n_info['label'].split("(")[0]))
+                       (name, n,
+                        n_info['label'].split("(")[0]))
     
 
 def main():
@@ -40,6 +41,11 @@ def main():
     except getopt.GetoptError as err:
         print >> sys.stderr, "missing"
         sys.exit(1)
+    for opt, arg in opts:
+        if opt == '-d':
+            dot_file = arg
+        if opt == '-f':
+            out_fasta = arg
     if (not dot_file
         or not out_fasta):
         print >> sys.stderr, "missing"
@@ -48,4 +54,5 @@ def main():
     get_node_fasta(dot_file, out_fasta)
 
 
-
+if __name__ == '__main__':
+    main()

@@ -25,14 +25,53 @@ import networkx as nx
 from blat_0 import read_psl
 
 
+def get_cr_dict(rc_psl_file):
+    """
+    rc_psl_file
+        sorted by tName then by tStart
+    """
+    
+    cur_tName = None
+    cur_cr_list = None
 
+    cr_dict = {}
+    
+    for psl in read_psl(rc_psl_file):
+        if psl.tName != cur_tName:
+            cr_dict[cur_tName] = cur_cr_list
+            cur_tName = psl.tName
+            cur_cr_list = []
+        cur_cr_list.append(psl)
+    
+    del cr_dict[None]
+
+    return cr_dict
 
 
 def main():
     dot_file = None
-    if (not dot_file):
+    
+    # sorted by tName then by tStart
+    rc_psl_file = None  
+    
+    try:
+        opts, _ = getopt.getopt(sys.argv[1:], 'd:', ['rc='])
+    except getopt.GetoptError as err:
+        print >> sys.stderr, str(err)
+        sys.exit(1)
+    
+    for opt, arg in opts:
+        if opt == '-d':
+            dot_file = arg
+        if opt == '--rc':
+            rc_psl_file = arg
+    
+    if (not dot_file
+        or not rc_psl_file):
         print >> sys.stderr, "missing"
         sys.exit(1)
+    
+    cr_dict = get_cr_dict(rc_psl_file)
         
 
 if __name__ == '__main__':
