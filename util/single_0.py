@@ -15,46 +15,29 @@
 #
 #  You should have received a copy of the GNU General Public License
 
-import sys
-import getopt
 
+import getopt
+import sys
+
+from Bio import SeqIO
 import networkx as nx
 
+from blat_0 import read_psl
 
-def simplify_trinity_dot(in_file, out_file):
-    g = nx.read_dot(in_file)
-    
-    for n in g.node:
-        g.node[n] = {'label': len(g.node[n]['label'].split("(")[0])}
-        
-    for n1, n2 in g.edges():
-        g[n1][n2][0] = {}
-    
-    nx.write_dot(g, out_file)
-    
+
+
+
 
 def main():
-    in_file = None
-    out_file = None
-    try:
-        opts, _ = getopt.getopt(sys.argv[1:], 'i:o:')
-    except getopt.GetoptError as err:
-        print >> sys.stderr, str(err)
-        sys.exit(1)
-    for opt, arg in opts:
-        if opt == '-i':
-            in_file = arg
-        if opt == '-o':
-            out_file = arg
-    if (not in_file
-        or not out_file):
+    dot_file = None
+    if (not dot_file):
         print >> sys.stderr, "missing"
         sys.exit(1)
         
-    simplify_trinity_dot(in_file, out_file)
-
 
 if __name__ == '__main__':
-    main()
+    main()        
+        
+
 
 

@@ -40,9 +40,11 @@ qStarts - Comma-separated list of starting positions of each block in query
 tStarts - Comma-separated list of starting positions of each block in target 
 """
 
+
 import sys
 
 from itertools import izip
+
 
 class BlatEntry(object):
     __slots__ = ["matches", "misMatches",
