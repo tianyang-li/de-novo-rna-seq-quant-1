@@ -1,4 +1,8 @@
 de-novo-rna-seq-quant-1
 =======================
 
-De novo quantification of RNA-Seq data
+De novo quantification of RNA-Seq data.
+
+This program uses sequence graphs (splicing graphs) produced by [Trinity](http://trinityrnaseq.sourceforge.net/).
+
+The version of Trinity used here is **trinityrnaseq_r2012-06-08.tgz**.
