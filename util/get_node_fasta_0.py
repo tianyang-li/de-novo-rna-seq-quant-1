@@ -28,7 +28,7 @@ def get_node_fasta(dot_file, out_fasta):
     
     with open(out_fasta, 'w') as fout:
         for n, n_info in g.node:
-            fout.write("%s:%s\n%s\n" % 
+            fout.write(">%s:%s\n%s\n" % 
                        (name, n, n_info['label'].split("(")[0]))
     
 
