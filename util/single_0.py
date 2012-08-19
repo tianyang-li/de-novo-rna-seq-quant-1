@@ -39,7 +39,9 @@ class ReadInGraph(object):
 def get_cnr_psl(cnr_psl_file):
     cnr_psl = {}
     
-    
+    for psl in read_psl(cnr_psl_file):
+        comp, node = psl.tName.split(":")
+        cnr_psl.setdefault(comp, {}).setdefault(node, []).append(psl)
     
     return cnr_psl
 
@@ -73,7 +75,8 @@ def main():
     rcomp_psl_file = None
     
     try:
-        opts, _ = getopt.getopt(sys.argv[1:], 'd:', ['rcont='])
+        opts, _ = getopt.getopt(sys.argv[1:], 'd:',
+                                ['rcont=', 'rcomp='])
     except getopt.GetoptError as err:
         print >> sys.stderr, str(err)
         sys.exit(1)
@@ -81,8 +84,10 @@ def main():
     for opt, arg in opts:
         if opt == '-d':
             dot_file = arg
-        if opt == '--rc':
+        if opt == '--rcont':
             rcont_psl_file = arg
+        if opt == '--rcomp':
+            rcomp_psl_file = arg
     
     if (not dot_file
         or not rcont_psl_file
