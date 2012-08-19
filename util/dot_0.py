@@ -16,8 +16,20 @@
 #  You should have received a copy of the GNU General Public License
 
 """
-some functions that can be used in several places
+some functions that are required with the dot files
 """
 
+import networkx as nx
+
+def get_splice_graph(dot_file):
+    g = nx.read_dot(dot_file)
+    
+    for n in g.node:
+        g.node[n] = {'label': g.node[n]['label'].split("(")[0]}
+    
+    for n1, n2 in g.edges():
+        g[n1][n2][0] = {}
+    
+    return g
 
 
