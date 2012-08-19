@@ -39,15 +39,18 @@ class ReadInGraph(object):
         self.loc = loc
 
 
-def read_all_in_graph(read_graph):
+def read_all_in_graph(read_in_graph, rcomp_psl_file,
+                      splice_graph):
     """
-    read_graph 
+    read_in_graph 
         a dictionary containing list of where 
         the read is in the graph
     
     locate all the reads in the graph that lie
     completely within a node
     """
+    
+    
 
 
 def main():
@@ -72,7 +75,8 @@ def main():
             rcont_psl_file = arg
     
     if (not dot_file
-        or not rcont_psl_file):
+        or not rcont_psl_file
+        or not rcomp_psl_file):
         print >> sys.stderr, "missing"
         sys.exit(1)
         
