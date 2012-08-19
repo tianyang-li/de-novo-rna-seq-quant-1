@@ -25,14 +25,42 @@ import networkx as nx
 from blat_0 import read_psl
 
 
+class ReadInGraph(object):
+    __slots__ = ['graph', 'node', 'loc']
+    
+    def __init__(self, graph, node, loc):
+        # graph name
+        self.graph = graph
+        
+        # node name
+        self.node = node
+        
+        # start location of read on node
+        self.loc = loc
+
+
+def read_all_in_graph(read_graph):
+    """
+    read_graph 
+        a dictionary containing list of where 
+        the read is in the graph
+    
+    locate all the reads in the graph that lie
+    completely within a node
+    """
+
+
 def main():
     dot_file = None
     
-    # sorted by tName then by tStart
-    rc_psl_file = None  
+    # read -> contig 
+    rcont_psl_file = None  
+    
+    # read -> each node's sequence
+    rcomp_psl_file = None
     
     try:
-        opts, _ = getopt.getopt(sys.argv[1:], 'd:', ['rc='])
+        opts, _ = getopt.getopt(sys.argv[1:], 'd:', ['rcont='])
     except getopt.GetoptError as err:
         print >> sys.stderr, str(err)
         sys.exit(1)
@@ -41,10 +69,10 @@ def main():
         if opt == '-d':
             dot_file = arg
         if opt == '--rc':
-            rc_psl_file = arg
+            rcont_psl_file = arg
     
     if (not dot_file
-        or not rc_psl_file):
+        or not rcont_psl_file):
         print >> sys.stderr, "missing"
         sys.exit(1)
         
