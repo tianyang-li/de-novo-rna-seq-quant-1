@@ -19,9 +19,6 @@
 import getopt
 import sys
 
-from Bio import SeqIO
-import networkx as nx
-
 from blat_0 import read_psl
 
 
@@ -37,14 +34,27 @@ class ReadInGraph(object):
         
         # start location of read on node
         self.loc = loc
+    
+
+def get_cnr_psl(cnr_psl_file):
+    cnr_psl = {}
+    
+    
+    
+    return cnr_psl
 
 
-def read_all_in_graph(read_in_graph, rcomp_psl_file,
+def read_all_in_graph(read_in_graph, cnr_psl,
                       splice_graph):
     """
     read_in_graph 
         a dictionary containing list of where 
         the read is in the graph
+    
+    cnr_psl:
+        a dictionary where 
+            cnr_psl[graph_name][node_name]
+        is a list of psl alignment to that node
     
     locate all the reads in the graph that lie
     completely within a node
