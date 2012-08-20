@@ -62,20 +62,24 @@ def get_cnr_psl(cnr_psl_file):
 def get_ccr_psl(ccr_psl_file):
     """
     return a dictionary where
-        ccr_psl[graph][contig]
     
-    is a list of read aligned to that contig
+        ccr_psl[graph]
+    
+    is a list of read aligned to a contig 
+    in that graph
     
     1st c - comp
     2nd c - contig
     r - read
     """
     
-    ccr_psl_file = defaultdict(lambda : defaultdict(list))
+    ccr_psl = defaultdict(lambda : defaultdict(list))
     
+    for psl in read_psl(ccr_psl_file):
+        comp, subcomp, seq = psl.tName.split("_")
+        ccr_psl[comp]["%s_%s" % (subcomp, seq)].append(psl)
     
-    
-    return ccr_psl_file
+    return ccr_psl
 
 
 def read_all_in_graph(read_in_graph, cnr_psl,
@@ -126,8 +130,6 @@ def main():
         or not rcomp_psl_file):
         print >> sys.stderr, "missing"
         sys.exit(1)
-    
-    cnr_psl = get_cnr_psl(rcomp_psl_file)
         
 
 if __name__ == '__main__':
