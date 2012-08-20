@@ -18,6 +18,7 @@
 
 import getopt
 import sys
+from collections import defaultdict
 
 from blat_0 import read_psl
 
@@ -37,13 +38,44 @@ class ReadInGraph(object):
     
 
 def get_cnr_psl(cnr_psl_file):
-    cnr_psl = {}
+    """
+    return dictionary where
+    
+        cnr_psl[graph][node]
+    
+    is a list of read aligned to that node 
+    
+    c - comp
+    n - node
+    r - read
+    """
+    
+    cnr_psl = defaultdict(lambda : defaultdict(list))
     
     for psl in read_psl(cnr_psl_file):
         comp, node = psl.tName.split(":")
-        cnr_psl.setdefault(comp, {}).setdefault(node, []).append(psl)
+        cnr_psl[comp][node].append(psl)
     
     return cnr_psl
+
+
+def get_ccr_psl(ccr_psl_file):
+    """
+    return a dictionary where
+        ccr_psl[graph][contig]
+    
+    is a list of read aligned to that contig
+    
+    1st c - comp
+    2nd c - contig
+    r - read
+    """
+    
+    ccr_psl_file = defaultdict(lambda : defaultdict(list))
+    
+    
+    
+    return ccr_psl_file
 
 
 def read_all_in_graph(read_in_graph, cnr_psl,
@@ -94,6 +126,8 @@ def main():
         or not rcomp_psl_file):
         print >> sys.stderr, "missing"
         sys.exit(1)
+    
+    cnr_psl = get_cnr_psl(rcomp_psl_file)
         
 
 if __name__ == '__main__':
