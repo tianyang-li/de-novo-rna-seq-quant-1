@@ -21,20 +21,41 @@ import sys
 from collections import defaultdict
 
 from blat_0 import read_psl
+from dot_0 import get_splice_graph
+
+
+class NodeSeq(object):
+    """
+    specifies where a sequence is on
+    in a graph's node
+    
+    it is assumed that 
+    the graph this node is in
+    is already known
+    """
+    
+    __slots__ = ['node', 'start', 'end']
+    
+    def __init__(self, node, start, end):
+        """
+        start, end - Python index 
+        """
+        
+        self.node = node
+        self.start = start
+        self.end = end
 
 
 class ReadInGraph(object):
-    __slots__ = ['graph', 'node', 'loc']
+    __slots__ = ['graph', 'node_seqs']
     
     def __init__(self, graph, node, loc):
         # graph name
         self.graph = graph
         
-        # node name
-        self.node = node
-        
-        # start location of read on node
-        self.loc = loc
+        # a list of NodeSeq saying where the
+        # read is in the graph
+        self.node_seqs = []
     
 
 def get_cnr_psl(cnr_psl_file):
@@ -73,11 +94,11 @@ def get_ccr_psl(ccr_psl_file):
     r - read
     """
     
-    ccr_psl = defaultdict(lambda : defaultdict(list))
+    ccr_psl = defaultdict(list)
     
     for psl in read_psl(ccr_psl_file):
-        comp, subcomp, seq = psl.tName.split("_")
-        ccr_psl[comp]["%s_%s" % (subcomp, seq)].append(psl)
+        comp = psl.tName.split("_")[0]
+        ccr_psl[comp].append(psl)
     
     return ccr_psl
 
@@ -98,6 +119,7 @@ def read_all_in_graph(read_in_graph, cnr_psl,
     completely within a node
     """
     
+    node_psl = cnr_psl[splice_graph.name]
     
 
 
@@ -130,6 +152,14 @@ def main():
         or not rcomp_psl_file):
         print >> sys.stderr, "missing"
         sys.exit(1)
+    
+    read_in_graph = defaultdict(list)
+    
+    cnr_psl = get_cnr_psl(rcomp_psl_file)
+    
+    splice_graph = get_splice_graph(dot_file)
+    
+    read_all_in_graph(read_in_graph, cnr_psl, splice_graph)
         
 
 if __name__ == '__main__':
