@@ -103,6 +103,10 @@ def get_ccr_psl(ccr_psl_file):
     return ccr_psl
 
 
+def read_all_in_node(psl):
+    
+
+
 def read_all_in_graph(read_in_graph, cnr_psl,
                       splice_graph):
     """
@@ -123,7 +127,8 @@ def read_all_in_graph(read_in_graph, cnr_psl,
     
     for node in splice_graph.node:
         for psl in node_psl[node]:
-            if 
+            if read_all_in_node(psl):
+                read_in_graph
 
 
 def main():
