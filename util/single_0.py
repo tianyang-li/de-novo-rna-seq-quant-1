@@ -121,6 +121,9 @@ def read_all_in_graph(read_in_graph, cnr_psl,
     
     node_psl = cnr_psl[splice_graph.name]
     
+    for node in splice_graph.node:
+        for psl in node_psl[node]:
+            if 
 
 
 def main():

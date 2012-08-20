@@ -29,6 +29,9 @@ def get_splice_graph(dot_file):
     
     for n1, n2 in g.edges():
         g[n1][n2][0] = {}
+        
+    # a list of reads in this graph
+    g.graph['reads'] = []
     
     return g
 
