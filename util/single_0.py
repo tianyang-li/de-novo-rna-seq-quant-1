@@ -19,6 +19,7 @@
 import getopt
 import sys
 from collections import defaultdict
+from itertools import izip
 
 from blat_0 import read_psl
 from dot_0 import get_splice_graph
@@ -104,7 +105,21 @@ def get_ccr_psl(ccr_psl_file):
 
 
 def read_all_in_node(psl):
+    """
+    max allowed gap length is 1 bp
+    """
     
+    if psl.qSize - psl.qEnd > 1:
+        return False
+    
+    if psl.qStart > 1:
+        return False
+    
+    for i in xrange(psl.blockCount - 1):
+        if psl.qStarts[i] + psl.blockSizes[i] + 1 < psl.qStarts[i + 1]:
+            return False
+    
+    return True
 
 
 def read_all_in_graph(read_in_graph, cnr_psl,
