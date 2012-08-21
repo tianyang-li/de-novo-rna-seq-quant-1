@@ -19,7 +19,6 @@
 import getopt
 import sys
 from collections import defaultdict
-from itertools import izip
 
 from blat_0 import read_psl
 from dot_0 import get_splice_graph
@@ -117,6 +116,8 @@ def read_all_in_node(psl):
     
     for i in xrange(psl.blockCount - 1):
         if psl.qStarts[i] + psl.blockSizes[i] + 1 < psl.qStarts[i + 1]:
+            return False
+        if psl.tStarts[i] + psl.blockSizes[i] + 1 < psl.tStarts[i + 1]:
             return False
     
     return True
