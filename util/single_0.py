@@ -80,29 +80,6 @@ def get_cnr_psl(cnr_psl_file):
     return cnr_psl
 
 
-def get_ccr_psl(ccr_psl_file):
-    """
-    return a dictionary where
-    
-        ccr_psl[graph]
-    
-    is a list of read aligned to a contig 
-    in that graph
-    
-    1st c - comp
-    2nd c - contig
-    r - read
-    """
-    
-    ccr_psl = defaultdict(lambda : defaultdict(list))
-    
-    for psl in read_psl(ccr_psl_file):
-        tName = psl.tName
-        ccr_psl[tName.split("_")[0]][tName].append(psl)
-    
-    return ccr_psl
-
-
 def read_all_in_node(psl):
     """
     max allowed gap length is 1 bp
@@ -110,8 +87,14 @@ def read_all_in_node(psl):
     
     if psl.qSize - psl.qEnd > 1:
         return False
+    if (psl.qSize - psl.qEnd == 1 and
+        psl.tEnd == psl.tSize):
+        return False 
     
     if psl.qStart > 1:
+        return False
+    if (psl.qStart == 1 and
+        psl.tStart == 0):
         return False
     
     for i in xrange(psl.blockCount - 1):
@@ -119,6 +102,8 @@ def read_all_in_node(psl):
             return False
         if psl.tStarts[i] + psl.blockSizes[i] + 1 < psl.tStarts[i + 1]:
             return False
+    
+    #TODO: have I missied some cases?
     
     return True
 
