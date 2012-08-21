@@ -94,11 +94,11 @@ def get_ccr_psl(ccr_psl_file):
     r - read
     """
     
-    ccr_psl = defaultdict(list)
+    ccr_psl = defaultdict(lambda : defaultdict(list))
     
     for psl in read_psl(ccr_psl_file):
-        comp = psl.tName.split("_")[0]
-        ccr_psl[comp].append(psl)
+        tName = psl.tName
+        ccr_psl[tName.split("_")[0]][tName].append(psl)
     
     return ccr_psl
 

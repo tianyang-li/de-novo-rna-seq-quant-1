@@ -104,6 +104,9 @@ class BlatEntry(object):
                 + "".join(("%d," % x) for x in self.qStarts) + "\t"
                 + "".join(("%d," % x) for x in self.tStarts))
     
+    def __repr__(self):
+        return "qName: %s, tName: %s" % (self.qName, self.tName)
+    
     def get_tBlocks(self):
         return self._get_blocks(self.tStarts)
     

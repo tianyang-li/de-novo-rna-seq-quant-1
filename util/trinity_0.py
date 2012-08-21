@@ -24,5 +24,26 @@ from collections import defaultdict
 from Bio import SeqIO
 
 
-def get_contig_dict(trinity_out_file):
+class FastaSeq(object):
+    __slots__ = ['seq', 'info']
+    
+    def __init__(self, info, seq):
+        self.seq = seq
+        self.info = info
+    
+    def __repr__(self):
+        return self.info
+    
+    def __str__(self):
+        return ">%s\n%s\n" % (self.info, self.seq)
 
+
+def get_contig_dict(trinity_out_file):
+    contig_dict = defaultdict(lambda : defaultdict(list))
+    
+    for rec in SeqIO.parse(trinity_out_file, 'fasta'):
+        rec_id = rec.id
+        contig_dict[rec_id.split("_")[0]
+                    ][rec_id].append(FastaSeq(rec_id, str(rec.seq)))
+    
+    return contig_dict
