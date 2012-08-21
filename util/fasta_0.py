@@ -16,22 +16,23 @@
 #  You should have received a copy of the GNU General Public License
 
 """
-handles Trinity's output
+some common FASTA related stuff
 """
 
-from collections import defaultdict
 
-from Bio import SeqIO
-
-from fasta_0 import FastaSeq
-
-
-def get_contig_dict(trinity_out_file):
-    contig_dict = defaultdict(lambda : defaultdict(list))
+class FastaSeq(object):
+    __slots__ = ['seq', 'info']
     
-    for rec in SeqIO.parse(trinity_out_file, 'fasta'):
-        rec_id = rec.id
-        contig_dict[rec_id.split("_")[0]
-                    ][rec_id].append(FastaSeq(rec_id, str(rec.seq)))
+    def __init__(self, info, seq):
+        self.seq = seq
+        self.info = info
     
-    return contig_dict
+    def __repr__(self):
+        return self.info
+    
+    def __str__(self):
+        return ">%s\n%s\n" % (self.info, self.seq)
+
+
+
+
