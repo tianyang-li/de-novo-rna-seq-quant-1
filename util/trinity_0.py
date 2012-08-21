@@ -35,3 +35,5 @@ def get_contig_dict(trinity_out_file):
                     ][rec_id].append(FastaSeq(rec_id, str(rec.seq)))
     
     return contig_dict
+
+
