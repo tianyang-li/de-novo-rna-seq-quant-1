@@ -80,6 +80,29 @@ def get_cnr_psl(cnr_psl_file):
     return cnr_psl
 
 
+def get_ccr_psl(ccr_psl_file):
+    """
+    return a dictionary where
+    
+        ccr_psl[graph]
+    
+    is a list of read aligned to a contig 
+    in that graph
+    
+    1st c - comp
+    2nd c - contig
+    r - read
+    """
+    
+    ccr_psl = defaultdict(lambda : defaultdict(list))
+    
+    for psl in read_psl(ccr_psl_file):
+        tName = psl.tName
+        ccr_psl[tName.split("_")[0]][tName].append(psl)
+    
+    return ccr_psl
+
+
 def read_all_in_node(psl):
     """
     max allowed gap length is 1 bp
@@ -112,8 +135,14 @@ def read_all_in_graph(read_in_graph, cnr_psl,
                       splice_graph):
     """
     read_in_graph 
-        a dictionary containing list of where 
+        a defaultdict(lambda : defaultdict(list)) 
+        containing list of where 
         the read is in the graph
+            
+            read_in_graph[read][graph]
+        
+        is a list of alignments of read to nodes in 
+        that graph
     
     cnr_psl:
         a dictionary where 
@@ -124,12 +153,19 @@ def read_all_in_graph(read_in_graph, cnr_psl,
     completely within a node
     """
     
-    node_psl = cnr_psl[splice_graph.name]
+    comp = splice_graph.name
+    node_psl = cnr_psl[comp]
     
     for node in splice_graph.node:
         for psl in node_psl[node]:
             if read_all_in_node(psl):
-                read_in_graph
+                read_in_graph[
+                              psl.qName
+                              ][
+                                comp
+                                ].append(NodeSeq(node,
+                                                 psl.tStart - psl.qStart,
+                                                 psl.tEnd + psl.tSize - psl.tEnd))
 
 
 def main():
@@ -162,7 +198,7 @@ def main():
         print >> sys.stderr, "missing"
         sys.exit(1)
     
-    read_in_graph = defaultdict(list)
+    read_in_graph = defaultdict(lambda : defaultdict(list))
     
     cnr_psl = get_cnr_psl(rcomp_psl_file)
     
