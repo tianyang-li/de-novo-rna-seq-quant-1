@@ -48,7 +48,7 @@ class TrinityContig(FastaSeq):
 path_re = re.compile(r'path=\[(.*)\]')
 node_re = re.compile(r'')
 
-def convert_node(n):
+def convert_node_re(n):
     return (n[0], int(n[1]), int(n[2]))
 
 def get_contig_nodes(rec_decription):
@@ -56,7 +56,7 @@ def get_contig_nodes(rec_decription):
     
     nodes = path_re.search(rec_decription).group(1).split(" ")
     
-    return map(lambda n: convert_node(node_re.search(n).groups()), nodes)
+    return map(lambda n: convert_node_re(node_re.search(n).groups()), nodes)
 
 
 def get_contig_dict(trinity_out_file):
