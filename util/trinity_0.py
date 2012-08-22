@@ -19,6 +19,8 @@
 handles Trinity's output
 """
 
+from __future__ import division
+
 from collections import defaultdict
 import re
 
@@ -43,13 +45,49 @@ class TrinityContig(FastaSeq):
         super(TrinityContig, self).__init__(rec_id, seq)
         
         self.nodes = nodes
+    
+    def find_start(self, start):
+        """
+        find the node of a psl.tStart is in
+        
+        it is assumed that _start_ can always
+        find a node to fit in
+        """
+        l = 0
+        h = len(self.nodes) - 1
+        x = int((l + h) / 2)
+        while (start < self.nodes[x][1]
+               or start >= self.nodes[x][2]):
+            if start < self.nodes[x][1]:
+                h = x - 1
+            else:
+                l = x + 1
+            x = int((l + h) / 2)  
+    
+    def find_end(self, end):
+        """
+        find the node a psl.tEnd is in
+        
+        it is assumed that _end_ can always find 
+        a node to fit in
+        """
+        l = 0
+        h = len(self.nodes) - 1
+        x = int((l + h) / 2)
+        while (end <= self.nodes[x][1]
+               or end > self.nodes[x][2]):
+            if end <= self.nodes[x][1]:
+                h = x - 1
+            else:
+                l = x + 1
+            x = int((l + h) / 2)
 
 
 path_re = re.compile(r'path=\[(.*)\]')
 node_re = re.compile(r'(\w*):(\d*)-(\d*)')
 
 def convert_node_re(n):
-    return (n[0], int(n[1]), int(n[2]))
+    return (n[0], int(n[1]), int(n[2]) + 1)
 
 def get_contig_nodes(rec_decription):
     global path_re, node_re
@@ -74,7 +112,7 @@ def get_contig_dict(trinity_out_file):
     
     for rec in SeqIO.parse(trinity_out_file, 'fasta'):
         rec_id = rec.id
-        contig_dict[rec_id.split("_")[0]][rec_id] = TrinityContig(rec_id, str(rec), get_contig_nodes(rec.decription))
+        contig_dict[rec_id.split("_")[0]][rec_id] = TrinityContig(rec_id, str(rec.seq), get_contig_nodes(rec.description))
     
     return contig_dict
 

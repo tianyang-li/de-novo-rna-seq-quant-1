@@ -223,8 +223,6 @@ def main():
     contig_dict = get_contig_dict(contig_file)
     
     rcc_psl = get_rcc_psl(rcont_psl_file)
-    
-    print >> sys.stderr, "hello world"
         
 
 if __name__ == '__main__':
