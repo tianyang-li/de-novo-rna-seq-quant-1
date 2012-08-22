@@ -81,29 +81,6 @@ def get_cnr_psl(rcomp_psl_file):
     return cnr_psl
 
 
-def get_ccr_psl(rcont_psl_file):
-    """
-    return a dictionary where
-    
-        ccr_psl[graph]
-    
-    is a list of read aligned to a contig 
-    in that graph
-    
-    1st c - comp
-    2nd c - contig
-    r - read
-    """
-    
-    ccr_psl = defaultdict(lambda : defaultdict(list))
-    
-    for psl in read_psl(rcont_psl_file):
-        tName = psl.tName
-        ccr_psl[tName.split("_")[0]][tName].append(psl)
-    
-    return ccr_psl
-
-
 def read_all_in_node(psl):
     """
     max allowed gap length is 1 bp
@@ -133,6 +110,26 @@ def read_all_in_node(psl):
 
 
 def get_rcc_psl(rcont_psl_file):
+    """
+    return a defaultdict(lambda : defaultdict(list))
+    where
+    
+        rcc_psl[read][graph]
+    
+    is a list of alignments to contigs in that graph
+    
+    r - read
+    1st c - comp
+    2nd c - contig
+    """
+    
+    rcc_psl = defaultdict(lambda : defaultdict(list))
+    
+    for psl in read_psl(rcont_psl_file):
+        tName = psl.tName
+        rcc_psl[tName.split("_")[0]][tName].append(psl)
+    
+    return rcc_psl
 
 
 def read_all_in_graph(read_in_graph, cnr_psl,
@@ -166,7 +163,7 @@ def read_all_in_graph(read_in_graph, cnr_psl,
                 read_in_graph[psl.qName][comp].append([NodeSeq(node, psl.tStart - psl.qStart, psl.tEnd + psl.tSize - psl.tEnd)])
 
 
-def read_across_node(read_in_graph, ccr_psl, contig_dict):
+def read_across_node(read_in_graph, rcc_psl, contig_dict):
     """
     read_in_graph 
         a defaultdict(lambda : defaultdict(list)) 
@@ -224,6 +221,8 @@ def main():
     read_all_in_graph(read_in_graph, cnr_psl, splice_graph)
     
     contig_dict = get_contig_dict(contig_file)
+    
+    rcc_psl = get_rcc_psl(rcont_psl_file)
     
     print >> sys.stderr, "hello world"
         
