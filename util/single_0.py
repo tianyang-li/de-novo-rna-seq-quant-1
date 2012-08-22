@@ -108,23 +108,24 @@ def read_all_in_node(psl):
     max allowed gap length is 1 bp
     """
     
-    if psl.qSize - psl.qEnd > 1:
-        return False
-    if (psl.qSize - psl.qEnd == 1 and
-        psl.tEnd == psl.tSize):
-        return False 
-    
-    if psl.qStart > 1:
-        return False
-    if (psl.qStart == 1 and
-        psl.tStart == 0):
-        return False
-    
-    for i in xrange(psl.blockCount - 1):
-        if psl.qStarts[i] + psl.blockSizes[i] + 1 < psl.qStarts[i + 1]:
+    if psl.strand == '+':
+        if psl.qSize - psl.qEnd > 1:
             return False
-        if psl.tStarts[i] + psl.blockSizes[i] + 1 < psl.tStarts[i + 1]:
+        if (psl.qSize - psl.qEnd == 1 and
+            psl.tEnd == psl.tSize):
+            return False 
+        
+        if psl.qStart > 1:
             return False
+        if (psl.qStart == 1 and
+            psl.tStart == 0):
+            return False
+        
+        for i in xrange(psl.blockCount - 1):
+            if psl.qStarts[i] + psl.blockSizes[i] + 1 < psl.qStarts[i + 1]:
+                return False
+            if psl.tStarts[i] + psl.blockSizes[i] + 1 < psl.tStarts[i + 1]:
+                return False
     
     #TODO: have I missied some cases?
     
@@ -159,14 +160,11 @@ def read_all_in_graph(read_in_graph, cnr_psl,
     for node in splice_graph.node:
         for psl in node_psl[node]:
             if read_all_in_node(psl):
-                read_in_graph[
-                              psl.qName
-                              ][
-                                comp
-                                ].append(NodeSeq(node,
-                                                 psl.tStart - psl.qStart,
-                                                 psl.tEnd + psl.tSize - psl.tEnd))
-
+                if psl.strand == '+':
+                    read_in_graph[psl.qName][comp].append(NodeSeq(node, psl.tStart - psl.qStart, psl.tEnd + psl.tSize - psl.tEnd))
+                else:
+                    read_in_graph[psl.qName][comp].append(NodeSeq(node, psl.tStart - (psl.tSize - psl.tEnd), psl.tEnd + psl.qStart))
+                    
 
 def main():
     dot_file = None

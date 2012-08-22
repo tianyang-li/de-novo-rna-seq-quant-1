@@ -28,8 +28,7 @@ def get_node_fasta(dot_files):
         name = g.graph['name']
         
         for n, n_info in g.node.iteritems():
-            print ">%s:%s\n%s\n" % (name, n,
-                                    n_info['label'].split("(")[0]),
+            print ">%s:%s\n%s\n" % (name, n, n_info['label'].split("(")[0]),
 
 
 def main():
