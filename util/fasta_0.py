@@ -24,8 +24,10 @@ class FastaSeq(object):
     __slots__ = ['seq', 'info']
     
     def __init__(self, info, seq):
-        self.seq = seq
+        # info like FASTA header
         self.info = info
+        
+        self.seq = seq
     
     def __repr__(self):
         return self.info

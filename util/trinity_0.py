@@ -20,10 +20,42 @@ handles Trinity's output
 """
 
 from collections import defaultdict
+import re
 
 from Bio import SeqIO
 
 from fasta_0 import FastaSeq
+
+
+class TrinityContig(FastaSeq):
+    __slots__ = ['nodes']
+    
+    def __init__(self, rec_id, seq, nodes):
+        """
+        nodes
+            a list of
+             
+                (node, low, high)
+            
+            describing nodes in splice graph
+        """
+        
+        super(TrinityContig, self).__init__(rec_id, seq)
+        
+        self.nodes = nodes
+
+
+path_re = re.compile(r'path=\[(.*)\]')
+node_re = re.compile(r'')
+
+def get_contig_nodes(rec_decription):
+    global path_re, node_re
+    
+    nodes = path_re.search(rec_decription).group(1).split(" ")
+    
+    nodes = map(lambda n: node_re.search(n).groups, nodes)
+    
+    return map(lambda n: (n[0], int(n[1]), int(n[2])), nodes)
 
 
 def get_contig_dict(trinity_out_file):
@@ -33,7 +65,7 @@ def get_contig_dict(trinity_out_file):
         
         contig_dict[graph][contig]
     
-    is __contig__ from __graph__
+    is _contig_ from _graph_
         
     """
     
@@ -41,8 +73,7 @@ def get_contig_dict(trinity_out_file):
     
     for rec in SeqIO.parse(trinity_out_file, 'fasta'):
         rec_id = rec.id
-        contig_dict[rec_id.split("_")[0]][rec_id] = FastaSeq(rec_id,
-                                                             str(rec.seq))
+        contig_dict[rec_id.split("_")[0]][rec_id] = TrinityContig(rec_id, str(rec), get_contig_nodes(rec.decription))
     
     return contig_dict
 
