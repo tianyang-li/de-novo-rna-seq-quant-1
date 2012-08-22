@@ -53,9 +53,10 @@ def get_contig_nodes(rec_decription):
     
     nodes = path_re.search(rec_decription).group(1).split(" ")
     
-    nodes = map(lambda n: node_re.search(n).groups, nodes)
+    def convert_node(n):
+        return (n[0], int(n[1]), int(n[2]))
     
-    return map(lambda n: (n[0], int(n[1]), int(n[2])), nodes)
+    return map(lambda n: convert_node(node_re.search(n).groups()), nodes)
 
 
 def get_contig_dict(trinity_out_file):
