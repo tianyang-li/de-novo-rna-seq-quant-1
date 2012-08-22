@@ -31,8 +31,7 @@ def get_contig_dict(trinity_out_file):
     
     for rec in SeqIO.parse(trinity_out_file, 'fasta'):
         rec_id = rec.id
-        contig_dict[rec_id.split("_")[0]
-                    ][rec_id].append(FastaSeq(rec_id, str(rec.seq)))
+        contig_dict[rec_id.split("_")[0]][rec_id].append(FastaSeq(rec_id, str(rec.seq)))
     
     return contig_dict
 
