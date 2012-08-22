@@ -27,11 +27,22 @@ from fasta_0 import FastaSeq
 
 
 def get_contig_dict(trinity_out_file):
-    contig_dict = defaultdict(lambda : defaultdict(list))
+    """
+    return a defaultdict(dict)
+    where
+        
+        contig_dict[graph][contig]
+    
+    is __contig__ from __graph__
+        
+    """
+    
+    contig_dict = defaultdict(dict)
     
     for rec in SeqIO.parse(trinity_out_file, 'fasta'):
         rec_id = rec.id
-        contig_dict[rec_id.split("_")[0]][rec_id].append(FastaSeq(rec_id, str(rec.seq)))
+        contig_dict[rec_id.split("_")[0]][rec_id] = FastaSeq(rec_id,
+                                                             str(rec.seq))
     
     return contig_dict
 
