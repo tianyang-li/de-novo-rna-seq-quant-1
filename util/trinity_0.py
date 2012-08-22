@@ -46,7 +46,7 @@ class TrinityContig(FastaSeq):
 
 
 path_re = re.compile(r'path=\[(.*)\]')
-node_re = re.compile(r'')
+node_re = re.compile(r'(\w*):(\d)*-(\d*)')
 
 def convert_node_re(n):
     return (n[0], int(n[1]), int(n[2]))
