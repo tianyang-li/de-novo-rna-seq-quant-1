@@ -192,14 +192,15 @@ class PSLNodes(object):
         self.nodes = nodes
 
 
-def read_psl_across_node(comp_name, comp,
+def read_psl_across_node(read_name, read_comps,
                          read_in_graph, contig_dict):
     psl_nodes = []
     
-    for cont_name, cont_psl in comp.iteritems():
-        for psl in cont_psl:
+    for comp_name, comp_psl in read_comps.iteritems():
+        for psl in comp_psl:
             if read_psl_qOK(psl) and psl.blockCount > 1:
-                contig = contig_dict[comp_name][cont_name]
+                
+                contig = contig_dict[comp_name][psl.tName]
                 
                 start_node_i = contig.find_start(psl.tStart)
                 end_node_i = contig.find_end(psl.tEnd)
@@ -215,6 +216,8 @@ def read_psl_across_node(comp_name, comp,
                     node = contig.nodes[end_node_i] 
                     
                     nodes.append((node[0], 0, psl.tEnd - node[1]))
+                    
+                    psl_nodes.append(PSLNodes(psl, nodes))
                     
     if not psl_nodes:
         return
@@ -232,8 +235,8 @@ def read_across_node(read_in_graph, rcc_psl, contig_dict):
         that graph
     """
     
-    for comp_name, comp in rcc_psl.iteritems():
-        read_psl_across_node(comp_name, comp,
+    for read_name, read_comp in rcc_psl.iteritems():
+        read_psl_across_node(read_name, read_comp,
                              read_in_graph, contig_dict)
                     
 
