@@ -195,15 +195,27 @@ class PSLNodes(object):
 def read_psl_across_node(comp_name, comp,
                          read_in_graph, contig_dict):
     psl_nodes = []
+    
     for cont_name, cont_psl in comp.iteritems():
         for psl in cont_psl:
             if read_psl_qOK(psl) and psl.blockCount > 1:
                 contig = contig_dict[comp_name][cont_name]
+                
                 start_node_i = contig.find_start(psl.tStart)
                 end_node_i = contig.find_end(psl.tEnd)
+                
                 if start_node_i != end_node_i:
+                    node = contig.nodes[start_node_i]
                     
-
+                    nodes = [(node[0], psl.tStart - node[1], node[2] - node[1])]
+                    
+                    for node in contig.nodes[start_node_i + 1:end_node_i]:
+                        nodes.append((node[0], 0, node[2] - node[1]))
+                        
+                    node = contig.nodes[end_node_i] 
+                    
+                    nodes.append((node[0], 0, psl.tEnd - node[1]))
+                    
     if not psl_nodes:
         return
 
