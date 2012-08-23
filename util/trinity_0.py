@@ -63,7 +63,7 @@ class TrinityContig(FastaSeq):
             else:
                 l = x + 1
             x = int((l + h) / 2)  
-        return self.nodes[x]
+        return x
     
     def find_end(self, end):
         """
@@ -82,7 +82,7 @@ class TrinityContig(FastaSeq):
             else:
                 l = x + 1
             x = int((l + h) / 2)
-        return self.nodes[x]
+        return x
 
 
 path_re = re.compile(r'path=\[(.*)\]')

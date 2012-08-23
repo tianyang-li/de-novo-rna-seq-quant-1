@@ -180,9 +180,32 @@ def read_all_in_node(read_in_graph, cnr_psl,
                 read_in_graph[psl.qName][comp].append([NodeSeq(node, psl.tStart - psl.qStart, psl.tEnd + psl.tSize - psl.tEnd)])
 
 
-def read_psl_across_node(cont_psl, read_in_graph):
-    psls = [psl for psl in cont_psl if (read_psl_qOK(psl) and psl.blockCount > 1)]
+class PSLNodes(object):
+    __slots__ = ['psl', 'nodes']
     
+    def __init__(self, psl, nodes):
+        # PSL alignment
+        self.psl = psl
+        
+        # a list of 
+        #     (node, node_start, node_end)
+        self.nodes = nodes
+
+
+def read_psl_across_node(comp_name, comp,
+                         read_in_graph, contig_dict):
+    psl_nodes = []
+    for cont_name, cont_psl in comp.iteritems():
+        for psl in cont_psl:
+            if read_psl_qOK(psl) and psl.blockCount > 1:
+                contig = contig_dict[comp_name][cont_name]
+                start_node_i = contig.find_start(psl.tStart)
+                end_node_i = contig.find_end(psl.tEnd)
+                if start_node_i != end_node_i:
+                    
+
+    if not psl_nodes:
+        return
 
 def read_across_node(read_in_graph, rcc_psl, contig_dict):
     """
@@ -197,9 +220,9 @@ def read_across_node(read_in_graph, rcc_psl, contig_dict):
         that graph
     """
     
-    for comp in rcc_psl.itervalues():
-        for cont_psl in comp.itervalues():
-            read_psl_across_node(cont_psl, read_in_graph)
+    for comp_name, comp in rcc_psl.iteritems():
+        read_psl_across_node(comp_name, comp,
+                             read_in_graph, contig_dict)
                     
 
 def main():
