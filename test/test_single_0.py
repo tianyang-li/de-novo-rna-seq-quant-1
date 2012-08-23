@@ -29,14 +29,14 @@ def main():
     
     contig_dict = get_contig_dict(contig_file)
     
-    for comp_name, comp in rcc_psl.iteritems():
-        for cont_name, psls in comp.iteritems():
+    for read_name, read_comp in rcc_psl.iteritems():
+        for comp_name, psls in read_comp.iteritems():
             for psl in psls:
-                node_start = contig_dict[comp_name][cont_name].find_start(psl.tStart)
+                node_start = contig_dict[comp_name][psl.tName].find_start(psl.tStart)
                 if (psl.tStart < node_start[1] 
                     or psl.tStart >= node_start[2]):
                     print >> sys.stderr, "error"
-                node_end = contig_dict[comp_name][cont_name].find_end(psl.tEnd)
+                node_end = contig_dict[comp_name][psl.tName].find_end(psl.tEnd)
                 if (psl.tEnd <= node_end[1]
                     or psl.tEnd > node_end[2]):
                     print >> sys.stderr, "error"

@@ -126,8 +126,7 @@ def get_rcc_psl(rcont_psl_file):
     rcc_psl = defaultdict(lambda : defaultdict(list))
     
     for psl in read_psl(rcont_psl_file):
-        tName = psl.tName
-        rcc_psl[tName.split("_")[0]][tName].append(psl)
+        rcc_psl[psl.qName][psl.tName.split("_")[0]].append(psl)
     
     return rcc_psl
 
