@@ -198,7 +198,7 @@ def read_psl_across_node(read_name, read_comps,
     
     for comp_name, comp_psl in read_comps.iteritems():
         for psl in comp_psl:
-            if read_psl_qOK(psl) and psl.blockCount > 1:
+            if read_psl_qOK(psl):
                 
                 contig = contig_dict[comp_name][psl.tName]
                 
