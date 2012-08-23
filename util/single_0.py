@@ -81,26 +81,44 @@ def get_cnr_psl(rcomp_psl_file):
     return cnr_psl
 
 
-def read_psl_in_node(psl):
+def read_psl_qOK(psl):
     """
-    max allowed gap length is 1 bp
-    """
+    max allowed gap is 1 bp
     
+    only consider what the alignment is
+    like on the query sequence
+    """
+
     if psl.qSize - psl.qEnd > 1:
         return False
-    if (psl.qSize - psl.qEnd == 1 and
-        psl.tEnd == psl.tSize):
-        return False 
     
     if psl.qStart > 1:
-        return False
-    if (psl.qStart == 1 and
-        psl.tStart == 0):
         return False
     
     for i in xrange(psl.blockCount - 1):
         if psl.qStarts[i] + psl.blockSizes[i] + 1 < psl.qStarts[i + 1]:
             return False
+    
+    return True
+    
+
+def read_psl_in_node(psl):
+    """
+    max allowed gap length is 1 bp
+    """
+    
+    if not read_psl_qOK(psl):
+        return False
+    
+    if (psl.qSize - psl.qEnd == 1 and
+        psl.tEnd == psl.tSize):
+        return False 
+    
+    if (psl.qStart == 1 and
+        psl.tStart == 0):
+        return False
+    
+    for i in xrange(psl.blockCount - 1):
         if psl.tStarts[i] + psl.blockSizes[i] + 1 < psl.tStarts[i + 1]:
             return False
     
@@ -162,14 +180,9 @@ def read_all_in_node(read_in_graph, cnr_psl,
                 read_in_graph[psl.qName][comp].append([NodeSeq(node, psl.tStart - psl.qStart, psl.tEnd + psl.tSize - psl.tEnd)])
 
 
-def read_psl_across_node(psl, read_in_graph):
-    if psl.qStart > 1 or psl.qSize - psl.qEnd > 1:
-        return
+def read_psl_across_node(cont_psl, read_in_graph):
+    psls = [psl for psl in cont_psl if (read_psl_qOK(psl) and psl.blockCount > 1)]
     
-    for i in xrange(psl.blockCount - 1):
-        if psl.qStarts[i] + psl.blockSizes[i] + 1 < psl.qStarts[i + 1]:
-            return
-
 
 def read_across_node(read_in_graph, rcc_psl, contig_dict):
     """
@@ -185,9 +198,8 @@ def read_across_node(read_in_graph, rcc_psl, contig_dict):
     """
     
     for comp in rcc_psl.itervalues():
-        for cont in comp.itervalues():
-            for psl in cont:
-                read_psl_across_node(psl, read_in_graph)
+        for cont_psl in comp.itervalues():
+            read_psl_across_node(cont_psl, read_in_graph)
                     
 
 def main():
