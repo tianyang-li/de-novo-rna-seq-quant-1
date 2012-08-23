@@ -17,6 +17,7 @@
 
 import sys
 import getopt
+import re
 
 import networkx as nx
 
@@ -24,8 +25,13 @@ import networkx as nx
 def simplify_trinity_dot(in_file, out_file):
     g = nx.read_dot(in_file)
     
+    node_re = re.compile(r'(\w*)\((\w*)\)\[(\d*)\]')
+    
     for n in g.node:
-        g.node[n] = {'label': len(g.node[n]['label'].split("(")[0])}
+        label = g.node[n]['label']
+        _, name, length = node_re.search(label).groups()
+        new_n = {'label': "name:%s,len:%s" % (name, length)}
+        g.node[n] = new_n
         
     for n1, n2 in g.edges():
         g[n1][n2][0] = {}

@@ -221,6 +221,8 @@ def read_psl_across_node(read_name, read_comps,
                     
     if not psl_nodes:
         return
+    
+    print len(psl_nodes)
 
 def read_across_node(read_in_graph, rcc_psl, contig_dict):
     """
