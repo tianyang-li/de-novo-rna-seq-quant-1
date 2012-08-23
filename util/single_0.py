@@ -174,6 +174,11 @@ def read_across_node(read_in_graph, rcc_psl, contig_dict):
         is a list of alignments of read to nodes in 
         that graph
     """
+    
+    for comp in rcc_psl.itervalues():
+        for cont in comp.itervalues():
+            for psl in cont:
+                print psl.tName
                     
 
 def main():
@@ -222,6 +227,8 @@ def main():
     contig_dict = get_contig_dict(contig_file)
     
     rcc_psl = get_rcc_psl(rcont_psl_file)
+    
+    read_across_node(read_in_graph, rcc_psl, contig_dict)
         
 
 if __name__ == '__main__':
