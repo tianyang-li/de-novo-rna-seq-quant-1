@@ -81,7 +81,7 @@ def get_cnr_psl(rcomp_psl_file):
     return cnr_psl
 
 
-def read_all_in_node(psl):
+def read_psl_in_node(psl):
     """
     max allowed gap length is 1 bp
     """
@@ -131,7 +131,7 @@ def get_rcc_psl(rcont_psl_file):
     return rcc_psl
 
 
-def read_all_in_graph(read_in_graph, cnr_psl,
+def read_all_in_node(read_in_graph, cnr_psl,
                       splice_graph):
     """
     read_in_graph 
@@ -158,8 +158,17 @@ def read_all_in_graph(read_in_graph, cnr_psl,
     
     for node in splice_graph.node:
         for psl in node_psl[node]:
-            if read_all_in_node(psl):
+            if read_psl_in_node(psl):
                 read_in_graph[psl.qName][comp].append([NodeSeq(node, psl.tStart - psl.qStart, psl.tEnd + psl.tSize - psl.tEnd)])
+
+
+def read_psl_across_node(psl, read_in_graph):
+    if psl.qStart > 1 or psl.qSize - psl.qEnd > 1:
+        return
+    
+    for i in xrange(psl.blockCount - 1):
+        if psl.qStarts[i] + psl.blockSizes[i] + 1 < psl.qStarts[i + 1]:
+            return
 
 
 def read_across_node(read_in_graph, rcc_psl, contig_dict):
@@ -178,7 +187,7 @@ def read_across_node(read_in_graph, rcc_psl, contig_dict):
     for comp in rcc_psl.itervalues():
         for cont in comp.itervalues():
             for psl in cont:
-                print psl.tName
+                read_psl_across_node(psl, read_in_graph)
                     
 
 def main():
@@ -222,7 +231,7 @@ def main():
     
     splice_graph = get_splice_graph(dot_file)
     
-    read_all_in_graph(read_in_graph, cnr_psl, splice_graph)
+    read_all_in_node(read_in_graph, cnr_psl, splice_graph)
     
     contig_dict = get_contig_dict(contig_file)
     
