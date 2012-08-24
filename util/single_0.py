@@ -195,10 +195,10 @@ class PSLNodes(object):
         self.nodes = nodes
     
     def nodes_tot_len(self):
-        return sum(map(lambda n: n[2] - n[1], self.nodes))
+        return sum(map(lambda n: n.end - n.start, self.nodes))
     
     def nodes_name_tuple(self):
-        return tuple(map(lambda n: n[0], self.nodes))
+        return tuple(map(lambda n: n.node, self.nodes))
 
 
 def get_gapped_blocks_by_target(psl):
@@ -285,8 +285,22 @@ def get_contig_nodes_from_t_blocks(t_blocks, contig):
     return nodes
 
 
+def check_nodes_in_graph(nodes, graph):
+    """
+    check the list of nodes to see
+    if edges really exist
+    """
+    
+    return True
+
+
 def read_psl_across_node(read_name, read_comps,
-                         read_in_graph, contig_dict):
+                         read_in_graph, contig_dict, splice_graphs):
+    """
+    splice_graphs
+        a dict of splice graphs
+    """
+    
     for comp_name, comp_psl in read_comps.iteritems():
         psl_nodes = []
         for psl in comp_psl:
@@ -298,13 +312,20 @@ def read_psl_across_node(read_name, read_comps,
                 
                 if check_t_blocks(t_blocks, contig):
                     nodes = get_contig_nodes_from_t_blocks(t_blocks, contig)
-                    if len(nodes) > 1:
+                    
+                    if (len(nodes) > 1 and 
+                        check_nodes_in_graph(nodes, splice_graphs[comp_name])):
+                        
                         psl_nodes.append(PSLNodes(psl, nodes))
                         
         if psl_nodes:
-            return
+            nodes2psl_node = {}
+            
+            for psl_node in psl_nodes:
+                nodes2psl_node[psl_node.nodes_name_tuple()] = psl_node
+            
 
-def read_across_node(read_in_graph, rcc_psl, contig_dict):
+def read_across_node(read_in_graph, rcc_psl, contig_dict, splice_graphs):
     """
     read_in_graph 
         a defaultdict(lambda : defaultdict(list)) 
@@ -319,7 +340,8 @@ def read_across_node(read_in_graph, rcc_psl, contig_dict):
     
     for read_name, read_comp in rcc_psl.iteritems():
         read_psl_across_node(read_name, read_comp,
-                             read_in_graph, contig_dict)
+                             read_in_graph, contig_dict,
+                             splice_graphs)
                     
 
 def main():
@@ -369,7 +391,8 @@ def main():
     
     rcc_psl = get_rcc_psl(rcont_psl_file)
     
-    read_across_node(read_in_graph, rcc_psl, contig_dict)
+    read_across_node(read_in_graph, rcc_psl,
+                     contig_dict, {splice_graph.name: splice_graph})
     
     print len(read_in_graph)
         
