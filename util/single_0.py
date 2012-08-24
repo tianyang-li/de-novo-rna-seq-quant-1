@@ -208,6 +208,18 @@ def get_gapped_blocks_by_target(psl):
     """
     
     blocks = []
+    
+    t_start = psl.tStarts[0]
+    t_end = psl.tStarts[0] + psl.blockSizes[0]
+    
+    for i in xrange(1, psl.blockCount):
+        if psl.tStarts[i - 1] + psl.blockSizes[i - 1] + 1 < psl.tStarts[i]:
+            blocks.append((t_start, t_end))
+            t_start = psl.tStarts[i]
+            
+        t_end = psl.tStarts[i] + psl.blockSizes[i]
+        
+    blocks.append((t_start, t_end))
 
     return blocks
 
