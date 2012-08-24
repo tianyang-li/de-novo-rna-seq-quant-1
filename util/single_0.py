@@ -46,6 +46,9 @@ class NodeSeq(object):
         self.start = start
         self.end = end
 
+    def __repr__(self):
+        return "name:%s,start:%d,end:%d" % (self.node, self.start, self.end)
+    
 
 class ReadInGraph(object):
     __slots__ = ['graph', 'node_seqs']
@@ -190,6 +193,12 @@ class PSLNodes(object):
         # a list of 
         #     (node, node_start, node_end)
         self.nodes = nodes
+    
+    def nodes_tot_len(self):
+        return sum(map(lambda n: n[2] - n[1], self.nodes))
+    
+    def nodes_name_tuple(self):
+        return tuple(map(lambda n: n[0], self.nodes))
 
 
 def get_gapped_blocks_by_target(psl):
@@ -278,9 +287,8 @@ def get_contig_nodes_from_t_blocks(t_blocks, contig):
 
 def read_psl_across_node(read_name, read_comps,
                          read_in_graph, contig_dict):
-    psl_nodes = []
-    
     for comp_name, comp_psl in read_comps.iteritems():
+        psl_nodes = []
         for psl in comp_psl:
             if read_psl_qOK(psl):
                 
@@ -289,12 +297,12 @@ def read_psl_across_node(read_name, read_comps,
                 contig = contig_dict[comp_name][psl.tName]
                 
                 if check_t_blocks(t_blocks, contig):
-                    psl_nodes.append(PSLNodes(psl, get_contig_nodes_from_t_blocks(t_blocks, contig)))
-                    
-    if not psl_nodes:
-        return
-    
-    print len(psl_nodes)
+                    nodes = get_contig_nodes_from_t_blocks(t_blocks, contig)
+                    if len(nodes) > 1:
+                        psl_nodes.append(PSLNodes(psl, nodes))
+                        
+        if psl_nodes:
+            return
 
 def read_across_node(read_in_graph, rcc_psl, contig_dict):
     """
@@ -362,6 +370,8 @@ def main():
     rcc_psl = get_rcc_psl(rcont_psl_file)
     
     read_across_node(read_in_graph, rcc_psl, contig_dict)
+    
+    print len(read_in_graph)
         
 
 if __name__ == '__main__':
