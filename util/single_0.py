@@ -224,6 +224,40 @@ def get_gapped_blocks_by_target(psl):
     return blocks
 
 
+def check_t_blocks(t_blocks, contig):
+    """
+    check if there's a splice
+    within in 1 bp
+    of 2 ends of a block in t_blocks
+    """
+
+    for _, t_block_end in t_blocks[:-1]:
+        node_i = contig.find_end(t_block_end)
+        
+        if not(t_block_end >= contig.nodes[node_i][2] - 1
+               or contig.nodes[node_i][1] + 1 == t_block_end):
+            return False
+    
+    for t_block_start, _ in t_blocks[1:]:
+        node_i = contig.find_schemas(t_block_start)
+        
+        if not(t_block_start <= contig.nodes[node_i][1] + 1
+               or t_block_start + 1 == contig.nodes[node_i][2]):
+            return False
+    
+    return True
+
+
+def get_contig_nodes_from_t_blocks(t_blocks, contig):
+    nodes = []
+    
+    for t_block in t_blocks:
+        start_i = contig.find_start(t_block[0])
+        end_i = contig.find_end(t_block[1])
+    
+    return nodes
+
+
 def read_psl_across_node(read_name, read_comps,
                          read_in_graph, contig_dict):
     psl_nodes = []
@@ -232,9 +266,12 @@ def read_psl_across_node(read_name, read_comps,
         for psl in comp_psl:
             if read_psl_qOK(psl):
                 
+                t_blocks = get_gapped_blocks_by_target(psl)
+                
                 contig = contig_dict[comp_name][psl.tName]
                 
-                
+                if check_t_blocks(t_blocks, contig):
+                    psl_nodes.append(PSLNodes(psl, get_contig_nodes_from_t_blocks(t_blocks, contig)))
                     
     if not psl_nodes:
         return
