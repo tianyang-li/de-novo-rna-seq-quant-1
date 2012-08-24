@@ -239,7 +239,7 @@ def check_t_blocks(t_blocks, contig):
             return False
     
     for t_block_start, _ in t_blocks[1:]:
-        node_i = contig.find_schemas(t_block_start)
+        node_i = contig.find_start(t_block_start)
         
         if not(t_block_start <= contig.nodes[node_i][1] + 1
                or t_block_start + 1 == contig.nodes[node_i][2]):
@@ -254,6 +254,24 @@ def get_contig_nodes_from_t_blocks(t_blocks, contig):
     for t_block in t_blocks:
         start_i = contig.find_start(t_block[0])
         end_i = contig.find_end(t_block[1])
+        
+        if start_i > end_i:
+            print >> sys.stderr, "error"
+        
+        if start_i == end_i:
+            nodes.append(NodeSeq(contig.nodes[start_i][0],
+                                 t_block[0] - contig.nodes[start_i][1],
+                                 t_block[1] - contig.nodes[start_i][1]))
+        else:
+            nodes.append(NodeSeq(contig.nodes[start_i][0],
+                                 t_block[0] - contig.nodes[start_i][1],
+                                 contig.nodes[start_i][2] - contig.nodes[start_i][1]))
+            
+            for n in contig.nodes[start_i + 1:end_i]:
+                nodes.append(NodeSeq(n[0], 0, n[2] - n[1]))
+            
+            nodes.append(NodeSeq(contig.nodes[end_i][0], 0,
+                                 t_block[1] - contig.nodes[end_i][1]))
     
     return nodes
 
