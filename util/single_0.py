@@ -291,6 +291,10 @@ def check_nodes_in_graph(nodes, graph):
     if edges really exist
     """
     
+    for i in xrange(len(nodes) - 1):
+        if nodes[i + 1].node not in graph[nodes[i].node]:
+            return False 
+    
     return True
 
 
