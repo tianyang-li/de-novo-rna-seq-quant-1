@@ -192,6 +192,26 @@ class PSLNodes(object):
         self.nodes = nodes
 
 
+def get_gapped_blocks_by_target(psl):
+    """
+    for a _psl_ already satisfying read_psl_qOK
+    get a list of blocks of that combine blocks
+    gapped <= 1 on target
+    
+    each entry in the list is
+        
+        (t_start, t_end) 
+        
+    of the node
+    
+    used to check for splice
+    """
+    
+    blocks = []
+
+    return blocks
+
+
 def read_psl_across_node(read_name, read_comps,
                          read_in_graph, contig_dict):
     psl_nodes = []
@@ -202,22 +222,7 @@ def read_psl_across_node(read_name, read_comps,
                 
                 contig = contig_dict[comp_name][psl.tName]
                 
-                start_node_i = contig.find_start(psl.tStart)
-                end_node_i = contig.find_end(psl.tEnd)
                 
-                if start_node_i != end_node_i:
-                    node = contig.nodes[start_node_i]
-                    
-                    nodes = [(node[0], psl.tStart - node[1], node[2] - node[1])]
-                    
-                    for node in contig.nodes[start_node_i + 1:end_node_i]:
-                        nodes.append((node[0], 0, node[2] - node[1]))
-                        
-                    node = contig.nodes[end_node_i] 
-                    
-                    nodes.append((node[0], 0, psl.tEnd - node[1]))
-                    
-                    psl_nodes.append(PSLNodes(psl, nodes))
                     
     if not psl_nodes:
         return
