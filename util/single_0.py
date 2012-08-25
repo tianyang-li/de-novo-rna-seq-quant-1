@@ -19,6 +19,7 @@
 import getopt
 import sys
 from collections import defaultdict
+import inspect
 
 from blat_0 import read_psl
 from dot_0 import get_splice_graph
@@ -218,17 +219,24 @@ def get_gapped_blocks_by_target(psl):
     
     blocks = []
     
-    t_start = psl.tStarts[0]
+    if psl.qStart == 0 or psl.tStart == 0:
+        t_start = psl.tStart
+    else:
+        t_start = psl.tStart - psl.qStart
+        
     t_end = psl.tStarts[0] + psl.blockSizes[0]
     
     for i in xrange(1, psl.blockCount):
         if psl.tStarts[i - 1] + psl.blockSizes[i - 1] + 1 < psl.tStarts[i]:
-            blocks.append((t_start, t_end))
+            blocks.append([t_start, t_end])
             t_start = psl.tStarts[i]
             
         t_end = psl.tStarts[i] + psl.blockSizes[i]
-        
-    blocks.append((t_start, t_end))
+    
+    if t_end != psl.tSize:
+        t_end += (psl.qSize - psl.qEnd)
+    
+    blocks.append([t_start, t_end])
 
     return blocks
 
@@ -265,7 +273,8 @@ def get_contig_nodes_from_t_blocks(t_blocks, contig):
         end_i = contig.find_end(t_block[1])
         
         if start_i > end_i:
-            print >> sys.stderr, "error"
+            print >> sys.stderr, ("error: start_i > end_i in %s" 
+                                  % inspect.getframeinfo(inspect.currentframe)[2])
         
         if start_i == end_i:
             nodes.append(NodeSeq(contig.nodes[start_i][0],

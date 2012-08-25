@@ -15,9 +15,18 @@
 #
 #  You should have received a copy of the GNU General Public License
 
+"""
+miscellaneous functions
+"""
+
+
 def mode(data):
     """
     data is a list containing
     hashable objects
     """
+    
+    
+    
+    
 
