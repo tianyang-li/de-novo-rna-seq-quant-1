@@ -265,6 +265,60 @@ def check_t_blocks(t_blocks, contig):
     return True
 
 
+def fix_t_blocks(t_blocks, contig):
+    """
+    fix t_blocks boundaries 
+    for the end of t_blocks[:-1]
+    and start of t_blocks[1:]
+    """
+
+    if len(t_blocks):
+        return t_blocks
+    
+    for tblock in t_blocks[:-1]:
+        end_i = contig.find_end(tblock[1])
+        
+        if contig.nodes[end_i].end != tblock[1]:
+            if contig.nodes[end_i].end == tblock[1] + 1:
+                tblock[1] = contig.nodes[end_i].end
+            elif tblock[1] == contig.nodes[end_i].start + 1:
+                tblock[1] = contig.nodes[end_i].start
+            else:
+                print >> sys.stderr, ("this is weird for a block's end in %s" % 
+                                      inspect.getframeinfo(inspect.currentframe))
+        
+    for tblock in t_blocks[1:]:
+        start_i = contig.find_start(tblock[0])
+        
+        if contig.nodes[start_i].start != tblock[0]:
+            if contig.nodes[start_i].start + 1 == tblock[0]:
+                tblock[0] = contig.nodes[start_i].start
+            elif tblock[0] + 1 == contig.nodes[start_i].end:
+                tblock[0] = contig.nodes[start_i].end
+            else:
+                print >> sys.stderr, ("this is weird for a block's start in %s" % 
+                                      inspect.getframeinfo(inspect.currentframe))
+    
+    new_tblocks = [tblock for tblock in t_blocks if tblock[0] < tblock[1]]
+    
+    return new_tblocks
+
+
+def fixed_tblocks_consistent(t_blocks):
+    """
+    check to see if the fixed t_blocks are consistent
+    """
+    
+    if not t_blocks:
+        return False
+    
+    for i in xrange(len(t_blocks) - 1):
+        if t_blocks[i][1] > t_blocks[i + 1][0]:
+            return False
+    
+    return True
+    
+
 def get_contig_nodes_from_t_blocks(t_blocks, contig):
     nodes = []
     
@@ -324,12 +378,15 @@ def read_psl_across_node(read_name, read_comps,
                 contig = contig_dict[comp_name][psl.tName]
                 
                 if check_t_blocks(t_blocks, contig):
-                    nodes = get_contig_nodes_from_t_blocks(t_blocks, contig)
+                    t_blocks = fix_t_blocks(t_blocks, contig)
                     
-                    if (len(nodes) > 1 and 
-                        check_nodes_in_graph(nodes, splice_graphs[comp_name])):
+                    if fixed_tblocks_consistent(t_blocks):
+                        nodes = get_contig_nodes_from_t_blocks(t_blocks, contig)
                         
-                        psl_nodes.append(PSLNodes(psl, nodes))
+                        if (len(nodes) > 1 and 
+                            check_nodes_in_graph(nodes, splice_graphs[comp_name])):
+                            
+                            psl_nodes.append(PSLNodes(psl, nodes))
                         
         if psl_nodes:
             nodes2psl_node = {}
