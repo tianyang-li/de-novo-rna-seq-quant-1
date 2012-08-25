@@ -20,6 +20,7 @@ import getopt
 import sys
 from collections import defaultdict
 import inspect
+import random
 
 from blat_0 import read_psl
 from dot_0 import get_splice_graph
@@ -125,8 +126,6 @@ def read_psl_in_node(psl):
     for i in xrange(psl.blockCount - 1):
         if psl.tStarts[i] + psl.blockSizes[i] + 1 < psl.tStarts[i + 1]:
             return False
-    
-    #TODO: have I missied some cases?
     
     return True
 
@@ -281,8 +280,10 @@ def fix_t_blocks(t_blocks, contig):
         if contig.nodes[end_i].end != tblock[1]:
             if contig.nodes[end_i].end == tblock[1] + 1:
                 tblock[1] = contig.nodes[end_i].end
+                
             elif tblock[1] == contig.nodes[end_i].start + 1:
                 tblock[1] = contig.nodes[end_i].start
+                
             else:
                 print >> sys.stderr, ("this is weird for a block's end in %s" % 
                                       inspect.getframeinfo(inspect.currentframe))
@@ -293,8 +294,10 @@ def fix_t_blocks(t_blocks, contig):
         if contig.nodes[start_i].start != tblock[0]:
             if contig.nodes[start_i].start + 1 == tblock[0]:
                 tblock[0] = contig.nodes[start_i].start
+                
             elif tblock[0] + 1 == contig.nodes[start_i].end:
                 tblock[0] = contig.nodes[start_i].end
+                
             else:
                 print >> sys.stderr, ("this is weird for a block's start in %s" % 
                                       inspect.getframeinfo(inspect.currentframe))
@@ -389,11 +392,26 @@ def read_psl_across_node(read_name, read_comps,
                             psl_nodes.append(PSLNodes(psl, nodes))
                         
         if psl_nodes:
-            nodes2psl_node = {}
+            nodes2psl_node = defaultdict(list)
             
             for psl_node in psl_nodes:
-                nodes2psl_node[psl_node.nodes_name_tuple()] = psl_node
+                nodes2psl_node[psl_node.nodes_name_tuple()].append(psl_node)
+                
+            for pns in nodes2psl_node.itervalues():
+                pns.sort(key=lambda pn: pn.psl.matches, reverse=True)
+                
+                max_match = pns[0].psl.matches
+                num_of_max_match = 1
+                for pn in pns[1:]:
+                    if pn.psl.matches == max_match:
+                        num_of_max_match += 1
+                
+                pn = random.choice(pns[:num_of_max_match])
+                
+                
+                
             
+                
 
 def read_across_node(read_in_graph, rcc_psl, contig_dict, splice_graphs):
     """
