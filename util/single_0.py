@@ -213,6 +213,9 @@ def get_gapped_blocks_by_target(psl):
         
     of the node
     
+    mismatches at the end of an alignment is 
+    taken care of here
+    
     used to check for splice
     """
     
@@ -408,9 +411,7 @@ def read_psl_across_node(read_name, read_comps,
                 
                 pn = random.choice(pns[:num_of_max_match])
                 
-                
-                
-            
+                read_in_graph[read_name][comp_name].append(pn.nodes)
                 
 
 def read_across_node(read_in_graph, rcc_psl, contig_dict, splice_graphs):
@@ -482,7 +483,10 @@ def main():
     read_across_node(read_in_graph, rcc_psl,
                      contig_dict, {splice_graph.name: splice_graph})
     
-    print len(read_in_graph)
+    for comp in read_in_graph.itervalues():
+        for aligns in comp.itervalues():
+            for align in aligns:
+                print sum(map(lambda n: n.end - n.start, align))
         
 
 if __name__ == '__main__':
