@@ -180,7 +180,7 @@ def read_all_in_node(read_in_graph, cnr_psl,
     for node in splice_graph.node:
         for psl in node_psl[node]:
             if read_psl_in_node(psl):
-                read_in_graph[psl.qName][comp].append([NodeSeq(node, psl.tStart - psl.qStart, psl.tEnd + psl.tSize - psl.tEnd)])
+                read_in_graph[psl.qName][comp].append([NodeSeq(node, psl.tStart - psl.qStart, psl.tEnd + psl.qSize - psl.qEnd)])
 
 
 class PSLNodes(object):
@@ -483,10 +483,7 @@ def main():
     read_across_node(read_in_graph, rcc_psl,
                      contig_dict, {splice_graph.name: splice_graph})
     
-    for comp in read_in_graph.itervalues():
-        for aligns in comp.itervalues():
-            for align in aligns:
-                print sum(map(lambda n: n.end - n.start, align))
+    
         
 
 if __name__ == '__main__':
