@@ -483,7 +483,7 @@ def main():
     read_across_node(read_in_graph, rcc_psl,
                      contig_dict, {splice_graph.name: splice_graph})
     
-    
+    print len(read_in_graph)
         
 
 if __name__ == '__main__':
