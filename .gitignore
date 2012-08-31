@@ -26,5 +26,9 @@
 *.a
 *.so
 
+build/
+
+lib/
+
 
 
