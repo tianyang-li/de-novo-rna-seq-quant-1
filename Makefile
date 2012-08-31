@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = -Wall
 AR = ar
-INCLUDES = -Igsl-1.15 -Isrc 
+INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0
 
 all: util/single_1.so
 

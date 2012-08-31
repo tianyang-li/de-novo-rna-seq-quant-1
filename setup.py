@@ -28,7 +28,7 @@ setup(
                            extra_compile_args=['-fPIC'] + cflags,
                            extra_objects=["lib/quant.a", "lib/libgsl.a"],
                            language="c++",
-                           include_dirs=["src", "gsl-1.15"],
+                           include_dirs=["src", "gsl-1.15", "boost_1_51_0"],
                            library_dirs=["lib"]
                            )
                  ]

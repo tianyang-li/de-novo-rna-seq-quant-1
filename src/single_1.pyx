@@ -15,6 +15,7 @@
 
 from graph_seq_0 cimport SeqLoc
 from fasta_0 import FastaSeq
+from misc_0 cimport ldbl
 
 def get_isoforms(read_in_graph, graph_dict):
     """
