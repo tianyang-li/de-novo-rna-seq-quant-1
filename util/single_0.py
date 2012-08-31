@@ -25,6 +25,7 @@ import random
 from blat_0 import read_psl
 from dot_0 import get_splice_graph
 from trinity_0 import get_contig_dict
+from single_1 import get_isoforms
 
 
 class NodeSeq(object):
@@ -444,8 +445,10 @@ def main():
 
     contig_file = None
     
+    out_file = None
+    
     try:
-        opts, _ = getopt.getopt(sys.argv[1:], 'd:c:',
+        opts, _ = getopt.getopt(sys.argv[1:], 'd:c:o:',
                                 ['rcont=', 'rcomp='])
     except getopt.GetoptError as err:
         print >> sys.stderr, str(err)
@@ -460,11 +463,14 @@ def main():
             rcomp_psl_file = arg
         if opt == '-c':
             contig_file = arg
+        if opt == '-o':
+            out_file = arg
     
     if (not dot_file
         or not contig_file
         or not rcont_psl_file
-        or not rcomp_psl_file):
+        or not rcomp_psl_file
+        or not out_file):
         print >> sys.stderr, "missing"
         sys.exit(1)
     
@@ -480,10 +486,16 @@ def main():
     
     rcc_psl = get_rcc_psl(rcont_psl_file)
     
-    read_across_node(read_in_graph, rcc_psl,
-                     contig_dict, {splice_graph.name: splice_graph})
+    graph_dict = {splice_graph.name: splice_graph}
     
-    print len(read_in_graph)
+    read_across_node(read_in_graph, rcc_psl,
+                     contig_dict, graph_dict)
+    
+    isoforms = get_isoforms(read_in_graph, graph_dict)
+    
+    with open(out_file, 'w') as fout:
+        for isoform in isoforms:
+            fout.write(str(isoform))
         
 
 if __name__ == '__main__':

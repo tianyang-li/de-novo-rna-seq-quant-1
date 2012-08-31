@@ -1,6 +1,7 @@
 CC = g++
 CFLAGS = -Wall
 AR = ar
+INCLUDES = -Igsl-1.15 -Isrc 
 
 all: util/single_1.so
 
@@ -17,10 +18,10 @@ lib/quant.a: build/single_1.o build/graph_seq_0.o
 	$(AR) rcs lib/quant.a build/single_1.o build/graph_seq_0.o
 
 build/single_1.o: src/single_1.cc src/single_1.h
-	$(CC) $(CFLAGS) -c src/single_1.cc -o build/single_1.o
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/single_1.cc -o build/single_1.o
 
 build/graph_seq_0.o: src/graph_seq_0.cc src/graph_seq_0.h
-	$(CC) $(CFLAGS) -c src/graph_seq_0.cc -o build/graph_seq_0.o
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/graph_seq_0.cc -o build/graph_seq_0.o
 	
 clean:
 	rm -rfv build/*

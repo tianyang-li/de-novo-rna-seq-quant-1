@@ -14,5 +14,16 @@
 #  You should have received a copy of the GNU General Public License
 
 from graph_seq_0 cimport SeqLoc
+from fasta_0 import FastaSeq
 
+def get_isoforms(read_in_graph, graph_dict):
+    """
+    read_in_graph: same as in single_0.py
+    
+    graph_dict: same as in single_0.py
+    
+    return the isoforms as a list of FastaSeq
+    """
+    isoforms = []
+    return isoforms
 
