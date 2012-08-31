@@ -19,5 +19,12 @@
 #ifndef SINGLE_1_H_
 #define SINGLE_1_H_
 
+#include <iostream>
+
+namespace single_1 {
+
+
+}
+
 #endif
 

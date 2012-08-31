@@ -18,3 +18,7 @@
 
 #include "single_1.h"
 
+namespace single_1 {
+
+}
+
