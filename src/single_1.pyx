@@ -13,9 +13,25 @@
 #
 #  You should have received a copy of the GNU General Public License
 
+from libcpp.vector cimport vector
+
 from graph_seq_0 cimport SeqLoc
 from fasta_0 import FastaSeq
-from misc_0 cimport ldbl
+from misc_0 cimport uint
+
+cdef extern from "_single_1.h" namespace "_single_1":
+    cdef cppclass PyNode:
+        PyNode(uint) except +
+        
+        uint node_id
+        vector[uint] edges
+    
+    cdef cppclass PyGraph:
+        PyGraph() except +
+        
+        uint graph_id
+        vector[PyNode] nodes
+        
 
 def get_isoforms(read_in_graph, graph_dict):
     """
@@ -26,7 +42,11 @@ def get_isoforms(read_in_graph, graph_dict):
     return the isoforms as a list of FastaSeq
     """
     
+    cdef vector[PyGraph] *py_graphs = new vector[PyGraph](len(graph_dict))
+    
     isoforms = []
+    
+    del py_graphs
     
     return isoforms
 

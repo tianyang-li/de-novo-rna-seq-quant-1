@@ -17,9 +17,9 @@ from misc_0 cimport uint
 
 cdef extern from "_graph_seq_0.h" namespace "_graph_seq_0":
     cdef cppclass SeqLoc:
-        SeqLoc(int, uint, uint) except +
+        SeqLoc(uint, uint, uint) except +
         
-        int node_id
+        uint node_id
         uint start
         uint end
 

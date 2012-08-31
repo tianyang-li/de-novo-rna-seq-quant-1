@@ -19,7 +19,49 @@
 #ifndef _SINGLE_1_H_
 #define _SINGLE_1_H_
 
+#include <vector>
+
+#include "_misc_0.h"
+
 namespace _single_1 {
+
+/*
+ * makes it easy to get graph information from
+ * python
+ */
+class PyNode {
+public:
+	PyNode(uint node_id_) :
+			node_id(node_id_) {
+	}
+
+	PyNode &operator=(PyNode const &x) {
+		if (this != &x) {
+			node_id = x.node_id;
+			edges = x.edges;
+		}
+		return *this;
+	}
+
+	PyNode(PyNode const &x) :
+			node_id(x.node_id), edges(x.edges) {
+	}
+
+	~PyNode() {
+	}
+
+	uint node_id;
+	std::vector<uint> edges;
+};
+
+class PyGraph {
+public:
+	PyGraph() {
+	}
+
+	uint graph_id;
+	std::vector<PyNode> nodes;
+};
 
 }
 

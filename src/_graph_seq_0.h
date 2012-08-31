@@ -33,7 +33,7 @@ namespace _graph_seq_0 {
  */
 class SeqLoc {
 public:
-	SeqLoc(int node_id_, uint start_, uint end_) :
+	SeqLoc(uint node_id_, uint start_, uint end_) :
 			node_id(node_id_), start(start_), end(end_) {
 	}
 
@@ -53,7 +53,7 @@ public:
 	~SeqLoc() {
 	}
 
-	int node_id;
+	uint node_id;
 	uint start;
 	uint end;
 };
