@@ -13,6 +13,12 @@
 #
 #  You should have received a copy of the GNU General Public License
 
-from graph_seq_0 cimport SeqLoc
+cdef extern from "" namespace "":
+    cdef cppclass SeqLoc:
+        SeqLoc(int, unsigned int, unsigned int) except +
+        
+        int node_id
+        unsigned int start
+        unsigned int end
 
 

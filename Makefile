@@ -8,11 +8,14 @@ util/single_1.so: src/single_1.pyx lib/quant.a setup.py
 	python setup.py build_ext -i
 	mv single_1.so util/
 
-lib/quant.a: build/single_1.o
-	$(AR) rcs lib/quant.a build/single_1.o
+lib/quant.a: build/single_1.o build/graph_seq_0.o
+	$(AR) rcs lib/quant.a build/single_1.o build/graph_seq_0.o
 
 build/single_1.o: src/single_1.cc src/single_1.h
 	$(CC) $(CFLAGS) -c src/single_1.cc -o build/single_1.o
+
+build/graph_seq_0.o: src/graph_seq_0.cc src/graph_seq_0.h
+	$(CC) $(CFLAGS) -c src/graph_seq_0.cc -o build/graph_seq_0.o
 	
 clean:
 	rm -rfv build/*
