@@ -16,9 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "single_1.h"
-
-namespace single_1 {
+namespace _graph_seq_0 {
 
 }
 

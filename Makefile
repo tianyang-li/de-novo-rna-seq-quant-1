@@ -5,11 +5,16 @@ INCLUDES = -Igsl-1.15 -Isrc
 
 all: util/single_1.so
 
-util/single_1.so: src/single_1.pyx lib/quant.a setup.py lib/libgsl.a \
-					src/graph_seq_0.pxd
+util/single_1.so: src/single_1.pyx lib/quant.a setup.py lib/libgsl.a 
 	
 	python setup.py build_ext -i
 	mv single_1.so util/
+
+src/single_1.pyx: src/graph_seq_0.pxd
+
+src/graph_seq_0.pxd: src/misc_0.pxd src/graph_seq_0.h src/graph_seq_0.cc
+
+src/misc_0.pxd: src/misc_0.cc src/misc_0.h
 
 lib/libgsl.a:
 	tar xzvf gsl-1.15.tar.gz

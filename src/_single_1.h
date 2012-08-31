@@ -16,11 +16,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SINGLE_1_H_
-#define SINGLE_1_H_
+#ifndef _SINGLE_1_H_
+#define _SINGLE_1_H_
 
-namespace single_1 {
+namespace _single_1 {
 
 }
 
-#endif // SINGLE_1_H_
+#endif // _SINGLE_1_H_

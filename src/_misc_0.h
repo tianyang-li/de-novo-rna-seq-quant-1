@@ -20,10 +20,10 @@
  * some general stuff
  */
 
-#ifndef MISC_0_H_
-#define MISC_0_H_
+#ifndef _MISC_0_H_
+#define _MISC_0_H_
 
 typedef unsigned int uint;
 typedef long double ldbl;
 
-#endif // MISC_0_H_
+#endif // _MISC_0_H_

@@ -13,5 +13,4 @@
 #
 #  You should have received a copy of the GNU General Public License
 
-cdef extern from "misc_0.h":
-    cdef unsigned int uint
+
