@@ -26,9 +26,9 @@ setup(
                            libraries=[],
                            extra_link_args=['-fPIC'] + cflags,
                            extra_compile_args=['-fPIC'] + cflags,
-                           extra_objects=["lib/quant.a"],
+                           extra_objects=["lib/quant.a", "lib/libgsl.a"],
                            language="c++",
-                           include_dirs=["src"],
+                           include_dirs=["src", "gsl-1.15"],
                            library_dirs=["lib"]
                            )
                  ]
