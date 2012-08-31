@@ -24,6 +24,8 @@ def get_isoforms(read_in_graph, graph_dict):
     
     return the isoforms as a list of FastaSeq
     """
+    
     isoforms = []
+    
     return isoforms
 
