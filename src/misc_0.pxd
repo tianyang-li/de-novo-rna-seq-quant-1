@@ -13,14 +13,5 @@
 #
 #  You should have received a copy of the GNU General Public License
 
-from misc_0 cimport uint
-
-cdef extern from "graph_seq_0.h" namespace "graph_seq_0":
-    cdef cppclass SeqLoc:
-        SeqLoc(int, uint, uint) except +
-        
-        int node_id
-        uint start
-        uint end
-
-
+cdef extern from "misc_0.h":
+    cdef unsigned int uint

@@ -23,5 +23,4 @@ namespace single_1 {
 
 }
 
-#endif
-
+#endif // SINGLE_1_H_

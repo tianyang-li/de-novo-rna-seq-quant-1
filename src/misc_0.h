@@ -18,46 +18,12 @@
 
 /*
  * some general stuff
- * for working with sequences, graphs, etc.
  */
 
-#ifndef GRAPH_SEQ_0_H_
-#define GRAPH_SEQ_0_H_
+#ifndef MISC_0_H_
+#define MISC_0_H_
 
-#include "misc_0.h"
+typedef unsigned int uint;
+typedef long double ldbl;
 
-namespace graph_seq_0 {
-
-/*
- * assumes that we already know which graph it is
- */
-class SeqLoc {
-public:
-	SeqLoc(int node_id_, uint start_, uint end_) :
-			node_id(node_id_), start(start_), end(end_) {
-	}
-
-	SeqLoc &operator=(SeqLoc const &x) {
-		if (this != &x) {
-			node_id = x.node_id;
-			start = x.start;
-			end = x.end;
-		}
-		return *this;
-	}
-
-	SeqLoc(SeqLoc const &x) :
-			node_id(x.node_id), start(x.start), end(x.end) {
-	}
-
-	~SeqLoc() {
-	}
-
-	int node_id;
-	uint start;
-	uint end;
-};
-
-}
-
-#endif // GRAPH_SEQ_0_H_
+#endif // MISC_0_H_

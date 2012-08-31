@@ -25,6 +25,9 @@ def get_isoforms(read_in_graph, graph_dict):
     return the isoforms as a list of FastaSeq
     """
     
+    cdef SeqLoc *x = new SeqLoc(12, 3, 4)
+    del x
+    
     isoforms = []
     
     return isoforms

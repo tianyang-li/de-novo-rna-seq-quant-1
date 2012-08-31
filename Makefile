@@ -5,7 +5,9 @@ INCLUDES = -Igsl-1.15 -Isrc
 
 all: util/single_1.so
 
-util/single_1.so: src/single_1.pyx lib/quant.a setup.py lib/libgsl.a
+util/single_1.so: src/single_1.pyx lib/quant.a setup.py lib/libgsl.a \
+					src/graph_seq_0.pxd
+	
 	python setup.py build_ext -i
 	mv single_1.so util/
 
@@ -27,7 +29,7 @@ clean:
 	rm -rfv build/*
 	rm -rfv util/single_1.so
 	rm -rfv lib/*
-	rm -rfv src/single_1.cpp
+	rm -rfv src/*.cpp
 	rm -rfv gsl-1.15/
 
 .PHONY: all clean
