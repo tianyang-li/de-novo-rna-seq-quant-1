@@ -20,9 +20,17 @@
 #define SINGLE_1_H_
 
 #include <iostream>
+#include <cstdio>
+
+#include <gsl/gsl_sf_bessel.h>
 
 namespace single_1 {
 
+void hello() {
+	double x = 5.0;
+	double y = gsl_sf_bessel_J0(x);
+	printf("J0(%g) = %.18e\n", x, y);
+}
 
 }
 
