@@ -55,6 +55,27 @@ void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
 		std::vector<PyReadInGraph> *py_reads,
 		std::vector<_graph_seq_0::Isoform> *isoforms);
 
+/*
+ * keep the reads aligned to a particular graph
+ */
+
+/*
+ * given read's index @read_id
+ * the alignment is at
+ * py_reads[read_id].graph_locs[graph_index].locs[align_index]
+ */
+class ReadIndex {
+public:
+	uint graph_index;
+	uint align_index;
+};
+
+class GraphReads {
+public:
+	uint graph_id;
+	std::vector<ReadIndex> reads;
+};
+
 }
 
 #endif // _SINGLE_1_H_

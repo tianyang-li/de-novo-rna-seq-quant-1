@@ -16,13 +16,36 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <vector>
+
 #include "_single_1.h"
+#include "_misc_0.h"
 
 namespace _single_1 {
 
 void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
 		std::vector<PyReadInGraph> *py_reads,
 		std::vector<_graph_seq_0::Isoform> *isoforms) {
+
+	std::vector<GraphReads> graphs_reads(py_graphs->size());
+
+	{
+		uint graph_id = 0;
+
+		for (std::vector<GraphReads>::iterator i = graphs_reads.begin();
+				i != graphs_reads.end(); ++i, ++graph_id) {
+			i->graph_id = graph_id;
+		}
+	}
+
+	{
+		uint read_id = 0;
+		for (std::vector<PyReadInGraph>::const_iterator i = py_reads->begin();
+				i != py_reads->end(); ++i, ++read_id) {
+
+		}
+	}
+
 }
 
 }
