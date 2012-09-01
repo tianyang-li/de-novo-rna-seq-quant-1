@@ -35,21 +35,6 @@ public:
 			graph_id(graph_id_) {
 	}
 
-	PyReadGraphLoc &operator=(PyReadGraphLoc const &x) {
-		if (this != &x) {
-			graph_id = x.graph_id;
-			locs = x.locs;
-		}
-		return *this;
-	}
-
-	PyReadGraphLoc(PyReadGraphLoc const &x) :
-			graph_id(x.graph_id), locs(x.locs) {
-	}
-
-	~PyReadGraphLoc() {
-	}
-
 	uint graph_id;
 	std::vector<_graph_seq_0::PyReadNodeLoc> locs;
 };

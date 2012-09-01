@@ -44,22 +44,6 @@ public:
 			node_id(node_id_), seq_len(seq_len_) {
 	}
 
-	PyNode &operator=(PyNode const &x) {
-		if (this != &x) {
-			node_id = x.node_id;
-			edges = x.edges;
-			seq_len = x.seq_len;
-		}
-		return *this;
-	}
-
-	PyNode(PyNode const &x) :
-			node_id(x.node_id), seq_len(x.seq_len), edges(x.edges) {
-	}
-
-	~PyNode() {
-	}
-
 	uint node_id;
 	uint seq_len;
 	std::vector<uint> edges;
@@ -81,22 +65,6 @@ class SeqLoc {
 public:
 	SeqLoc(uint node_id_, uint start_, uint end_) :
 			node_id(node_id_), start(start_), end(end_) {
-	}
-
-	SeqLoc &operator=(SeqLoc const &x) {
-		if (this != &x) {
-			node_id = x.node_id;
-			start = x.start;
-			end = x.end;
-		}
-		return *this;
-	}
-
-	SeqLoc(SeqLoc const &x) :
-			node_id(x.node_id), start(x.start), end(x.end) {
-	}
-
-	~SeqLoc() {
 	}
 
 	uint node_id;
