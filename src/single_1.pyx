@@ -27,11 +27,13 @@ cdef extern from "_single_1.h" namespace "_single_1":
         vector[PyReadNodeLoc] locs
         uint graph_id
     
+    
     cdef cppclass PyReadInGraph:
         PyReadInGraph() except +
         
         uint read_id
         vector[PyReadGraphLoc] graph_locs
+    
     
     cdef void _get_isoforms(vector[PyGraph] * py_graphs,
                             vector[PyReadInGraph] * py_reads,
