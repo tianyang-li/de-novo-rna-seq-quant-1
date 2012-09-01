@@ -56,10 +56,13 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
     """
     
     cdef uint graph_id = 0
+    
     cdef uint node_id
+    
     cdef PyNode * py_node 
     
     cdef vector[PyGraph].iterator py_graph_iter = py_graphs.begin()
+    
     cdef vector[PyNode].iterator py_node_iter
     
     for graph_name, graph in graph_dict.iteritems():
@@ -69,8 +72,11 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
         
         for node in graph.nodes():
             id_map.nodes_map[node] = node_id
-            py_node = new PyNode(node_id)
+            
+            py_node = new PyNode(node_id, len(graph.node[node]['label']))
+            
             deref(py_graph_iter).nodes.push_back(deref(py_node))
+            
             del py_node
             
             inc(py_node_iter)

@@ -28,7 +28,7 @@ cdef extern from "_graph_seq_0.h" namespace "_graph_seq_0":
     ctypedef vector[SeqLoc] PyReadNodeLoc
     
     cdef cppclass PyNode:
-        PyNode(uint) except +
+        PyNode(uint, uint) except +
         
         uint node_id
         uint seq_len

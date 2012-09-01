@@ -40,20 +40,21 @@ namespace _graph_seq_0 {
  */
 class PyNode {
 public:
-	PyNode(uint node_id_) :
-			node_id(node_id_) {
+	PyNode(uint node_id_, uint seq_len_) :
+			node_id(node_id_), seq_len(seq_len_) {
 	}
 
 	PyNode &operator=(PyNode const &x) {
 		if (this != &x) {
 			node_id = x.node_id;
 			edges = x.edges;
+			seq_len = x.seq_len;
 		}
 		return *this;
 	}
 
 	PyNode(PyNode const &x) :
-			node_id(x.node_id), edges(x.edges) {
+			node_id(x.node_id), seq_len(x.seq_len), edges(x.edges) {
 	}
 
 	~PyNode() {
