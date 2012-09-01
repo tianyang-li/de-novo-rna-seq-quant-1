@@ -62,34 +62,6 @@ void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
 		}
 	}
 
-	{
-		//test
-		uint graph_id = 0;
-
-		for (std::vector<GraphReads>::const_iterator i = graph_reads.begin();
-				i != graph_reads.end(); ++i, ++graph_id) {
-			for (std::vector<ReadIndex>::const_iterator j = i->reads.begin();
-					j != i->reads.end(); ++j) {
-				if (j->read_id != (*py_reads)[j->read_id].read_id) {
-					fprintf(stderr, "read_id not equal!\n");
-				} else {
-					if (graph_id
-							!= (*py_reads)[j->read_id].graph_locs[j->graph_index].graph_id) {
-						fprintf(stderr, "graph_id not equal!\n");
-					} else {
-						for (std::vector<_graph_seq_0::PyReadNodeLoc>::const_iterator k =
-								(*py_reads)[j->read_id].graph_locs[j->graph_index].locs.begin();
-								k
-										!= (*py_reads)[j->read_id].graph_locs[j->graph_index].locs.end();
-								++k) {
-							printf("start_node:%u,end_node:%u\n",
-									k->front().node_id, k->back().node_id);
-						}
-					}
-				}
-			}
-		}
-	}
 
 }
 
