@@ -111,6 +111,9 @@ typedef std::vector<SeqLoc> PyReadNodeLoc;
 
 class Isoform {
 public:
+	Isoform() {
+	}
+
 	uint graph_id;
 };
 

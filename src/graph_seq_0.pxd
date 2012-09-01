@@ -39,5 +39,10 @@ cdef extern from "_graph_seq_0.h" namespace "_graph_seq_0":
         
         uint graph_id
         vector[PyNode] nodes
+    
+    cdef cppclass Isoform:
+        Isoform() except +
+            
+        uint graph_id
 
 

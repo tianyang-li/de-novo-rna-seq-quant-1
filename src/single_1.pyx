@@ -16,7 +16,7 @@
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from graph_seq_0 cimport SeqLoc, PyReadNodeLoc, PyGraph, PyNode
+from graph_seq_0 cimport SeqLoc, PyReadNodeLoc, PyGraph, PyNode, Isoform
 from fasta_0 import FastaSeq
 from misc_0 cimport uint
 
@@ -32,6 +32,10 @@ cdef extern from "_single_1.h" namespace "_single_1":
         
         uint read_id
         vector[PyReadGraphLoc] graph_locs
+    
+    cdef void _get_isoforms(vector[PyGraph] * py_graphs,
+                            vector[PyReadInGraph] * py_reads,
+                            vector[Isoform] * isoforms)
 
 
 class IdMap(object):
@@ -162,9 +166,14 @@ def get_isoforms(read_in_graph, graph_dict, max_run=1000000):
     
     get_read_in_graph_from_py(read_in_graph, id_maps, py_reads)
     
+    cdef vector[Isoform] * _isoforms = new vector[Isoform]()
+    
+    _get_isoforms(py_graphs, py_reads, _isoforms)
+    
     isoforms = []
     
     del py_graphs
+    del py_reads
     
     return isoforms
 

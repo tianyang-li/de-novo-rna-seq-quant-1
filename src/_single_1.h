@@ -63,6 +63,13 @@ public:
 	std::vector<PyReadGraphLoc> graph_locs;
 };
 
+/*
+ * used to interface with python
+ */
+void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
+		std::vector<PyReadInGraph> *py_reads,
+		std::vector<_graph_seq_0::Isoform> *isoforms);
+
 }
 
 #endif // _SINGLE_1_H_

@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wall
+CFLAGS = -Wall -fPIC
 AR = ar
 INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0
 
@@ -38,7 +38,7 @@ clean:
 	rm -rfv util/single_1.so
 	rm -rfv lib/*
 	rm -rfv src/*.cpp
-	rm -rfv gsl-1.15/
+	#rm -rfv gsl-1.15/
 
 .PHONY: all clean
 
