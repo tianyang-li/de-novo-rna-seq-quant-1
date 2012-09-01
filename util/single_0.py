@@ -447,14 +447,19 @@ def main():
     
     out_file = None
     
+    max_run = 1000000 # max number of runs in MCMC
+    
     try:
         opts, _ = getopt.getopt(sys.argv[1:], 'd:c:o:',
-                                ['rcont=', 'rcomp='])
+                                ['rcont=', 'rcomp=', 'max-run='])
     except getopt.GetoptError as err:
         print >> sys.stderr, str(err)
         sys.exit(1)
     
     for opt, arg in opts:
+        if opt == '--max-run':
+            # max number of runs in MCMC
+            max_run = int(arg)
         if opt == '-d':
             dot_file = arg
         if opt == '--rcont':
@@ -491,7 +496,7 @@ def main():
     read_across_node(read_in_graph, rcc_psl,
                      contig_dict, graph_dict)
     
-    isoforms = get_isoforms(read_in_graph, graph_dict)
+    isoforms = get_isoforms(read_in_graph, graph_dict, max_run)
     
     with open(out_file, 'w') as fout:
         for isoform in isoforms:
