@@ -27,48 +27,6 @@
 namespace _single_1 {
 
 /*
- * makes it easy to get graph information from
- * python
- */
-
-/*
- * assumes that we know what what graph it is
- */
-class PyNode {
-public:
-	PyNode(uint node_id_) :
-			node_id(node_id_) {
-	}
-
-	PyNode &operator=(PyNode const &x) {
-		if (this != &x) {
-			node_id = x.node_id;
-			edges = x.edges;
-		}
-		return *this;
-	}
-
-	PyNode(PyNode const &x) :
-			node_id(x.node_id), edges(x.edges) {
-	}
-
-	~PyNode() {
-	}
-
-	uint node_id;
-	std::vector<uint> edges;
-};
-
-class PyGraph {
-public:
-	PyGraph() {
-	}
-
-	uint graph_id;
-	std::vector<PyNode> nodes;
-};
-
-/*
  * assumes that the read is already known
  */
 class PyReadGraphLoc {

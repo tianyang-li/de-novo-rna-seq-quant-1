@@ -425,7 +425,7 @@ def read_across_node(read_in_graph, rcc_psl, contig_dict, splice_graphs):
             read_in_graph[read][graph]
         
         is a list of alignments of read to nodes in 
-        that graph
+        that graph (NodeSeq)
     """
     
     for read_name, read_comp in rcc_psl.iteritems():

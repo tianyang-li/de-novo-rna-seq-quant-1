@@ -16,23 +16,11 @@
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from graph_seq_0 cimport SeqLoc, PyReadNodeLoc
+from graph_seq_0 cimport SeqLoc, PyReadNodeLoc, PyGraph, PyNode
 from fasta_0 import FastaSeq
 from misc_0 cimport uint
 
 cdef extern from "_single_1.h" namespace "_single_1":
-    cdef cppclass PyNode:
-        PyNode(uint) except +
-        
-        uint node_id
-        vector[uint] edges
-    
-    cdef cppclass PyGraph:
-        PyGraph() except +
-        
-        uint graph_id
-        vector[PyNode] nodes
-        
     cdef cppclass PyReadGraphLoc: 
         PyReadGraphLoc(uint) except +
         
@@ -103,6 +91,45 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
 cdef void get_read_in_graph_from_py(read_in_graph, id_maps,
                                     vector[PyReadInGraph] * py_reads):        
     cdef uint read_id = 0
+    cdef uint graph_id, node_id
+    
+    cdef vector[PyReadInGraph].iterator py_read_iter = py_reads.begin()
+    
+    cdef PyReadGraphLoc * py_graph_loc
+    
+    cdef PyReadNodeLoc * py_node_loc
+    
+    cdef SeqLoc * seq_loc
+    
+    for read_info in read_in_graph.itervalues():
+        deref(py_read_iter).read_id = read_id
+        
+        for graph_name, graph_aligns in read_info.iteritems():
+            id_map = id_maps[graph_name]
+            
+            py_graph_loc = new PyReadGraphLoc(id_map.graph_id)
+            
+            for graph_align in graph_aligns:
+                py_node_loc = new PyReadNodeLoc()
+                
+                for align in graph_align:
+                    seq_loc = new SeqLoc(id_map.nodes_map[align.node],
+                                         align.start, align.end)
+                    
+                    py_node_loc.push_back(deref(seq_loc))
+                    
+                    del seq_loc
+                    
+                py_graph_loc.locs.push_back(deref(py_node_loc))
+                
+                del py_node_loc 
+            
+            deref(py_read_iter).graph_locs.push_back(deref(py_graph_loc))
+            
+            del py_graph_loc
+        
+        inc(py_read_iter)
+        inc(read_id)
         
 
 def get_isoforms(read_in_graph, graph_dict, max_run=1000000):
