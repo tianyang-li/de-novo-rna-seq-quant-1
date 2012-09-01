@@ -27,22 +27,36 @@ void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
 		std::vector<PyReadInGraph> *py_reads,
 		std::vector<_graph_seq_0::Isoform> *isoforms) {
 
-	std::vector<GraphReads> graphs_reads(py_graphs->size());
+	std::vector<GraphReads> graph_reads(py_graphs->size());
 
 	{
 		uint graph_id = 0;
 
-		for (std::vector<GraphReads>::iterator i = graphs_reads.begin();
-				i != graphs_reads.end(); ++i, ++graph_id) {
+		for (std::vector<GraphReads>::iterator i = graph_reads.begin();
+				i != graph_reads.end(); ++i, ++graph_id) {
 			i->graph_id = graph_id;
 		}
 	}
 
 	{
 		uint read_id = 0;
+
 		for (std::vector<PyReadInGraph>::const_iterator i = py_reads->begin();
 				i != py_reads->end(); ++i, ++read_id) {
+			uint graph_index = 0;
 
+			for (std::vector<PyReadGraphLoc>::const_iterator j =
+					i->graph_locs.begin(); j != i->graph_locs.end();
+					++j, ++graph_index) {
+				uint align_index = 0;
+
+				for (std::vector<_graph_seq_0::PyReadNodeLoc>::const_iterator k =
+						j->locs.begin(); k != j->locs.end();
+						++k, ++align_index) {
+					graph_reads[j->graph_id].reads.push_back(
+							ReadIndex(read_id, graph_index, align_index));
+				}
+			}
 		}
 	}
 

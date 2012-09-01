@@ -60,12 +60,18 @@ void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
  */
 
 /*
- * given read's index @read_id
+ * given read's @read_id
  * the alignment is at
  * py_reads[read_id].graph_locs[graph_index].locs[align_index]
  */
 class ReadIndex {
 public:
+	ReadIndex(uint read_id_, uint graph_index_, uint align_index_) :
+			read_id(read_id_), graph_index(graph_index_), align_index(
+					align_index_) {
+	}
+
+	uint read_id;
 	uint graph_index;
 	uint align_index;
 };
