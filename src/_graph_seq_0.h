@@ -24,6 +24,8 @@
 #ifndef _GRAPH_SEQ_0_H_
 #define _GRAPH_SEQ_0_H_
 
+#include <vector>
+
 #include "_misc_0.h"
 
 namespace _graph_seq_0 {
@@ -57,6 +59,11 @@ public:
 	uint start;
 	uint end;
 };
+
+/*
+ * assumes the graph is already known
+ */
+typedef std::vector<SeqLoc> PyReadNodeLoc;
 
 }
 

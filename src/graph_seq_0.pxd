@@ -13,6 +13,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 
+from libcpp.vector cimport vector
+
 from misc_0 cimport uint
 
 cdef extern from "_graph_seq_0.h" namespace "_graph_seq_0":
@@ -22,5 +24,7 @@ cdef extern from "_graph_seq_0.h" namespace "_graph_seq_0":
         uint node_id
         uint start
         uint end
+    
+    ctypedef vector[SeqLoc] PyReadNodeLoc
 
 

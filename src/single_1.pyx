@@ -16,7 +16,7 @@
 from libcpp.vector cimport vector
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from graph_seq_0 cimport SeqLoc
+from graph_seq_0 cimport SeqLoc, PyReadNodeLoc
 from fasta_0 import FastaSeq
 from misc_0 cimport uint
 
@@ -32,6 +32,18 @@ cdef extern from "_single_1.h" namespace "_single_1":
         
         uint graph_id
         vector[PyNode] nodes
+        
+    cdef cppclass PyReadGraphLoc: 
+        PyReadGraphLoc(uint) except +
+        
+        vector[PyReadNodeLoc] locs
+        uint graph_id
+    
+    cdef cppclass PyReadInGraph:
+        PyReadInGraph() except +
+        
+        uint read_id
+        vector[PyReadGraphLoc] graph_locs
 
 
 class IdMap(object):
@@ -72,7 +84,6 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
             py_node = new PyNode(node_id)
             deref(py_graph_iter).nodes.push_back(deref(py_node))
             del py_node
-            #TODO: no dynamic mem allocation? faster?
             
             inc(py_node_iter)
             inc(node_id)
@@ -87,6 +98,11 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
         
         inc(graph_id)
         inc(py_graph_iter)
+
+
+cdef void get_read_in_graph_from_py(read_in_graph, id_maps,
+                                    vector[PyReadInGraph] * py_reads):        
+    cdef uint read_id = 0
         
 
 def get_isoforms(read_in_graph, graph_dict, max_run=1000000):
@@ -108,6 +124,10 @@ def get_isoforms(read_in_graph, graph_dict, max_run=1000000):
     id_maps = {}
     
     get_graph_from_py(graph_dict, id_maps, py_graphs)
+    
+    cdef vector[PyReadInGraph] * py_reads = new vector[PyReadInGraph](len(read_in_graph))
+    
+    get_read_in_graph_from_py(read_in_graph, id_maps, py_reads)
     
     isoforms = []
     

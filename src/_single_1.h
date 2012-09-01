@@ -22,12 +22,17 @@
 #include <vector>
 
 #include "_misc_0.h"
+#include "_graph_seq_0.h"
 
 namespace _single_1 {
 
 /*
  * makes it easy to get graph information from
  * python
+ */
+
+/*
+ * assumes that we know what what graph it is
  */
 class PyNode {
 public:
@@ -61,6 +66,43 @@ public:
 
 	uint graph_id;
 	std::vector<PyNode> nodes;
+};
+
+/*
+ * assumes that the read is already known
+ */
+class PyReadGraphLoc {
+public:
+	PyReadGraphLoc(uint graph_id_) :
+			graph_id(graph_id_) {
+	}
+
+	PyReadGraphLoc &operator=(PyReadGraphLoc const &x) {
+		if (this != &x) {
+			graph_id = x.graph_id;
+			locs = x.locs;
+		}
+		return *this;
+	}
+
+	PyReadGraphLoc(PyReadGraphLoc const &x) :
+			graph_id(x.graph_id), locs(x.locs) {
+	}
+
+	~PyReadGraphLoc() {
+	}
+
+	uint graph_id;
+	std::vector<_graph_seq_0::PyReadNodeLoc> locs;
+};
+
+class PyReadInGraph {
+public:
+	PyReadInGraph() {
+	}
+
+	uint read_id;
+	std::vector<PyReadGraphLoc> graph_locs;
 };
 
 }
