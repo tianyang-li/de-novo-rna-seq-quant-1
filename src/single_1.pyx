@@ -140,6 +140,20 @@ cdef void get_read_in_graph_from_py(read_in_graph, id_maps,
         
         inc(py_read_iter)
         inc(read_id)
+
+
+cdef void convert_isoforms(isoforms, vector[Isoform] * _isoforms):
+    """
+    isoforms:
+        a list of FastaSeq
+    """
+    
+    cdef vector[Isoform].iterator isof_iter = _isoforms.begin()
+    
+    while isof_iter != _isoforms.end():
+        
+        
+        inc(isof_iter)
         
 
 def get_isoforms(read_in_graph, graph_dict, max_run=1000000):
@@ -172,8 +186,11 @@ def get_isoforms(read_in_graph, graph_dict, max_run=1000000):
     
     isoforms = []
     
+    convert_isoforms(isoforms, _isoforms)
+    
     del py_graphs
     del py_reads
+    del _isoforms
     
     return isoforms
 

@@ -38,7 +38,7 @@ clean:
 	rm -rfv util/single_1.so
 	rm -rfv lib/*
 	rm -rfv src/*.cpp
-	#rm -rfv gsl-1.15/
+	#rm -rfv gsl-1.15/ #TODO make this into a command 
 
 .PHONY: all clean
 
