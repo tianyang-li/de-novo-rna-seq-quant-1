@@ -40,6 +40,9 @@ class IdMap(object):
     def __init__(self, graph_id):
         self.graph_id = graph_id
         self.nodes_map = {}
+    
+    def __str__(self):
+        return "graph:%s,nodes_map:%s" % (self.graph_id, str(self.nodes_map))
 
 
 cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
@@ -53,11 +56,32 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
     """
     
     cdef uint graph_id = 0
+    cdef uint node_id
+    cdef PyNode * py_node 
     
     cdef vector[PyGraph].iterator py_graph_iter = py_graphs.begin()
+    cdef vector[PyNode].iterator py_node_iter
     
     for graph_name, graph in graph_dict.iteritems():
         id_map = IdMap(graph_id)
+        
+        node_id = 0
+        
+        for node in graph.nodes():
+            id_map.nodes_map[node] = node_id
+            py_node = new PyNode(node_id)
+            deref(py_graph_iter).nodes.push_back(deref(py_node))
+            del py_node
+            #TODO: no dynamic mem allocation? faster?
+            
+            inc(py_node_iter)
+            inc(node_id)
+        
+        py_node_iter = deref(py_graph_iter).nodes.begin() 
+        
+        for node in graph.nodes():
+            for edge in graph[node]:
+                deref(py_node_iter).edges.push_back(id_map.nodes_map[edge])
         
         id_maps[graph_name] = id_map 
         
