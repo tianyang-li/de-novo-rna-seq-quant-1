@@ -23,7 +23,19 @@
 #ifndef _MISC_0_H_
 #define _MISC_0_H_
 
+#include <string>
+#include <cstddef>
+#include <boost/functional/hash.hpp>
+#include <boost/dynamic_bitset.hpp>
+
 typedef unsigned int uint;
 typedef long double ldbl;
+
+template<typename Block, typename Allocator>
+size_t hash_value(boost::dynamic_bitset<Block, Allocator> const &x) {
+	boost::hash<std::string> hasher;
+	std::string x_str = x.to_string();
+	return hasher(x_str);
+}
 
 #endif // _MISC_0_H_

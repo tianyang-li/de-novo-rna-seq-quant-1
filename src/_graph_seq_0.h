@@ -25,6 +25,9 @@
 #define _GRAPH_SEQ_0_H_
 
 #include <vector>
+#include <string>
+#include <boost/dynamic_bitset.hpp>
+#include <boost/functional/hash.hpp>
 
 #include "_misc_0.h"
 
@@ -82,6 +85,11 @@ public:
 	Isoform() {
 	}
 
+	uint graph_id;
+};
+
+class SpliceGraph {
+public:
 	uint graph_id;
 };
 
