@@ -17,18 +17,24 @@
  */
 
 #include <vector>
-
-#include <cstdio>
+#include <boost/dynamic_bitset.hpp>
 
 #include "_single_1.h"
 #include "_misc_0.h"
 
 namespace _single_1 {
 
+void get_read_constraints(std::vector<GraphReads> const &graph_reads,
+		std::vector<PyReadInGraph> const &py_reads,
+		std::vector<boost::dynamic_bitset<> > &rc /* read constraints */) {
+
+}
+
 void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
 		std::vector<PyReadInGraph> *py_reads,
 		std::vector<_graph_seq_0::Isoform> *isoforms) {
 
+	// the reads that a graph has
 	std::vector<GraphReads> graph_reads(py_graphs->size());
 
 	{
@@ -62,6 +68,18 @@ void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
 		}
 	}
 
+	std::vector<_graph_seq_0::SpliceGraph> graphs(py_graphs->size());
+	{
+		uint graph_id = 0;
+		std::vector<GraphReads>::iterator graph_read = graph_reads.begin();
+
+		for (std::vector<_graph_seq_0::SpliceGraph>::iterator i =
+				graphs.begin(); i != graphs.end();
+				++i, ++graph_id, ++graph_read) {
+			i->graph_id = graph_id;
+			get_read_constraints(graph_reads, *py_reads, i->read_constraints);
+		}
+	}
 
 }
 

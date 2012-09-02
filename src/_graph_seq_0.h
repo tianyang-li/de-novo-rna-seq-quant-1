@@ -91,6 +91,7 @@ public:
 class SpliceGraph {
 public:
 	uint graph_id;
+	std::vector<boost::dynamic_bitset<> > read_constraints;
 };
 
 }

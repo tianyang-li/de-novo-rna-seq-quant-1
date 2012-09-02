@@ -20,6 +20,7 @@
 #define _SINGLE_1_H_
 
 #include <vector>
+#include <boost/dynamic_bitset.hpp>
 
 #include "_misc_0.h"
 #include "_graph_seq_0.h"
