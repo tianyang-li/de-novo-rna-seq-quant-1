@@ -31,10 +31,10 @@
 typedef unsigned int uint;
 typedef long double ldbl;
 
-template<typename Block, typename Allocator>
-size_t hash_value(boost::dynamic_bitset<Block, Allocator> const &x) {
+size_t hash_value(boost::dynamic_bitset<> const &x) {
 	boost::hash<std::string> hasher;
-	std::string x_str = x.to_string();
+	std::string x_str;
+	boost::to_string(x, x_str);
 	return hasher(x_str);
 }
 
