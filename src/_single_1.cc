@@ -18,16 +18,21 @@
 
 #include <vector>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/unordered_set.hpp>
 
 #include "_single_1.h"
 #include "_misc_0.h"
+#include "_graph_seq_0.h"
 
 namespace _single_1 {
 
-void get_read_constraints(std::vector<GraphReads> const &graph_reads,
+inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
+		GraphReads const &graph_read,
 		std::vector<PyReadInGraph> const &py_reads,
 		std::vector<boost::dynamic_bitset<> > &rc /* read constraints */) {
 
+	// non-redundant read constraints
+	boost::unordered_set<boost::dynamic_bitset<> > nr_rc;
 }
 
 void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
@@ -71,13 +76,17 @@ void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
 	std::vector<_graph_seq_0::SpliceGraph> graphs(py_graphs->size());
 	{
 		uint graph_id = 0;
-		std::vector<GraphReads>::iterator graph_read = graph_reads.begin();
+		std::vector<GraphReads>::const_iterator graph_read =
+				graph_reads.begin();
+		std::vector<_graph_seq_0::PyGraph>::const_iterator py_graph =
+				py_graphs->begin();
 
 		for (std::vector<_graph_seq_0::SpliceGraph>::iterator i =
 				graphs.begin(); i != graphs.end();
-				++i, ++graph_id, ++graph_read) {
+				++i, ++graph_id, ++graph_read, ++py_graph) {
 			i->graph_id = graph_id;
-			get_read_constraints(graph_reads, *py_reads, i->read_constraints);
+			get_read_constraints(*py_graph, *graph_read, *py_reads,
+					i->read_constraints);
 		}
 	}
 
