@@ -92,7 +92,7 @@ inline void setup_graph() {
 
 void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 		vector<PyReadInGraph> *py_reads,
-		vector<_graph_seq_0::Isoform> *isoforms) {
+		vector<_graph_seq_0::Fasta> *isoforms) {
 
 	// the reads that a graph has
 	vector<GraphReads> graph_reads(py_graphs->size());

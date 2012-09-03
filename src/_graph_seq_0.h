@@ -36,6 +36,7 @@
 namespace _graph_seq_0 {
 
 using std::vector;
+using std::string;
 
 /*
  * makes it easy to get graph information from
@@ -47,12 +48,12 @@ using std::vector;
  */
 class PyNode {
 public:
-	PyNode(uint node_id_, uint seq_len_) :
-			node_id(node_id_), seq_len(seq_len_) {
+	PyNode(uint node_id_, string seq_) :
+			node_id(node_id_), seq(seq_) {
 	}
 
 	uint node_id;
-	uint seq_len;
+	string seq;
 	vector<uint> edges;
 };
 
@@ -84,12 +85,10 @@ public:
  */
 typedef vector<SeqLoc> PyReadNodeLoc;
 
-class Isoform {
+class Fasta {
 public:
-	Isoform() {
-	}
-
-	uint graph_id;
+	string info;
+	string seq; // only ACGT allowed
 };
 
 // size if the length of the graph

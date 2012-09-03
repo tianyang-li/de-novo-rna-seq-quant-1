@@ -54,7 +54,7 @@ public:
  */
 void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
 		std::vector<PyReadInGraph> *py_reads,
-		std::vector<_graph_seq_0::Isoform> *isoforms);
+		std::vector<_graph_seq_0::Fasta> *isoforms);
 
 /*
  * keep the reads aligned to a particular graph

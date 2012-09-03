@@ -14,6 +14,7 @@
 #  You should have received a copy of the GNU General Public License
 
 from libcpp.vector cimport vector
+from libcpp.string cimport string
 
 from misc_0 cimport uint
 
@@ -28,10 +29,10 @@ cdef extern from "_graph_seq_0.h" namespace "_graph_seq_0":
     ctypedef vector[SeqLoc] PyReadNodeLoc
     
     cdef cppclass PyNode:
-        PyNode(uint, uint) except +
+        PyNode(uint, string) except +
         
         uint node_id
-        uint seq_len
+        string seq_len
         vector[uint] edges
     
     cdef cppclass PyGraph:
@@ -40,9 +41,10 @@ cdef extern from "_graph_seq_0.h" namespace "_graph_seq_0":
         uint graph_id
         vector[PyNode] nodes
     
-    cdef cppclass Isoform:
-        Isoform() except +
-            
-        uint graph_id
+    cdef cppclass Fasta:
+        Fasta() except +
+        
+        string info
+        string seq 
 
 

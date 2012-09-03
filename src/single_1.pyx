@@ -14,9 +14,10 @@
 #  You should have received a copy of the GNU General Public License
 
 from libcpp.vector cimport vector
+from libcpp.string cimport string
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from graph_seq_0 cimport SeqLoc, PyReadNodeLoc, PyGraph, PyNode, Isoform
+from graph_seq_0 cimport SeqLoc, PyReadNodeLoc, PyGraph, PyNode, Fasta
 from fasta_0 import FastaSeq
 from misc_0 cimport uint
 
@@ -37,7 +38,7 @@ cdef extern from "_single_1.h" namespace "_single_1":
     
     cdef void _get_isoforms(vector[PyGraph] * py_graphs,
                             vector[PyReadInGraph] * py_reads,
-                            vector[Isoform] * isoforms)
+                            vector[Fasta] * isoforms)
 
 
 class IdMap(object):
@@ -79,7 +80,8 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
         for node in graph.nodes():
             id_map.nodes_map[node] = node_id
             
-            py_node = new PyNode(node_id, len(graph.node[node]['label']))
+            py_node = new PyNode(node_id,
+                                 < string >< char *> graph.node[node]['label'])
             
             deref(py_graph_iter).nodes.push_back(deref(py_node))
             
@@ -144,16 +146,17 @@ cdef void get_read_in_graph_from_py(read_in_graph, id_maps,
         inc(read_id)
 
 
-cdef void convert_isoforms(isoforms, vector[Isoform] * _isoforms):
+cdef void convert_isoforms(isoforms, vector[Fasta] * _isoforms):
     """
     isoforms:
         a list of FastaSeq
     """
     
-    cdef vector[Isoform].iterator isof_iter = _isoforms.begin()
+    cdef vector[Fasta].iterator isof_iter = _isoforms.begin()
     
     while isof_iter != _isoforms.end():
-        
+        isoforms.append(FastaSeq(deref(isof_iter).info.c_str(),
+                                 deref(isof_iter).seq.c_str()))
         
         inc(isof_iter)
         
@@ -182,7 +185,7 @@ def get_isoforms(read_in_graph, graph_dict, max_run=1000000):
     
     get_read_in_graph_from_py(read_in_graph, id_maps, py_reads)
     
-    cdef vector[Isoform] * _isoforms = new vector[Isoform]()
+    cdef vector[Fasta] * _isoforms = new vector[Fasta]()
     
     _get_isoforms(py_graphs, py_reads, _isoforms)
     
