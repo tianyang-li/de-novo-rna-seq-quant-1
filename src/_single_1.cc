@@ -87,7 +87,8 @@ inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 	}
 }
 
-inline void setup_graph() {
+inline void setup_graph(_graph_seq_0::DirectedGraph &graph,
+		vector<_graph_seq_0::PyGraph> &py_graphs) {
 }
 
 void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
@@ -131,8 +132,11 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 	for (vector<_graph_seq_0::SpliceGraph>::iterator i = graphs.begin();
 			i != graphs.end(); ++i, ++graph_id, ++graph_read, ++py_graph) {
 		i->graph_id = graph_id;
+
 		get_read_constraints(*py_graph, *graph_read, *py_reads,
 				i->read_constraints);
+
+		setup_graph(i->graph, *py_graphs);
 	}
 
 }
