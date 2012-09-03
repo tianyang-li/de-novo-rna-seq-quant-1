@@ -99,17 +99,20 @@ typedef boost::dynamic_bitset<> SeqConstraint;
 class SeqConstraintHash {
 public:
 	inline size_t operator()(SeqConstraint const &x) const {
-		std::string x_str;
+		string x_str;
 		boost::to_string(x, x_str);
-		boost::hash<std::string> hasher;
+		boost::hash<string> hasher;
 		return hasher(x_str);
 	}
 };
+
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> DirectedGraph;
 
 class SpliceGraph {
 public:
 	uint graph_id;
 	vector<SeqConstraint> read_constraints;
+	DirectedGraph graph;
 };
 
 }
