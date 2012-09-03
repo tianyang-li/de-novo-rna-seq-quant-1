@@ -31,11 +31,14 @@
 typedef unsigned int uint;
 typedef long double ldbl;
 
-inline size_t hash_value(boost::dynamic_bitset<> const &x) {
-	std::string x_str;
-	boost::to_string(x, x_str);
-	boost::hash<std::string> hasher;
-	return hasher(x_str);
-}
+class dynamic_bitset_hash {
+public:
+	inline size_t operator()(boost::dynamic_bitset<> const &x) const {
+		std::string x_str;
+		boost::to_string(x, x_str);
+		boost::hash<std::string> hasher;
+		return hasher(x_str);
+	}
+};
 
 #endif // _MISC_0_H_

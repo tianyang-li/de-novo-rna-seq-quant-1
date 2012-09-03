@@ -24,6 +24,8 @@
 #include "_misc_0.h"
 #include "_graph_seq_0.h"
 
+#include <iostream>
+
 namespace _single_1 {
 
 inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
@@ -32,17 +34,21 @@ inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 		std::vector<boost::dynamic_bitset<> > &rcs /* read constraints */) {
 
 	// non-redundant read constraints
-	boost::unordered_set<boost::dynamic_bitset<> > nr_rcs;
+	boost::unordered_set<boost::dynamic_bitset<>, dynamic_bitset_hash> nr_rcs;
 
 	for (std::vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
 			i != graph_read.reads.end(); ++i) {
 		boost::dynamic_bitset<> rc(py_graph.nodes.size());
+
 		for (_graph_seq_0::PyReadNodeLoc::const_iterator j =
 				py_reads[i->read_id].graph_locs[i->graph_index].locs[i->align_index].begin();
 				j
 						!= py_reads[i->read_id].graph_locs[i->graph_index].locs[i->align_index].end();
 				++j) {
+			rc.set(j->node_id);
 		}
+
+		nr_rcs.insert(rc);
 	}
 
 }
