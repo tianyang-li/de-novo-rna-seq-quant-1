@@ -17,7 +17,7 @@
  */
 
 #include <vector>
-#include <boost/dynamic_bitset.hpp>
+#include <utility>
 #include <boost/unordered_set.hpp>
 
 #include "_single_1.h"
@@ -28,17 +28,17 @@
 
 namespace _single_1 {
 
+using std::vector;
+
 inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
-		GraphReads const &graph_read,
-		std::vector<PyReadInGraph> const &py_reads,
-		std::vector<boost::dynamic_bitset<> > &rcs /* read constraints */) {
+		GraphReads const &graph_read, vector<PyReadInGraph> const &py_reads,
+		vector<SeqConstraint> &rcs /* read constraints */) {
+	// read constraints
+	boost::unordered_set<SeqConstraint, SeqConstraintHash> rcs_set;
 
-	// non-redundant read constraints
-	boost::unordered_set<boost::dynamic_bitset<>, dynamic_bitset_hash> nr_rcs;
-
-	for (std::vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
+	for (vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
 			i != graph_read.reads.end(); ++i) {
-		boost::dynamic_bitset<> rc(py_graph.nodes.size());
+		SeqConstraint rc(py_graph.nodes.size());
 
 		for (_graph_seq_0::PyReadNodeLoc::const_iterator j =
 				py_reads[i->read_id].graph_locs[i->graph_index].locs[i->align_index].begin();
@@ -48,64 +48,87 @@ inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 			rc.set(j->node_id);
 		}
 
-		nr_rcs.insert(rc);
+		rcs_set.insert(rc);
 	}
 
-}
+	// read constraints
+	vector<SeqConstraint> rcs_vec;
 
-void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
-		std::vector<PyReadInGraph> *py_reads,
-		std::vector<_graph_seq_0::Isoform> *isoforms) {
-
-	// the reads that a graph has
-	std::vector<GraphReads> graph_reads(py_graphs->size());
-
-	{
-		uint graph_id = 0;
-
-		for (std::vector<GraphReads>::iterator i = graph_reads.begin();
-				i != graph_reads.end(); ++i, ++graph_id) {
-			i->graph_id = graph_id;
-		}
+	for (boost::unordered_set<SeqConstraint, SeqConstraintHash>::const_iterator i =
+			rcs_set.begin(); i != rcs_set.end(); ++i) {
+		rcs_vec.push_back(*i);
 	}
 
-	{
-		uint read_id = 0;
+	// build a partial order on read constraints
+	// count in-degree
+	vector<uint> rc_in(rcs_vec.size(), 0);
 
-		for (std::vector<PyReadInGraph>::const_iterator i = py_reads->begin();
-				i != py_reads->end(); ++i, ++read_id) {
-			uint graph_index = 0;
-
-			for (std::vector<PyReadGraphLoc>::const_iterator j =
-					i->graph_locs.begin(); j != i->graph_locs.end();
-					++j, ++graph_index) {
-				uint align_index = 0;
-
-				for (std::vector<_graph_seq_0::PyReadNodeLoc>::const_iterator k =
-						j->locs.begin(); k != j->locs.end();
-						++k, ++align_index) {
-					graph_reads[j->graph_id].reads.push_back(
-							ReadIndex(read_id, graph_index, align_index));
+	for (uint i = 1; i < rcs_vec.size(); ++i) {
+		for (uint j = 0; j < i; ++j) {
+			SeqConstraint ij_or = rcs_vec[i] | rcs_vec[j];
+			if (ij_or == rcs_vec[i]) {
+				rc_in[j] += 1;
+			} else {
+				if (ij_or == rcs_vec[j]) {
+					rc_in[i] += 1;
 				}
 			}
 		}
 	}
 
-	std::vector<_graph_seq_0::SpliceGraph> graphs(py_graphs->size());
-	{
-		uint graph_id = 0;
-		std::vector<GraphReads>::const_iterator graph_read =
-				graph_reads.begin();
-		std::vector<_graph_seq_0::PyGraph>::const_iterator py_graph =
-				py_graphs->begin();
+	uint rc_id = 0;
 
-		for (std::vector<_graph_seq_0::SpliceGraph>::iterator i =
-				graphs.begin(); i != graphs.end();
-				++i, ++graph_id, ++graph_read, ++py_graph) {
-			i->graph_id = graph_id;
-			get_read_constraints(*py_graph, *graph_read, *py_reads,
-					i->read_constraints);
+	for (vector<uint>::const_iterator i = rc_in.begin(); i != rc_in.end();
+			++i, ++rc_id) {
+		if (*i == 0) {
+			rcs.push_back(rcs_vec[rc_id]);
 		}
+	}
+}
+
+void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
+		vector<PyReadInGraph> *py_reads,
+		vector<_graph_seq_0::Isoform> *isoforms) {
+
+	// the reads that a graph has
+	vector<GraphReads> graph_reads(py_graphs->size());
+
+	uint graph_id = 0;
+
+	for (vector<GraphReads>::iterator i = graph_reads.begin();
+			i != graph_reads.end(); ++i, ++graph_id) {
+		i->graph_id = graph_id;
+	}
+
+	uint read_id = 0;
+
+	for (vector<PyReadInGraph>::const_iterator i = py_reads->begin();
+			i != py_reads->end(); ++i, ++read_id) {
+		uint graph_index = 0;
+
+		for (vector<PyReadGraphLoc>::const_iterator j = i->graph_locs.begin();
+				j != i->graph_locs.end(); ++j, ++graph_index) {
+			uint align_index = 0;
+
+			for (vector<_graph_seq_0::PyReadNodeLoc>::const_iterator k =
+					j->locs.begin(); k != j->locs.end(); ++k, ++align_index) {
+				graph_reads[j->graph_id].reads.push_back(
+						ReadIndex(read_id, graph_index, align_index));
+			}
+		}
+	}
+
+	vector<_graph_seq_0::SpliceGraph> graphs(py_graphs->size());
+
+	graph_id = 0;
+	vector<GraphReads>::const_iterator graph_read = graph_reads.begin();
+	vector<_graph_seq_0::PyGraph>::const_iterator py_graph = py_graphs->begin();
+
+	for (vector<_graph_seq_0::SpliceGraph>::iterator i = graphs.begin();
+			i != graphs.end(); ++i, ++graph_id, ++graph_read, ++py_graph) {
+		i->graph_id = graph_id;
+		get_read_constraints(*py_graph, *graph_read, *py_reads,
+				i->read_constraints);
 	}
 
 }

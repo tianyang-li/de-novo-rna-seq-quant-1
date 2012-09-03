@@ -33,6 +33,8 @@
 
 namespace _graph_seq_0 {
 
+using std::vector;
+
 /*
  * makes it easy to get graph information from
  * python
@@ -49,7 +51,7 @@ public:
 
 	uint node_id;
 	uint seq_len;
-	std::vector<uint> edges;
+	vector<uint> edges;
 };
 
 class PyGraph {
@@ -58,7 +60,7 @@ public:
 	}
 
 	uint graph_id;
-	std::vector<PyNode> nodes;
+	vector<PyNode> nodes;
 };
 
 /*
@@ -78,7 +80,7 @@ public:
 /*
  * assumes the graph is already known
  */
-typedef std::vector<SeqLoc> PyReadNodeLoc;
+typedef vector<SeqLoc> PyReadNodeLoc;
 
 class Isoform {
 public:
@@ -91,7 +93,7 @@ public:
 class SpliceGraph {
 public:
 	uint graph_id;
-	std::vector<boost::dynamic_bitset<> > read_constraints;
+	vector<boost::dynamic_bitset<> > read_constraints;
 };
 
 }

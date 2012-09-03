@@ -31,9 +31,14 @@
 typedef unsigned int uint;
 typedef long double ldbl;
 
-class dynamic_bitset_hash {
+// size if the length of the graph
+// bit set to 1 if the seq falls into
+// the corresponding node
+typedef boost::dynamic_bitset<> SeqConstraint;
+
+class SeqConstraintHash {
 public:
-	inline size_t operator()(boost::dynamic_bitset<> const &x) const {
+	inline size_t operator()(SeqConstraint const &x) const {
 		std::string x_str;
 		boost::to_string(x, x_str);
 		boost::hash<std::string> hasher;
