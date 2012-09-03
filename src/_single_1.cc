@@ -29,12 +29,13 @@
 namespace _single_1 {
 
 using std::vector;
+using _graph_seq_0::SeqConstraint;
 
 inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 		GraphReads const &graph_read, vector<PyReadInGraph> const &py_reads,
 		vector<SeqConstraint> &rcs /* read constraints */) {
 	// read constraints
-	boost::unordered_set<SeqConstraint, SeqConstraintHash> rcs_set;
+	boost::unordered_set<SeqConstraint, _graph_seq_0::SeqConstraintHash> rcs_set;
 
 	for (vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
 			i != graph_read.reads.end(); ++i) {
@@ -54,7 +55,7 @@ inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 	// read constraints
 	vector<SeqConstraint> rcs_vec;
 
-	for (boost::unordered_set<SeqConstraint, SeqConstraintHash>::const_iterator i =
+	for (boost::unordered_set<SeqConstraint, _graph_seq_0::SeqConstraintHash>::const_iterator i =
 			rcs_set.begin(); i != rcs_set.end(); ++i) {
 		rcs_vec.push_back(*i);
 	}
@@ -84,6 +85,9 @@ inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 			rcs.push_back(rcs_vec[rc_id]);
 		}
 	}
+}
+
+inline void setup_graph() {
 }
 
 void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,

@@ -23,27 +23,7 @@
 #ifndef _MISC_0_H_
 #define _MISC_0_H_
 
-#include <string>
-#include <cstddef>
-#include <boost/functional/hash.hpp>
-#include <boost/dynamic_bitset.hpp>
-
 typedef unsigned int uint;
 typedef long double ldbl;
-
-// size if the length of the graph
-// bit set to 1 if the seq falls into
-// the corresponding node
-typedef boost::dynamic_bitset<> SeqConstraint;
-
-class SeqConstraintHash {
-public:
-	inline size_t operator()(SeqConstraint const &x) const {
-		std::string x_str;
-		boost::to_string(x, x_str);
-		boost::hash<std::string> hasher;
-		return hasher(x_str);
-	}
-};
 
 #endif // _MISC_0_H_

@@ -26,8 +26,10 @@
 
 #include <vector>
 #include <string>
-#include <boost/dynamic_bitset.hpp>
+#include <cstddef>
 #include <boost/functional/hash.hpp>
+#include <boost/dynamic_bitset.hpp>
+#include <boost/graph/adjacency_list.hpp>
 
 #include "_misc_0.h"
 
@@ -90,10 +92,25 @@ public:
 	uint graph_id;
 };
 
+// size if the length of the graph
+// bit set to 1 if the seq falls into
+// the corresponding node
+typedef boost::dynamic_bitset<> SeqConstraint;
+
+class SeqConstraintHash {
+public:
+	inline size_t operator()(SeqConstraint const &x) const {
+		std::string x_str;
+		boost::to_string(x, x_str);
+		boost::hash<std::string> hasher;
+		return hasher(x_str);
+	}
+};
+
 class SpliceGraph {
 public:
 	uint graph_id;
-	vector<boost::dynamic_bitset<> > read_constraints;
+	vector<SeqConstraint> read_constraints;
 };
 
 }
