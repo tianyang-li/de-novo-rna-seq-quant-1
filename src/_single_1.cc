@@ -29,10 +29,22 @@ namespace _single_1 {
 inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 		GraphReads const &graph_read,
 		std::vector<PyReadInGraph> const &py_reads,
-		std::vector<boost::dynamic_bitset<> > &rc /* read constraints */) {
+		std::vector<boost::dynamic_bitset<> > &rcs /* read constraints */) {
 
 	// non-redundant read constraints
-	boost::unordered_set<boost::dynamic_bitset<> > nr_rc;
+	boost::unordered_set<boost::dynamic_bitset<> > nr_rcs;
+
+	for (std::vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
+			i != graph_read.reads.end(); ++i) {
+		boost::dynamic_bitset<> rc(py_graph.nodes.size());
+		for (_graph_seq_0::PyReadNodeLoc::const_iterator j =
+				py_reads[i->read_id].graph_locs[i->graph_index].locs[i->align_index].begin();
+				j
+						!= py_reads[i->read_id].graph_locs[i->graph_index].locs[i->align_index].end();
+				++j) {
+		}
+	}
+
 }
 
 void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
