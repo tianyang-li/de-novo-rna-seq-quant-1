@@ -17,7 +17,6 @@
  */
 
 #include <vector>
-#include <utility>
 #include <boost/unordered_set.hpp>
 
 #include "_single_1.h"
@@ -34,6 +33,8 @@ using _graph_seq_0::SeqConstraint;
 inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 		GraphReads const &graph_read, vector<PyReadInGraph> const &py_reads,
 		vector<SeqConstraint> &rcs /* read constraints */) {
+	// TODO: this is not the right one
+
 	// read constraints
 	boost::unordered_set<SeqConstraint, _graph_seq_0::SeqConstraintHash> rcs_set;
 
@@ -88,7 +89,21 @@ inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 }
 
 inline void setup_graph(_graph_seq_0::DirectedGraph &graph,
-		vector<_graph_seq_0::PyGraph> &py_graphs) {
+		_graph_seq_0::PyGraph const &py_graph) {
+	// TODO: fix this for final version
+	// here no non-branch start/end site detection
+	// or trimming is done
+	// transcript length is also not estimated
+	for (uint i = 0; i != py_graph.nodes.size(); ++i) {
+		boost::add_vertex(graph);
+	}
+	for (vector<_graph_seq_0::PyNode>::const_iterator i =
+			py_graph.nodes.begin(); i != py_graph.nodes.end(); ++i) {
+		for (vector<uint>::const_iterator j = i->edges.begin();
+				j != i->edges.end(); ++j) {
+			boost::add_edge(i->node_id, *j, graph);
+		}
+	}
 }
 
 void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
@@ -133,10 +148,8 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 			i != graphs.end(); ++i, ++graph_id, ++graph_read, ++py_graph) {
 		i->graph_id = graph_id;
 
-		get_read_constraints(*py_graph, *graph_read, *py_reads,
-				i->read_constraints);
+		setup_graph(i->graph, *py_graph);
 
-		setup_graph(i->graph, *py_graphs);
 	}
 
 }
