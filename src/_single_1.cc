@@ -88,20 +88,24 @@ inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 	}
 }
 
-inline void setup_graph(_graph_seq_0::DirectedGraph &graph,
+inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 		_graph_seq_0::PyGraph const &py_graph) {
+	// setup boost graph
+	// setup read constraints
+
 	// TODO: fix this for final version
 	// here no non-branch start/end site detection
 	// or trimming is done
 	// transcript length is also not estimated
+
 	for (uint i = 0; i != py_graph.nodes.size(); ++i) {
-		boost::add_vertex(graph);
+		boost::add_vertex(graph.graph);
 	}
 	for (vector<_graph_seq_0::PyNode>::const_iterator i =
 			py_graph.nodes.begin(); i != py_graph.nodes.end(); ++i) {
 		for (vector<uint>::const_iterator j = i->edges.begin();
 				j != i->edges.end(); ++j) {
-			boost::add_edge(i->node_id, *j, graph);
+			boost::add_edge(i->node_id, *j, graph.graph);
 		}
 	}
 }
@@ -148,7 +152,7 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 			i != graphs.end(); ++i, ++graph_id, ++graph_read, ++py_graph) {
 		i->graph_id = graph_id;
 
-		setup_graph(i->graph, *py_graph);
+		setup_graph(*i, *py_graph);
 
 	}
 
