@@ -28,8 +28,8 @@ cdef extern from "_graph_seq_0.h" namespace "_graph_seq_0":
     
     ctypedef vector[SeqLoc] ReadNodeLoc
     
-    cdef cppclass PyNode:
-        PyNode(uint, string) except +
+    cdef cppclass Node:
+        Node(uint, string) except +
         
         uint node_id
         string seq_len
@@ -39,7 +39,7 @@ cdef extern from "_graph_seq_0.h" namespace "_graph_seq_0":
         PyGraph() except +
         
         uint graph_id
-        vector[PyNode] nodes
+        vector[Node] nodes
     
     cdef cppclass Fasta:
         Fasta() except +

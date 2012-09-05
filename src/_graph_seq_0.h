@@ -46,14 +46,18 @@ using std::string;
 /*
  * assumes that we know what what graph it is
  */
-class PyNode {
+class Node {
 public:
-	PyNode(uint node_id_, string seq_) :
-			node_id(node_id_), seq(seq_) {
+	Node(uint node_id_, string seq_) :
+			node_id(node_id_), seq(seq_), est_len(seq_.size()) {
 	}
 
 	uint node_id;
+	// all the alignment positions are according to
+	// @seq, but the length used in estimation is
+	// @est_len
 	string seq;
+	uint est_len;
 	vector<uint> edges;
 };
 
@@ -63,7 +67,7 @@ public:
 	}
 
 	uint graph_id;
-	vector<PyNode> nodes;
+	vector<Node> nodes;
 };
 
 /*

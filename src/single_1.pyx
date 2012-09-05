@@ -17,7 +17,7 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from graph_seq_0 cimport SeqLoc, ReadNodeLoc, PyGraph, PyNode, Fasta
+from graph_seq_0 cimport SeqLoc, ReadNodeLoc, PyGraph, Node, Fasta
 from fasta_0 import FastaSeq
 from misc_0 cimport uint
 
@@ -66,11 +66,11 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
     
     cdef uint node_id
     
-    cdef PyNode * py_node 
+    cdef Node * py_node 
     
     cdef vector[PyGraph].iterator py_graph_iter = py_graphs.begin()
     
-    cdef vector[PyNode].iterator py_node_iter
+    cdef vector[Node].iterator py_node_iter
     
     for graph_name, graph in graph_dict.iteritems():
         id_map = IdMap(graph_id)
@@ -80,7 +80,7 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
         for node in graph.nodes():
             id_map.nodes_map[node] = node_id
             
-            py_node = new PyNode(node_id,
+            py_node = new Node(node_id,
                                  < string >< char *> graph.node[node]['label'])
             
             deref(py_graph_iter).nodes.push_back(deref(py_node))

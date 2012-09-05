@@ -43,7 +43,7 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 	for (uint i = 0; i != py_graph.nodes.size(); ++i) {
 		boost::add_vertex(graph.graph);
 	}
-	for (vector<_graph_seq_0::PyNode>::const_iterator i =
+	for (vector<_graph_seq_0::Node>::const_iterator i =
 			py_graph.nodes.begin(); i != py_graph.nodes.end(); ++i) {
 		for (vector<uint>::const_iterator j = i->edges.begin();
 				j != i->edges.end(); ++j) {
