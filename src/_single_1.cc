@@ -29,10 +29,29 @@ namespace _single_1 {
 using std::vector;
 using _graph_seq_0::SeqConstraint;
 
-inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
-		GraphReads const &graph_read, vector<ReadInGraph> const &py_reads,
-		vector<SeqConstraint> &rcs /* read constraints */) {
-	// TODO: this is not the right one
+inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
+		_graph_seq_0::PyGraph const &py_graph, GraphReads const &graph_read,
+		vector<ReadInGraph> &py_reads) {
+	// setup boost graph
+	// setup read constraints
+
+	// TODO: fix this for final version
+	// here no non-branch start/end site detection
+	// or trimming is done
+	// transcript length is also not estimated
+
+	for (uint i = 0; i != py_graph.nodes.size(); ++i) {
+		boost::add_vertex(graph.graph);
+	}
+	for (vector<_graph_seq_0::PyNode>::const_iterator i =
+			py_graph.nodes.begin(); i != py_graph.nodes.end(); ++i) {
+		for (vector<uint>::const_iterator j = i->edges.begin();
+				j != i->edges.end(); ++j) {
+			boost::add_edge(i->node_id, *j, graph.graph);
+		}
+	}
+
+	// TODO: fix graph node when segmentation is done
 
 	// read constraints
 	boost::unordered_set<SeqConstraint, _graph_seq_0::SeqConstraintHash> rcs_set;
@@ -82,37 +101,13 @@ inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 	for (vector<uint>::const_iterator i = rc_in.begin(); i != rc_in.end();
 			++i, ++rc_id) {
 		if (*i == 0) {
-			rcs.push_back(rcs_vec[rc_id]);
-		}
-	}
-}
-
-inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
-		_graph_seq_0::PyGraph const &py_graph, GraphReads const &graph_read,
-		vector<ReadInGraph> const &py_reads) {
-	// setup boost graph
-	// setup read constraints
-
-	// TODO: fix this for final version
-	// here no non-branch start/end site detection
-	// or trimming is done
-	// transcript length is also not estimated
-
-	for (uint i = 0; i != py_graph.nodes.size(); ++i) {
-		boost::add_vertex(graph.graph);
-	}
-	for (vector<_graph_seq_0::PyNode>::const_iterator i =
-			py_graph.nodes.begin(); i != py_graph.nodes.end(); ++i) {
-		for (vector<uint>::const_iterator j = i->edges.begin();
-				j != i->edges.end(); ++j) {
-			boost::add_edge(i->node_id, *j, graph.graph);
+			graph.read_constraints.push_back(rcs_vec[rc_id]);
 		}
 	}
 }
 
 void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
-		vector<ReadInGraph> *py_reads,
-		vector<_graph_seq_0::Fasta> *isoforms) {
+		vector<ReadInGraph> *py_reads, vector<_graph_seq_0::Fasta> *isoforms) {
 
 	// the reads that a graph has
 	vector<GraphReads> graph_reads(py_graphs->size());
