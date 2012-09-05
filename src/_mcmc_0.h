@@ -19,17 +19,35 @@
 #ifndef _MCMC_0_H_
 #define _MCMC_0_H_
 
+#include <vector>
+
 #include "_graph_seq_0.h"
 
 namespace _mcmc_0 {
 
 using _graph_seq_0::SpliceGraph;
 using _graph_seq_0::GraphReads;
+using std::vector;
+using _graph_seq_0::ReadInGraph;
+
+typedef _graph_seq_0::PyGraph GraphInfo;
 
 // calculate the probability that a read
 // is from a the transcripts (isoforms)
 template<class RNodeLoc>
-ldbl ReadFromTransProb();
+class ReadFromTransProb {
+	inline ldbl operator()(ReadInGraph<RNodeLoc> const &r) {
+		return 0.0;
+	}
+};
+
+template<class RNodeLoc>
+void isoform_main(vector<GraphInfo> const &graph_info,
+		vector<SpliceGraph> &graphs,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		vector<GraphReads> const &graph_reads,
+		ReadFromTransProb<RNodeLoc> &r_prob) {
+}
 
 }
 

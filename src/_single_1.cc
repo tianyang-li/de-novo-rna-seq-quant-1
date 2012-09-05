@@ -24,7 +24,9 @@
 #include "_graph_seq_0.h"
 #include "_mcmc_0.h"
 
-#include <iostream> // TODO: remove this
+// TODO: remove this
+#include <iostream>
+
 namespace _single_1 {
 
 using std::vector;
@@ -156,15 +158,20 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 	}
 
 	// for graph information:
-	//     @py_graphs sequences, seq_len, est_len
+	//     @py_graphs sequences, seq_len, est_len -> @graph_info
 	// 	   @graphs structure and isoforms
 
 	// for read to graph alignment information:
-	//     @py_reads would have been modified and
+	//     @py_reads would have been modified and -> @read_in_graph
 	//     will continue to be used
 
 	// for each graph's alignments information:
 	//     @graph_reads will continue to be used
+
+	_mcmc_0::ReadFromTransProb<SingleNodeLoc> r_prob;
+
+	_mcmc_0::isoform_main<SingleNodeLoc>(*py_graphs, graphs, *py_reads,
+			graph_reads, r_prob);
 
 	_graph_seq_0::get_isoform_FASTA(graphs, *py_graphs, *isoforms);
 }

@@ -24,6 +24,7 @@
 
 #include "_misc_0.h"
 #include "_graph_seq_0.h"
+#include "_mcmc_0.h"
 
 namespace _single_1 {
 
@@ -39,6 +40,21 @@ typedef _graph_seq_0::ReadNodeLoc SingleNodeLoc;
 void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
 		std::vector<ReadInGraph<SingleNodeLoc> > *py_reads,
 		std::vector<_graph_seq_0::Fasta> *isoforms);
+
+}
+
+namespace _mcmc_0 {
+
+using _single_1::SingleNodeLoc;
+using _graph_seq_0::ReadInGraph;
+
+template<>
+class ReadFromTransProb<SingleNodeLoc> {
+	inline ldbl operator()(ReadInGraph<SingleNodeLoc> const &r) const {
+		return 0.0;
+	}
+
+};
 
 }
 
