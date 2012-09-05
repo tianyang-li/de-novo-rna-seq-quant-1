@@ -29,6 +29,7 @@ namespace _single_1 {
 
 using std::vector;
 using _graph_seq_0::SeqConstraint;
+using _graph_seq_0::ReadIndex;
 
 inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 		_graph_seq_0::PyGraph const &py_graph, GraphReads const &graph_read,
@@ -154,6 +155,18 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 
 	}
 
+	// for graph information:
+	//     @py_graphs sequences, seq_len, est_len
+	// 	   @graphs structure and isoforms
+
+	// for read to graph alignment information:
+	//     @py_reads would have been modified and
+	//     will continue to be used
+
+	// for each graph's alignments information:
+	//     @graph_reads will continue to be used
+
+	_graph_seq_0::get_isoform_FASTA(graphs, *py_graphs, *isoforms);
 }
 
 }

@@ -30,6 +30,7 @@
 #include <boost/functional/hash.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/unordered_set.hpp>
 
 #include "_misc_0.h"
 
@@ -114,11 +115,16 @@ public:
 
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> DirectedGraph;
 
+typedef SeqConstraintHash IsoformHash;
+typedef boost::dynamic_bitset<> Isoform;
+typedef boost::unordered_set<Isoform, IsoformHash> IsoformSet;
+
 class SpliceGraph {
 public:
 	uint graph_id;
 	vector<SeqConstraint> read_constraints;
 	DirectedGraph graph;
+	IsoformSet isoforms;
 };
 
 /*
@@ -161,6 +167,18 @@ public:
 	uint graph_index;
 	uint align_index;
 };
+
+/*
+ * keep the reads aligned to a particular graph
+ */
+class GraphReads {
+public:
+	uint graph_id;
+	std::vector<ReadIndex> reads;
+};
+
+void get_isoform_FASTA(vector<SpliceGraph> const &graphs,
+		vector<PyGraph> const &py_graphs, vector<Fasta> &isoforms);
 
 }
 

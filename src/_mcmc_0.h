@@ -23,7 +23,14 @@
 
 namespace _mcmc_0 {
 
+using _graph_seq_0::SpliceGraph;
+using _graph_seq_0::GraphReads;
+
+// calculate the probability that a read
+// is from a the transcripts (isoforms)
+template<class RNodeLoc>
+ldbl ReadFromTransProb();
+
 }
 
 #endif // _MCMC_0_H_
-
