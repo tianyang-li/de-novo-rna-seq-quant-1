@@ -30,6 +30,7 @@ using _graph_seq_0::SpliceGraph;
 using _graph_seq_0::GraphReads;
 using std::vector;
 using _graph_seq_0::ReadInGraph;
+using _graph_seq_0::check_isoform_read_constraint;
 
 typedef _graph_seq_0::PyGraph GraphInfo;
 
@@ -48,6 +49,12 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
 		ReadFromTransProb<RNodeLoc> &r_prob, uint max_run) {
+	uint runs = 0;
+
+	while (runs != max_run) {
+
+		++runs;
+	}
 }
 
 }
