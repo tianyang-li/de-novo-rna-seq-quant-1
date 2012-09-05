@@ -27,12 +27,15 @@
 
 namespace _single_1 {
 
+using _graph_seq_0::ReadInGraph;
+using _graph_seq_0::ReadIndex;
+
 /*
  * assumes that the read is already known
  */
-class ReadGraphLoc {
+class SingleGraphLoc {
 public:
-	ReadGraphLoc(uint graph_id_) :
+	SingleGraphLoc(uint graph_id_) :
 			graph_id(graph_id_) {
 	}
 
@@ -40,43 +43,16 @@ public:
 	std::vector<_graph_seq_0::ReadNodeLoc> locs;
 };
 
-class ReadInGraph {
-public:
-	ReadInGraph() {
-	}
-
-	uint read_id;
-	std::vector<ReadGraphLoc> graph_locs;
-};
-
 /*
  * used to interface with python
  */
 void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
-		std::vector<ReadInGraph> *py_reads,
+		std::vector<ReadInGraph<SingleGraphLoc> > *py_reads,
 		std::vector<_graph_seq_0::Fasta> *isoforms);
 
 /*
  * keep the reads aligned to a particular graph
  */
-
-/*
- * given read's @read_id
- * the alignment is at
- * py_reads[read_id].graph_locs[graph_index].locs[align_index]
- */
-class ReadIndex {
-public:
-	ReadIndex(uint read_id_, uint graph_index_, uint align_index_) :
-			read_id(read_id_), graph_index(graph_index_), align_index(
-					align_index_) {
-	}
-
-	uint read_id;
-	uint graph_index;
-	uint align_index;
-};
-
 class GraphReads {
 public:
 	uint graph_id;

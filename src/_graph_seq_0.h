@@ -53,11 +53,13 @@ public:
 	}
 
 	uint node_id;
+
 	// all the alignment positions are according to
 	// @seq, but the length used in estimation is
 	// @est_len
 	string seq;
 	uint est_len;
+
 	vector<uint> edges;
 };
 
@@ -117,6 +119,33 @@ public:
 	uint graph_id;
 	vector<SeqConstraint> read_constraints;
 	DirectedGraph graph;
+};
+
+template<class ReadGraphLoc>
+class ReadInGraph {
+public:
+	ReadInGraph() {
+	}
+
+	uint read_id;
+	std::vector<ReadGraphLoc> graph_locs;
+};
+
+/*
+ * given read's @read_id
+ * the alignment is at
+ * py_reads[read_id].graph_locs[graph_index].locs[align_index]
+ */
+class ReadIndex {
+public:
+	ReadIndex(uint read_id_, uint graph_index_, uint align_index_) :
+			read_id(read_id_), graph_index(graph_index_), align_index(
+					align_index_) {
+	}
+
+	uint read_id;
+	uint graph_index;
+	uint align_index;
 };
 
 }

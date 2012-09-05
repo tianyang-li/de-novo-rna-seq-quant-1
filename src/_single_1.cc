@@ -31,7 +31,7 @@ using _graph_seq_0::SeqConstraint;
 
 inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 		_graph_seq_0::PyGraph const &py_graph, GraphReads const &graph_read,
-		vector<ReadInGraph> &py_reads) {
+		vector<ReadInGraph<SingleGraphLoc> > &py_reads) {
 	// setup boost graph
 	// setup read constraints
 
@@ -43,8 +43,8 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 	for (uint i = 0; i != py_graph.nodes.size(); ++i) {
 		boost::add_vertex(graph.graph);
 	}
-	for (vector<_graph_seq_0::Node>::const_iterator i =
-			py_graph.nodes.begin(); i != py_graph.nodes.end(); ++i) {
+	for (vector<_graph_seq_0::Node>::const_iterator i = py_graph.nodes.begin();
+			i != py_graph.nodes.end(); ++i) {
 		for (vector<uint>::const_iterator j = i->edges.begin();
 				j != i->edges.end(); ++j) {
 			boost::add_edge(i->node_id, *j, graph.graph);
@@ -107,7 +107,8 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 }
 
 void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
-		vector<ReadInGraph> *py_reads, vector<_graph_seq_0::Fasta> *isoforms) {
+		vector<ReadInGraph<SingleGraphLoc> > *py_reads,
+		vector<_graph_seq_0::Fasta> *isoforms) {
 
 	// the reads that a graph has
 	vector<GraphReads> graph_reads(py_graphs->size());
@@ -121,11 +122,11 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 
 	uint read_id = 0;
 
-	for (vector<ReadInGraph>::const_iterator i = py_reads->begin();
-			i != py_reads->end(); ++i, ++read_id) {
+	for (vector<ReadInGraph<SingleGraphLoc> >::const_iterator i =
+			py_reads->begin(); i != py_reads->end(); ++i, ++read_id) {
 		uint graph_index = 0;
 
-		for (vector<ReadGraphLoc>::const_iterator j = i->graph_locs.begin();
+		for (vector<SingleGraphLoc>::const_iterator j = i->graph_locs.begin();
 				j != i->graph_locs.end(); ++j, ++graph_index) {
 			uint align_index = 0;
 

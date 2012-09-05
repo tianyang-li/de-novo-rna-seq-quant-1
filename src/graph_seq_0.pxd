@@ -46,5 +46,11 @@ cdef extern from "_graph_seq_0.h" namespace "_graph_seq_0":
         
         string info
         string seq 
+    
+    cdef cppclass ReadInGraph[T]:
+        ReadInGraph() except +
+        
+        uint read_id
+        vector[T] graph_locs
 
 
