@@ -83,7 +83,7 @@ public:
 /*
  * assumes the graph is already known
  */
-typedef vector<SeqLoc> PyReadNodeLoc;
+typedef vector<SeqLoc> ReadNodeLoc;
 
 class Fasta {
 public:

@@ -30,30 +30,30 @@ namespace _single_1 {
 /*
  * assumes that the read is already known
  */
-class PyReadGraphLoc {
+class ReadGraphLoc {
 public:
-	PyReadGraphLoc(uint graph_id_) :
+	ReadGraphLoc(uint graph_id_) :
 			graph_id(graph_id_) {
 	}
 
 	uint graph_id;
-	std::vector<_graph_seq_0::PyReadNodeLoc> locs;
+	std::vector<_graph_seq_0::ReadNodeLoc> locs;
 };
 
-class PyReadInGraph {
+class ReadInGraph {
 public:
-	PyReadInGraph() {
+	ReadInGraph() {
 	}
 
 	uint read_id;
-	std::vector<PyReadGraphLoc> graph_locs;
+	std::vector<ReadGraphLoc> graph_locs;
 };
 
 /*
  * used to interface with python
  */
 void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
-		std::vector<PyReadInGraph> *py_reads,
+		std::vector<ReadInGraph> *py_reads,
 		std::vector<_graph_seq_0::Fasta> *isoforms);
 
 /*

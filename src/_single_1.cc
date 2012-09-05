@@ -23,15 +23,14 @@
 #include "_misc_0.h"
 #include "_graph_seq_0.h"
 
-#include <iostream>
-
+#include <iostream> // TODO: remove this
 namespace _single_1 {
 
 using std::vector;
 using _graph_seq_0::SeqConstraint;
 
 inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
-		GraphReads const &graph_read, vector<PyReadInGraph> const &py_reads,
+		GraphReads const &graph_read, vector<ReadInGraph> const &py_reads,
 		vector<SeqConstraint> &rcs /* read constraints */) {
 	// TODO: this is not the right one
 
@@ -42,7 +41,7 @@ inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 			i != graph_read.reads.end(); ++i) {
 		SeqConstraint rc(py_graph.nodes.size());
 
-		for (_graph_seq_0::PyReadNodeLoc::const_iterator j =
+		for (_graph_seq_0::ReadNodeLoc::const_iterator j =
 				py_reads[i->read_id].graph_locs[i->graph_index].locs[i->align_index].begin();
 				j
 						!= py_reads[i->read_id].graph_locs[i->graph_index].locs[i->align_index].end();
@@ -89,7 +88,8 @@ inline void get_read_constraints(_graph_seq_0::PyGraph const &py_graph,
 }
 
 inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
-		_graph_seq_0::PyGraph const &py_graph) {
+		_graph_seq_0::PyGraph const &py_graph, GraphReads const &graph_read,
+		vector<ReadInGraph> const &py_reads) {
 	// setup boost graph
 	// setup read constraints
 
@@ -111,7 +111,7 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 }
 
 void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
-		vector<PyReadInGraph> *py_reads,
+		vector<ReadInGraph> *py_reads,
 		vector<_graph_seq_0::Fasta> *isoforms) {
 
 	// the reads that a graph has
@@ -126,15 +126,15 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 
 	uint read_id = 0;
 
-	for (vector<PyReadInGraph>::const_iterator i = py_reads->begin();
+	for (vector<ReadInGraph>::const_iterator i = py_reads->begin();
 			i != py_reads->end(); ++i, ++read_id) {
 		uint graph_index = 0;
 
-		for (vector<PyReadGraphLoc>::const_iterator j = i->graph_locs.begin();
+		for (vector<ReadGraphLoc>::const_iterator j = i->graph_locs.begin();
 				j != i->graph_locs.end(); ++j, ++graph_index) {
 			uint align_index = 0;
 
-			for (vector<_graph_seq_0::PyReadNodeLoc>::const_iterator k =
+			for (vector<_graph_seq_0::ReadNodeLoc>::const_iterator k =
 					j->locs.begin(); k != j->locs.end(); ++k, ++align_index) {
 				graph_reads[j->graph_id].reads.push_back(
 						ReadIndex(read_id, graph_index, align_index));
@@ -152,7 +152,7 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 			i != graphs.end(); ++i, ++graph_id, ++graph_read, ++py_graph) {
 		i->graph_id = graph_id;
 
-		setup_graph(*i, *py_graph);
+		setup_graph(*i, *py_graph, *graph_read, *py_reads);
 
 	}
 
