@@ -29,25 +29,15 @@ namespace _single_1 {
 
 using _graph_seq_0::ReadInGraph;
 using _graph_seq_0::ReadIndex;
+using _graph_seq_0::ReadGraphLoc;
 
-/*
- * assumes that the read is already known
- */
-class SingleGraphLoc {
-public:
-	SingleGraphLoc(uint graph_id_) :
-			graph_id(graph_id_) {
-	}
-
-	uint graph_id;
-	std::vector<_graph_seq_0::ReadNodeLoc> locs;
-};
+typedef _graph_seq_0::ReadNodeLoc SingleNodeLoc;
 
 /*
  * used to interface with python
  */
 void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
-		std::vector<ReadInGraph<SingleGraphLoc> > *py_reads,
+		std::vector<ReadInGraph<SingleNodeLoc> > *py_reads,
 		std::vector<_graph_seq_0::Fasta> *isoforms);
 
 /*

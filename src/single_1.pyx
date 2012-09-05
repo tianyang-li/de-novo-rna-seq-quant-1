@@ -17,20 +17,15 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from graph_seq_0 cimport SeqLoc, ReadNodeLoc, PyGraph, Node, Fasta, ReadInGraph
+from graph_seq_0 cimport SeqLoc, ReadNodeLoc, PyGraph, Node, Fasta, ReadInGraph, ReadGraphLoc
 from fasta_0 import FastaSeq
 from misc_0 cimport uint
 
-cdef extern from "_single_1.h" namespace "_single_1":
-    cdef cppclass SingleGraphLoc: 
-        SingleGraphLoc(uint) except +
-        
-        vector[ReadNodeLoc] locs
-        uint graph_id
+cdef extern from "_single_1.h" namespace "_single_1":   
+    ctypedef ReadNodeLoc SingleNodeLoc
     
-   
     cdef void _get_isoforms(vector[PyGraph] * py_graphs,
-                            vector[ReadInGraph[SingleGraphLoc]] * py_reads,
+                            vector[ReadInGraph[SingleNodeLoc]] * py_reads,
                             vector[Fasta] * isoforms)
 
 
@@ -96,13 +91,13 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
 
 
 cdef void get_read_in_graph_from_py(read_in_graph, id_maps,
-                                    vector[ReadInGraph[SingleGraphLoc]] * py_reads):        
+                                    vector[ReadInGraph[SingleNodeLoc]] * py_reads):        
     cdef uint read_id = 0
     cdef uint graph_id, node_id
     
-    cdef vector[ReadInGraph[SingleGraphLoc]].iterator py_read_iter = py_reads.begin()
+    cdef vector[ReadInGraph[SingleNodeLoc]].iterator py_read_iter = py_reads.begin()
     
-    cdef SingleGraphLoc * py_graph_loc
+    cdef ReadGraphLoc[SingleNodeLoc] * py_graph_loc
     
     cdef ReadNodeLoc * py_node_loc
     
@@ -114,7 +109,7 @@ cdef void get_read_in_graph_from_py(read_in_graph, id_maps,
         for graph_name, graph_aligns in read_info.iteritems():
             id_map = id_maps[graph_name]
             
-            py_graph_loc = new SingleGraphLoc(id_map.graph_id)
+            py_graph_loc = new ReadGraphLoc[SingleNodeLoc](id_map.graph_id)
             
             for graph_align in graph_aligns:
                 py_node_loc = new ReadNodeLoc()
@@ -174,7 +169,7 @@ def get_isoforms(read_in_graph, graph_dict, max_run=1000000):
     
     get_graph_from_py(graph_dict, id_maps, py_graphs)
     
-    cdef vector[ReadInGraph[SingleGraphLoc]] * py_reads = new vector[ReadInGraph[SingleGraphLoc]](len(read_in_graph))
+    cdef vector[ReadInGraph[SingleNodeLoc]] * py_reads = new vector[ReadInGraph[SingleNodeLoc]](len(read_in_graph))
     
     get_read_in_graph_from_py(read_in_graph, id_maps, py_reads)
     

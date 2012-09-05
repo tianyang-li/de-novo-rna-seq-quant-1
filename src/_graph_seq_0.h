@@ -121,14 +121,28 @@ public:
 	DirectedGraph graph;
 };
 
-template<class ReadGraphLoc>
+/*
+ * assumes that the read is already known
+ */
+template<class RNodeLoc> // ReadNodeLoc
+class ReadGraphLoc {
+public:
+	ReadGraphLoc(uint graph_id_) :
+			graph_id(graph_id_) {
+	}
+
+	uint graph_id;
+	std::vector<RNodeLoc> locs;
+};
+
+template<class RNodeLoc>
 class ReadInGraph {
 public:
 	ReadInGraph() {
 	}
 
 	uint read_id;
-	std::vector<ReadGraphLoc> graph_locs;
+	std::vector<ReadGraphLoc<RNodeLoc> > graph_locs;
 };
 
 /*
