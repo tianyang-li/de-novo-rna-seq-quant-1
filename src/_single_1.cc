@@ -22,6 +22,7 @@
 #include "_single_1.h"
 #include "_misc_0.h"
 #include "_graph_seq_0.h"
+#include "_mcmc_0.h"
 
 #include <iostream> // TODO: remove this
 namespace _single_1 {

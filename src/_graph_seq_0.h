@@ -124,7 +124,7 @@ public:
 /*
  * assumes that the read is already known
  */
-template<class RNodeLoc> // ReadNodeLoc
+template<class RNodeLoc> // Read Node Loc
 class ReadGraphLoc {
 public:
 	ReadGraphLoc(uint graph_id_) :

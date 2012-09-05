@@ -20,9 +20,10 @@ lib/libgsl.a:
 	cd gsl-1.15 && ./configure && make
 	cp gsl-1.15/.libs/libgsl.a lib/
 
-lib/quant.a: build/_single_1.o build/_graph_seq_0.o build/_misc_0.o
+lib/quant.a: build/_single_1.o build/_graph_seq_0.o build/_misc_0.o \
+				build/_mcmc_0.o
 	$(AR) rcs lib/quant.a build/_single_1.o build/_graph_seq_0.o \
-		build/_misc_0.o
+		build/_misc_0.o build/_mcmc_0.o
 
 build/_misc_0.o: src/_misc_0.cc src/_misc_0.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c src/_misc_0.cc -o build/_misc_0.o
@@ -32,6 +33,9 @@ build/_single_1.o: src/_single_1.cc src/_single_1.h
 
 build/_graph_seq_0.o: src/_graph_seq_0.cc src/_graph_seq_0.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c src/_graph_seq_0.cc -o build/_graph_seq_0.o
+
+build/_mcmc_0.o: src/_mcmc_0.h src/_mcmc_0.cc
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/_mcmc_0.cc -o build/_mcmc_0.o
 	
 clean:
 	rm -rfv build/*
