@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "_graph_seq_0.h"
+#include "_misc_0.h"
 
 namespace _mcmc_0 {
 
@@ -46,7 +47,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		vector<SpliceGraph> &graphs,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
-		ReadFromTransProb<RNodeLoc> &r_prob) {
+		ReadFromTransProb<RNodeLoc> &r_prob, uint max_run) {
 }
 
 }

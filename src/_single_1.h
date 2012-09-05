@@ -39,7 +39,7 @@ typedef _graph_seq_0::ReadNodeLoc SingleNodeLoc;
  */
 void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
 		std::vector<ReadInGraph<SingleNodeLoc> > *py_reads,
-		std::vector<_graph_seq_0::Fasta> *isoforms);
+		std::vector<_graph_seq_0::Fasta> *isoforms, uint max_run);
 
 }
 

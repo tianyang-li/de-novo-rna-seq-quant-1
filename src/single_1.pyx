@@ -26,7 +26,8 @@ cdef extern from "_single_1.h" namespace "_single_1":
     
     cdef void _get_isoforms(vector[PyGraph] * py_graphs,
                             vector[ReadInGraph[SingleNodeLoc]] * py_reads,
-                            vector[Fasta] * isoforms)
+                            vector[Fasta] * isoforms,
+                            uint max_run)
 
 
 class IdMap(object):
@@ -175,7 +176,7 @@ def get_isoforms(read_in_graph, graph_dict, max_run=1000000):
     
     cdef vector[Fasta] * _isoforms = new vector[Fasta]()
     
-    _get_isoforms(py_graphs, py_reads, _isoforms)
+    _get_isoforms(py_graphs, py_reads, _isoforms, max_run)
     
     isoforms = []
     

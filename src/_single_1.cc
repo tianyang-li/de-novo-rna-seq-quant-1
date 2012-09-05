@@ -112,7 +112,7 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 
 void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 		vector<ReadInGraph<SingleNodeLoc> > *py_reads,
-		vector<_graph_seq_0::Fasta> *isoforms) {
+		vector<_graph_seq_0::Fasta> *isoforms, uint max_run) {
 
 	// the reads that a graph has
 	vector<GraphReads> graph_reads(py_graphs->size());
@@ -171,7 +171,7 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 	_mcmc_0::ReadFromTransProb<SingleNodeLoc> r_prob;
 
 	_mcmc_0::isoform_main<SingleNodeLoc>(*py_graphs, graphs, *py_reads,
-			graph_reads, r_prob);
+			graph_reads, r_prob, max_run);
 
 	_graph_seq_0::get_isoform_FASTA(graphs, *py_graphs, *isoforms);
 }
