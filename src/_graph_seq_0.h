@@ -27,13 +27,19 @@
 #include <vector>
 #include <string>
 #include <cstddef>
+#include <iterator>
+#include <algorithm>
 #include <boost/functional/hash.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/graph/graph_traits.hpp>
+#include <boost/graph/topological_sort.hpp>
 
 #include "_misc_0.h"
+
+// TODO: remove this
+#include <iostream>
 
 namespace _graph_seq_0 {
 
@@ -120,6 +126,7 @@ typedef SeqConstraintHash IsoformHash;
 typedef boost::dynamic_bitset<> Isoform;
 typedef boost::unordered_set<Isoform, IsoformHash> IsoformSet;
 typedef boost::property_map<DirectedGraph, boost::vertex_index_t>::type DGIndexMap;
+typedef boost::graph_traits<DirectedGraph>::vertex_descriptor DGVertex;
 
 class SpliceGraph {
 public:
@@ -128,6 +135,13 @@ public:
 	DirectedGraph graph;
 	DGIndexMap index;
 	IsoformSet isoforms;
+	vector<DGVertex> topo_sort; // topological sort results
+
+	inline void setup() {
+		index = boost::get(boost::vertex_index, graph);
+		boost::topological_sort(graph, std::back_inserter(topo_sort));
+		std::reverse(topo_sort.begin(), topo_sort.end());
+	}
 };
 
 /*

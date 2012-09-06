@@ -24,6 +24,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <gsl/gsl_rng.h>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -60,6 +61,13 @@ class ReadFromTransProb {
 	}
 };
 
+// given read constraint
+// and graph, get a random isoform
+// that satisfies the constraint
+inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, gsl_rng *rn) {
+	// size of @isof is already set
+}
+
 template<class RNodeLoc>
 void isoform_main(vector<GraphInfo> const &graph_info,
 		vector<SpliceGraph> &graphs,
@@ -86,6 +94,8 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 	// TODO: multiple chains pthread parallelization
 
+	gsl_rng *rn = gsl_rng_alloc(gsl_rng_mt19937);
+
 	vector<IsoformSet> isoforms(graphs.size());
 	vector<IsoformSet>::iterator isof_iter = isoforms.begin();
 	sn_iter = start_nodes.begin();
@@ -102,6 +112,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 			satisfied_rc[un_rc] = false;
 
 			Isoform isof(boost::num_vertices(i->graph));
+			rand_rc_isof(*i, isof, rn);
 		}
 
 	}
@@ -112,6 +123,9 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 		++runs;
 	}
+
+	gsl_rng_free(rn);
+
 }
 
 }
