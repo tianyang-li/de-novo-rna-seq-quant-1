@@ -76,29 +76,43 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 
 	SeqConstraint const &rc = graph.read_constraints[un_rc];
 
-	uint ts_index = 0;
+	// ts - topological sort
+	vector<DGVertex>::const_iterator ts_iter = graph.topo_sort.begin();
 
-	while (rc[ts_index] == false) {
-		++ts_index;
+	while (rc[*ts_iter] == false) {
+		++ts_iter;
 	}
 
-	uint cur_node = ts_index;
-	isof.set(cur_node);
+	{
+		// go "up" to find transcript start head
 
-	DGInEdgeIter in_i, in_end;
-	tie(in_i, in_end) = boost::in_edges(cur_node, graph.graph);
-
-	while (in_i != in_end) {
-		uint go2node = gsl_rng_uniform_int(rn,
-				boost::in_degree(cur_node, graph.graph));
-
-		for (uint i = 0; i != go2node; ++i) {
-			++in_i;
-		}
-
-		cur_node = boost::source(*in_i, graph.graph);
+		uint cur_node = *ts_iter;
 		isof.set(cur_node);
+
+		DGInEdgeIter in_i, in_end;
 		tie(in_i, in_end) = boost::in_edges(cur_node, graph.graph);
+
+		while (in_i != in_end) {
+			uint go2node = gsl_rng_uniform_int(rn,
+					boost::in_degree(cur_node, graph.graph));
+
+			for (uint i = 0; i != go2node; ++i) {
+				++in_i;
+			}
+
+			cur_node = boost::source(*in_i, graph.graph);
+			isof.set(cur_node);
+			tie(in_i, in_end) = boost::in_edges(cur_node, graph.graph);
+		}
+	}
+
+	// last node that has a constraint
+	uint last_rc_node = *ts_iter;
+
+	while (ts_iter != graph.topo_sort.end()) {
+		while (ts_iter != graph.topo_sort.end() && rc[*ts_iter] == false) {
+			++ts_iter;
+		}
 	}
 
 }
