@@ -23,6 +23,7 @@
 #include <utility>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -40,6 +41,7 @@ using _graph_seq_0::ReadInGraph;
 using _graph_seq_0::check_isoform_rc;
 using _graph_seq_0::IsoformSet;
 using _graph_seq_0::DirectedGraph;
+using boost::dynamic_bitset;
 
 typedef _graph_seq_0::PyGraph GraphInfo;
 
@@ -85,9 +87,14 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 			}
 		}
 
-		for (vector<uint>::const_iterator j = sn_iter->begin();
-				j != sn_iter->end(); ++j) {
-			std::cout << *j << std::endl;
+		dynamic_bitset<> satisfied_rc(i->read_constraints.size());
+		satisfied_rc.set();
+		while (satisfied_rc.any()) {
+			uint un_rc = 0; // un-satisfied read constraint index
+			while (satisfied_rc[un_rc] == false) {
+				++un_rc;
+			}
+			satisfied_rc[un_rc] = false;
 		}
 
 	}
