@@ -78,13 +78,18 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		for (pair<DGVertexIter, DGVertexIter> j = boost::vertices(i->graph);
 				j.first != j.second; ++j.first) {
 			DGInEdgeIter in_i, in_end;
-			std::cout << index[*j.first] << " ";
-			for (boost::tie(in_i, in_end) = boost::in_edges(index[*j.first],
-					i->graph); in_i != in_end; ++in_i) {
-				std::cout << *in_i << " ";
+			boost::tie(in_i, in_end) = boost::in_edges(index[*j.first],
+					i->graph);
+			if (in_i == in_end) {
+				sn_iter->push_back(index[*j.first]);
 			}
-			std::cout << std::endl;
 		}
+
+		for (vector<uint>::const_iterator j = sn_iter->begin();
+				j != sn_iter->end(); ++j) {
+			std::cout << *j << std::endl;
+		}
+
 	}
 
 	uint runs = 0;
