@@ -24,7 +24,9 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_permutation.h>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -45,6 +47,8 @@ using _graph_seq_0::Isoform;
 using _graph_seq_0::DirectedGraph;
 using boost::dynamic_bitset;
 using _graph_seq_0::DGVertex;
+using _graph_seq_0::SeqConstraint;
+using boost::tie;
 
 typedef _graph_seq_0::PyGraph GraphInfo;
 
@@ -65,12 +69,38 @@ class ReadFromTransProb {
 // given read constraint
 // and graph, get a random isoform
 // that satisfies the constraint
-inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, gsl_rng *rn) {
+inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
+		gsl_rng *rn) {
 	// size of @isof is already set
-	for (vector<DGVertex>::const_iterator i = graph.topo_sort.begin();
-			i != graph.topo_sort.end(); ++i) {
+	// read constraint asumes all 0's doesn't occur
 
+	SeqConstraint const &rc = graph.read_constraints[un_rc];
+
+	uint ts_index = 0;
+
+	while (rc[ts_index] == false) {
+		++ts_index;
 	}
+
+	uint cur_node = ts_index;
+	isof.set(cur_node);
+
+	DGInEdgeIter in_i, in_end;
+	tie(in_i, in_end) = boost::in_edges(cur_node, graph.graph);
+
+	while (in_i != in_end) {
+		uint go2node = gsl_rng_uniform_int(rn,
+				boost::in_degree(cur_node, graph.graph));
+
+		for (uint i = 0; i != go2node; ++i) {
+			++in_i;
+		}
+
+		cur_node = boost::source(*in_i, graph.graph);
+		isof.set(cur_node);
+		tie(in_i, in_end) = boost::in_edges(cur_node, graph.graph);
+	}
+
 }
 
 template<class RNodeLoc>
@@ -89,8 +119,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		for (pair<DGVertexIter, DGVertexIter> j = boost::vertices(i->graph);
 				j.first != j.second; ++j.first) {
 			DGInEdgeIter in_i, in_end;
-			boost::tie(in_i, in_end) = boost::in_edges(i->index[*j.first],
-					i->graph);
+			tie(in_i, in_end) = boost::in_edges(i->index[*j.first], i->graph);
 			if (in_i == in_end) {
 				sn_iter->push_back(i->index[*j.first]);
 			}
@@ -101,14 +130,22 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 	gsl_rng *rn = gsl_rng_alloc(gsl_rng_mt19937);
 
+	// TODO: seed @rn
+
 	vector<IsoformSet> isoforms(graphs.size());
-	vector<IsoformSet>::iterator isof_iter = isoforms.begin();
+	vector<IsoformSet>::iterator isof_set_iter = isoforms.begin();
 	sn_iter = start_nodes.begin();
 
 	for (vector<SpliceGraph>::const_iterator i = graphs.begin();
-			i != graphs.end(); ++i, ++isof_iter, ++sn_iter) {
-		dynamic_bitset<> satisfied_rc(i->read_constraints.size());
+			i != graphs.end(); ++i, ++isof_set_iter, ++sn_iter) {
+
+		uint rc_size = i->read_constraints.size();
+
+		// 1 - unsatisfied
+		// 0 - satisfied
+		dynamic_bitset<> satisfied_rc(rc_size);
 		satisfied_rc.set();
+
 		while (satisfied_rc.any()) {
 			uint un_rc = 0; // un-satisfied read constraint index
 			while (satisfied_rc[un_rc] == false) {
@@ -117,7 +154,22 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 			satisfied_rc[un_rc] = false;
 
 			Isoform isof(boost::num_vertices(i->graph));
-			rand_rc_isof(*i, isof, rn);
+			rand_rc_isof(*i, isof, un_rc, rn);
+			isof_set_iter->insert(isof);
+
+			for (uint j = 0; j != rc_size; ++j) {
+				if (satisfied_rc[j] == true) {
+					if (isof == (isof | i->read_constraints[j])) {
+						satisfied_rc[j] = false;
+					}
+				}
+			}
+		}
+
+		// TODO: remove this
+		for (IsoformSet::const_iterator j = isof_set_iter->begin();
+				j != isof_set_iter->end(); ++j) {
+			std::cout << *j << std::endl;
 		}
 
 	}

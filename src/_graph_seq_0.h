@@ -122,7 +122,8 @@ public:
 	}
 };
 
-typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS> DirectedGraph;
+typedef boost::adjacency_list<boost::hash_setS, boost::vecS,
+		boost::bidirectionalS> DirectedGraph;
 
 typedef SeqConstraintHash IsoformHash;
 typedef boost::dynamic_bitset<> Isoform;
@@ -137,12 +138,12 @@ public:
 	DirectedGraph graph;
 	DGIndexMap index;
 	IsoformSet isoforms;
-	//DirectedGraph tc; // transitive closure TODO: is tc needed?
+	DirectedGraph tc; // transitive closure
 	vector<DGVertex> topo_sort; // topological sort results
 
 	inline void setup() {
 		index = boost::get(boost::vertex_index, graph);
-		//boost::transitive_closure(graph, tc); TODO: is tc needed?
+		boost::transitive_closure(graph, tc);
 		boost::topological_sort(graph, std::back_inserter(topo_sort));
 		std::reverse(topo_sort.begin(), topo_sort.end());
 	}

@@ -507,8 +507,6 @@ def main():
     read_across_node(read_in_graph, rcc_psl,
                      contig_dict, graph_dict)
     
-    print len(read_in_graph) # TODO: remove this
-    
     isoforms = get_isoforms(read_in_graph, graph_dict, max_run)
     
     with open(out_file, 'w') as fout:
