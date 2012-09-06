@@ -46,6 +46,7 @@ typedef _graph_seq_0::PyGraph GraphInfo;
 typedef boost::property_map<DirectedGraph, boost::vertex_index_t>::type DGIndexMap;
 typedef boost::graph_traits<DirectedGraph>::vertex_iterator DGVertexIter;
 typedef boost::graph_traits<DirectedGraph>::adjacency_iterator DGAdjIter;
+typedef boost::graph_traits<DirectedGraph>::in_edge_iterator DGInEdgeIter;
 
 // calculate the probability that a read
 // is from a the transcripts (isoforms)
@@ -76,13 +77,13 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 		for (pair<DGVertexIter, DGVertexIter> j = boost::vertices(i->graph);
 				j.first != j.second; ++j.first) {
-			DGAdjIter ai, ai_end;
+			DGInEdgeIter in_i, in_end;
 			std::cout << index[*j.first] << " ";
-			for (boost::tie(ai, ai_end) = boost::adjacent_vertices(
-					index[*j.first], i->graph); ai != ai_end; ++ai) {
-				std::cout << *ai << " ";
+			for (boost::tie(in_i, in_end) = boost::in_edges(index[*j.first],
+					i->graph); in_i != in_end; ++in_i) {
+				std::cout << *in_i << " ";
 			}
-			std::cout << "########" << std::endl;
+			std::cout << std::endl;
 		}
 	}
 

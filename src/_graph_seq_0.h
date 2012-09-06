@@ -113,7 +113,7 @@ public:
 	}
 };
 
-typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> DirectedGraph;
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS> DirectedGraph;
 
 typedef SeqConstraintHash IsoformHash;
 typedef boost::dynamic_bitset<> Isoform;
