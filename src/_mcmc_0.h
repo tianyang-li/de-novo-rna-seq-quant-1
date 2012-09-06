@@ -20,19 +20,30 @@
 #define _MCMC_0_H_
 
 #include <vector>
+#include <utility>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
 
+// TODO: remove this
+#include <iostream>
+
 namespace _mcmc_0 {
 
+using std::pair;
 using _graph_seq_0::SpliceGraph;
 using _graph_seq_0::GraphReads;
 using std::vector;
 using _graph_seq_0::ReadInGraph;
-using _graph_seq_0::check_isoform_read_constraint;
+using _graph_seq_0::check_isoform_rc;
+using _graph_seq_0::IsoformSet;
 
 typedef _graph_seq_0::PyGraph GraphInfo;
+
+typedef boost::property_map<_graph_seq_0::DirectedGraph, boost::vertex_index_t>::type DGIndexMap;
+typedef boost::graph_traits<_graph_seq_0::DirectedGraph>::vertex_iterator DGVertexIter;
 
 // calculate the probability that a read
 // is from a the transcripts (isoforms)
@@ -49,6 +60,25 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
 		ReadFromTransProb<RNodeLoc> &r_prob, uint max_run) {
+
+	vector<IsoformSet> isoforms(graphs.size());
+	vector<IsoformSet>::iterator isof_iter = isoforms.begin();
+
+	// all the nodes with in-dgree == 0
+	vector<vector<uint> > start_nodes(graphs.size());
+	vector<vector<uint> >::iterator sn_iter = start_nodes.begin();
+
+	for (vector<SpliceGraph>::const_iterator i = graphs.begin();
+			i != graphs.end(); ++i, ++isof_iter, ++sn_iter) {
+		DGIndexMap index = boost::get(boost::vertex_index, i->graph);
+
+		for (pair<DGVertexIter, DGVertexIter> j = boost::vertices(i->graph);
+				j.first != j.second; ++j.first) {
+			std::cout << index[*j.first] << std::endl;
+
+		}
+	}
+
 	uint runs = 0;
 
 	while (runs != max_run) {

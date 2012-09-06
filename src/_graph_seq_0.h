@@ -180,10 +180,10 @@ public:
 void get_isoform_FASTA(vector<SpliceGraph> const &graphs,
 		vector<PyGraph> const &py_graphs, vector<Fasta> &isoforms);
 
-inline bool check_isoform_read_constraint(IsoformSet const &isoforms,
-		vector<SeqConstraint> rcs /* read constraints */) {
-	return true;
-
+// check isoform constraint
+inline bool check_isoform_rc(Isoform const &isoform,
+		SeqConstraint const &rc /* read constraints */) {
+	return isoform == (isoform | rc);
 }
 
 }
