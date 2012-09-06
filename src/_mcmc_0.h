@@ -44,6 +44,7 @@ using _graph_seq_0::IsoformSet;
 using _graph_seq_0::Isoform;
 using _graph_seq_0::DirectedGraph;
 using boost::dynamic_bitset;
+using _graph_seq_0::DGVertex;
 
 typedef _graph_seq_0::PyGraph GraphInfo;
 
@@ -66,6 +67,10 @@ class ReadFromTransProb {
 // that satisfies the constraint
 inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, gsl_rng *rn) {
 	// size of @isof is already set
+	for (vector<DGVertex>::const_iterator i = graph.topo_sort.begin();
+			i != graph.topo_sort.end(); ++i) {
+
+	}
 }
 
 template<class RNodeLoc>

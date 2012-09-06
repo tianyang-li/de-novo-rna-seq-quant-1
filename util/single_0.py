@@ -359,11 +359,22 @@ def check_nodes_in_graph(nodes, graph):
     """
     check the list of nodes to see
     if edges really exist
+    
+    also check the end of nodes[1:] and
+    start of nodes[:-1] to see if the
+    end and starts are correct 
     """
     
     for i in xrange(len(nodes) - 1):
         if nodes[i + 1].node not in graph[nodes[i].node]:
             return False 
+        
+        if nodes[i].end != len(graph.node[nodes[i].node]['label']):
+            return False
+    
+    for i in xrange(1, len(nodes)):
+        if nodes[i].start != 0:
+            return False
     
     return True
 
@@ -495,6 +506,8 @@ def main():
     
     read_across_node(read_in_graph, rcc_psl,
                      contig_dict, graph_dict)
+    
+    print len(read_in_graph) # TODO: remove this
     
     isoforms = get_isoforms(read_in_graph, graph_dict, max_run)
     

@@ -35,6 +35,7 @@
 #include <boost/unordered_set.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/transitive_closure.hpp>
+#include <boost/graph/topological_sort.hpp>
 
 #include "_misc_0.h"
 
@@ -136,11 +137,14 @@ public:
 	DirectedGraph graph;
 	DGIndexMap index;
 	IsoformSet isoforms;
-	DirectedGraph tc; // transitive closure
+	//DirectedGraph tc; // transitive closure TODO: is tc needed?
+	vector<DGVertex> topo_sort; // topological sort results
 
 	inline void setup() {
 		index = boost::get(boost::vertex_index, graph);
-		boost::transitive_closure(graph, tc);
+		//boost::transitive_closure(graph, tc); TODO: is tc needed?
+		boost::topological_sort(graph, std::back_inserter(topo_sort));
+		std::reverse(topo_sort.begin(), topo_sort.end());
 	}
 };
 
