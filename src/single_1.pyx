@@ -84,6 +84,8 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
         for node in graph.nodes():
             for edge in graph[node]:
                 deref(py_node_iter).edges.push_back(id_map.nodes_map[edge])
+                
+            inc(py_node_iter)
         
         id_maps[graph_name] = id_map 
         

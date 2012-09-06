@@ -39,11 +39,13 @@ using std::vector;
 using _graph_seq_0::ReadInGraph;
 using _graph_seq_0::check_isoform_rc;
 using _graph_seq_0::IsoformSet;
+using _graph_seq_0::DirectedGraph;
 
 typedef _graph_seq_0::PyGraph GraphInfo;
 
-typedef boost::property_map<_graph_seq_0::DirectedGraph, boost::vertex_index_t>::type DGIndexMap;
-typedef boost::graph_traits<_graph_seq_0::DirectedGraph>::vertex_iterator DGVertexIter;
+typedef boost::property_map<DirectedGraph, boost::vertex_index_t>::type DGIndexMap;
+typedef boost::graph_traits<DirectedGraph>::vertex_iterator DGVertexIter;
+typedef boost::graph_traits<DirectedGraph>::adjacency_iterator DGAdjIter;
 
 // calculate the probability that a read
 // is from a the transcripts (isoforms)
@@ -74,8 +76,13 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 		for (pair<DGVertexIter, DGVertexIter> j = boost::vertices(i->graph);
 				j.first != j.second; ++j.first) {
-			std::cout << index[*j.first] << std::endl;
-
+			DGAdjIter ai, ai_end;
+			std::cout << index[*j.first] << " ";
+			for (boost::tie(ai, ai_end) = boost::adjacent_vertices(
+					index[*j.first], i->graph); ai != ai_end; ++ai) {
+				std::cout << *ai << " ";
+			}
+			std::cout << "########" << std::endl;
 		}
 	}
 
