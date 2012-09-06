@@ -177,7 +177,7 @@ def get_isoforms(read_in_graph, graph_dict, max_run=1000000):
     get_read_in_graph_from_py(read_in_graph, id_maps, py_reads)
     
     cdef vector[Fasta] * _isoforms = new vector[Fasta]()
-
+    
     _get_isoforms(py_graphs, py_reads, _isoforms, max_run)
     
     isoforms = []
