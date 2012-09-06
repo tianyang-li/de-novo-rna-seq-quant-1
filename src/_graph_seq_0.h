@@ -31,6 +31,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/unordered_set.hpp>
+#include <boost/graph/graph_traits.hpp>
 
 #include "_misc_0.h"
 
@@ -118,12 +119,14 @@ typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS> D
 typedef SeqConstraintHash IsoformHash;
 typedef boost::dynamic_bitset<> Isoform;
 typedef boost::unordered_set<Isoform, IsoformHash> IsoformSet;
+typedef boost::property_map<DirectedGraph, boost::vertex_index_t>::type DGIndexMap;
 
 class SpliceGraph {
 public:
 	uint graph_id;
 	vector<SeqConstraint> read_constraints;
 	DirectedGraph graph;
+	DGIndexMap index;
 	IsoformSet isoforms;
 };
 

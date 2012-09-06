@@ -40,6 +40,7 @@ using std::vector;
 using _graph_seq_0::ReadInGraph;
 using _graph_seq_0::check_isoform_rc;
 using _graph_seq_0::IsoformSet;
+using _graph_seq_0::Isoform;
 using _graph_seq_0::DirectedGraph;
 using boost::dynamic_bitset;
 
@@ -66,27 +67,31 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		vector<GraphReads> const &graph_reads,
 		ReadFromTransProb<RNodeLoc> &r_prob, uint max_run) {
 
-	vector<IsoformSet> isoforms(graphs.size());
-	vector<IsoformSet>::iterator isof_iter = isoforms.begin();
-
 	// all the nodes with in-dgree == 0
 	vector<vector<uint> > start_nodes(graphs.size());
 	vector<vector<uint> >::iterator sn_iter = start_nodes.begin();
 
 	for (vector<SpliceGraph>::const_iterator i = graphs.begin();
-			i != graphs.end(); ++i, ++isof_iter, ++sn_iter) {
-		DGIndexMap index = boost::get(boost::vertex_index, i->graph);
-
+			i != graphs.end(); ++i, ++sn_iter) {
 		for (pair<DGVertexIter, DGVertexIter> j = boost::vertices(i->graph);
 				j.first != j.second; ++j.first) {
 			DGInEdgeIter in_i, in_end;
-			boost::tie(in_i, in_end) = boost::in_edges(index[*j.first],
+			boost::tie(in_i, in_end) = boost::in_edges(i->index[*j.first],
 					i->graph);
 			if (in_i == in_end) {
-				sn_iter->push_back(index[*j.first]);
+				sn_iter->push_back(i->index[*j.first]);
 			}
 		}
+	}
 
+	// TODO: multiple chains pthread parallelization
+
+	vector<IsoformSet> isoforms(graphs.size());
+	vector<IsoformSet>::iterator isof_iter = isoforms.begin();
+	sn_iter = start_nodes.begin();
+
+	for (vector<SpliceGraph>::const_iterator i = graphs.begin();
+			i != graphs.end(); ++i, ++isof_iter, ++sn_iter) {
 		dynamic_bitset<> satisfied_rc(i->read_constraints.size());
 		satisfied_rc.set();
 		while (satisfied_rc.any()) {
@@ -95,6 +100,8 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 				++un_rc;
 			}
 			satisfied_rc[un_rc] = false;
+
+			Isoform isof(boost::num_vertices(i->graph));
 		}
 
 	}

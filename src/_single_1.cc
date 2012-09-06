@@ -57,6 +57,8 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 
 	// TODO: fix graph node when segmentation is done
 
+	graph.index = boost::get(boost::vertex_index, graph.graph);
+
 	// read constraints
 	boost::unordered_set<SeqConstraint, _graph_seq_0::SeqConstraintHash> rcs_set;
 
