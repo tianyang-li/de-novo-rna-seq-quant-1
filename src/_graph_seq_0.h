@@ -34,12 +34,13 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/graph/graph_traits.hpp>
-#include <boost/graph/topological_sort.hpp>
+#include <boost/graph/transitive_closure.hpp>
 
 #include "_misc_0.h"
 
 // TODO: remove this
 #include <iostream>
+#include <boost/graph/graph_utility.hpp>
 
 namespace _graph_seq_0 {
 
@@ -135,12 +136,11 @@ public:
 	DirectedGraph graph;
 	DGIndexMap index;
 	IsoformSet isoforms;
-	vector<DGVertex> topo_sort; // topological sort results
+	DirectedGraph tc; // transitive closure
 
 	inline void setup() {
 		index = boost::get(boost::vertex_index, graph);
-		boost::topological_sort(graph, std::back_inserter(topo_sort));
-		std::reverse(topo_sort.begin(), topo_sort.end());
+		boost::transitive_closure(graph, tc);
 	}
 };
 
