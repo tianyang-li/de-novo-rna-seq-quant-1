@@ -22,10 +22,12 @@
 #include <cstddef>
 #include <vector>
 #include <utility>
+#include <algorithm>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/unordered_map.hpp>
 #include <gsl/gsl_rng.h>
 
 #include "_graph_seq_0.h"
@@ -56,6 +58,7 @@ using boost::out_degree;
 using boost::out_edges;
 using boost::target;
 using boost::edge;
+using _graph_seq_0::IsoformInfo;
 
 typedef _graph_seq_0::PyGraph GraphInfo;
 
@@ -193,6 +196,7 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 
 // in each step of MCMC
 // shows what isoforms are added and what isoforms are removed
+// in each graph
 class IsoformAction {
 public:
 	enum Action {
@@ -218,7 +222,7 @@ private:
 			vector<SpliceGraph> &graphs,
 			vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 			vector<GraphReads> const &graph_reads,
-			vector<IsoformSet> const &graph_isoforms,
+			vector<IsoformInfo> const &graph_isoforms, gsl_rng *rn,
 			vector<IsoformAction> &isof_acts /* an empty vector */) {
 		return 0;
 	}
@@ -255,8 +259,8 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 		// TODO: seed @rn
 
-		vector<IsoformSet> graph_isoforms(graphs.size());
-		vector<IsoformSet>::iterator isof_set_iter = graph_isoforms.begin();
+		vector<IsoformInfo> graph_isoforms(graphs.size());
+		vector<IsoformInfo>::iterator isof_set_iter = graph_isoforms.begin();
 		sn_iter = start_nodes.begin();
 
 		for (vector<SpliceGraph>::const_iterator i = graphs.begin();
@@ -278,7 +282,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 				Isoform isof(boost::num_vertices(i->graph));
 				rand_rc_isof(*i, isof, un_rc, rn);
-				isof_set_iter->insert(isof);
+				isof_set_iter->insert(pair<Isoform, ldbl>(isof, 0.0L));
 
 				for (uint j = 0; j != rc_size; ++j) {
 					if (satisfied_rc[j] == true) {
@@ -287,14 +291,25 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 						}
 					}
 				}
+
+				// assign random expression levels according
+				// to a dirichlet distribution
+
 			}
 
 		}
 
 		for (uint runs = 0; runs != max_run; ++runs) {
-			vector<IsoformAction> isof_acts;
+			vector<IsoformAction> isof_acts; // for each graph
+
 			ldbl accept_prob_blob = isof_jump(graph_info, graphs, read_in_graph,
-					graph_reads, graph_isoforms, isof_acts);
+					graph_reads, graph_isoforms, rn, isof_acts);
+
+			ldbl accept_prob = std::min(1.0L, accept_prob_blob);
+
+			if (gsl_rng_uniform(rn) <= accept_prob) {
+				// apply @isof_acts to @graph_isoforms
+			}
 		}
 
 		gsl_rng_free(rn);

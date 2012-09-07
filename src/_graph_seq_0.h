@@ -42,6 +42,7 @@
 // TODO: remove this
 #include <iostream>
 #include <boost/graph/graph_utility.hpp>
+#include <boost/unordered_map.hpp>
 
 #define BOOST_DYNAMIC_BITSET_DONT_USE_FRIENDS
 
@@ -133,12 +134,15 @@ typedef boost::unordered_set<Isoform, IsoformHash> IsoformSet;
 typedef boost::property_map<DirectedGraph, boost::vertex_index_t>::type DGIndexMap;
 typedef boost::graph_traits<DirectedGraph>::vertex_descriptor DGVertex;
 
+// stores isoform and its corresponding expression level
+typedef boost::unordered_map<Isoform, ldbl, IsoformHash> IsoformInfo;
+
 class SpliceGraph {
 public:
 	uint graph_id;
 	vector<SeqConstraint> read_constraints;
 	DirectedGraph graph;
-	IsoformSet isoforms;
+	IsoformInfo isoforms;
 	DirectedGraph tc; // transitive closure
 	vector<DGVertex> topo_sort; // topological sort results
 

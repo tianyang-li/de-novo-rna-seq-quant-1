@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <boost/dynamic_bitset.hpp>
+#include <gsl/gsl_rng.h>
 
 #include "_misc_0.h"
 #include "_graph_seq_0.h"
@@ -55,11 +56,12 @@ public:
 			vector<SpliceGraph> &graphs,
 			vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
 			vector<GraphReads> const &graph_reads,
-			vector<IsoformSet> const &graph_isoforms,
+			vector<IsoformInfo> const &graph_isoforms, gsl_rng *rn,
 			vector<IsoformAction> &isof_acts) {
 		return 0;
 	}
 };
+
 }
 
 #endif // _SINGLE_1_H_
