@@ -68,6 +68,7 @@ typedef boost::graph_traits<DirectedGraph>::edge_descriptor DGEdge;
 
 // calculate the probability that a read
 // is from a the transcripts (isoforms)
+// IMPORTANT: never use without specializing
 template<class RNodeLoc>
 class ReadFromTransProb {
 	inline ldbl operator()(ReadInGraph<RNodeLoc> const &r) {
@@ -267,11 +268,9 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 		}
 
-		uint runs = 0;
+		for (uint runs = 0; runs != max_run; ++runs) {
 
-		while (runs != max_run) {
 
-			++runs;
 		}
 
 		gsl_rng_free(rn);
