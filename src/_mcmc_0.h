@@ -27,8 +27,6 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <gsl/gsl_rng.h>
-#include <gsl/gsl_permutation.h>
-#include <gsl/gsl_randist.h>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -74,6 +72,20 @@ class ReadFromTransProb {
 	inline ldbl operator()(ReadInGraph<RNodeLoc> const &r) {
 		return 0.0;
 	}
+};
+
+class GSLRngUnifInt {
+public:
+	GSLRngUnifInt(gsl_rng *rn_) :
+			rn(rn_) {
+	}
+
+	uint operator()(uint n) {
+		return gsl_rng_uniform_int(rn, n);
+	}
+
+private:
+	gsl_rng *rn;
 };
 
 // given read constraint
@@ -126,8 +138,6 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 
 			isof.set(cur_node);
 
-			uint in_deg = in_degree(cur_node, graph.graph);
-
 			vector<DGEdge> edges_in;
 
 			DGInEdgeIter in_i, in_end;
@@ -138,16 +148,10 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 				++in_i;
 			}
 
-			gsl_permutation *in_perm = gsl_permutation_alloc(in_deg);
-			gsl_permutation_init(in_perm);
+			GSLRngUnifInt rn_wrapper(rn);
+			std::random_shuffle(edges_in.begin(), edges_in.end(), rn_wrapper);
 
-			gsl_ran_shuffle(rn, in_perm->data, in_deg, sizeof(size_t));
 
-			for (uint i = 0; i != in_deg; ++i) {
-
-			}
-
-			gsl_permutation_free(in_perm);
 
 			last_rc_node = cur_node;
 		}
