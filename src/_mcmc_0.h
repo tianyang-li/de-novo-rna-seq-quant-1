@@ -55,6 +55,7 @@ using boost::source;
 using boost::out_degree;
 using boost::out_edges;
 using boost::target;
+using boost::edge;
 
 typedef _graph_seq_0::PyGraph GraphInfo;
 
@@ -132,28 +133,43 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 	uint last_rc_node = *ts_iter;
 	++ts_iter;
 
+	// extend "back up" to
+	// connect to the previous contraint
 	while (ts_iter != graph.topo_sort.end()) {
 		if (rc[*ts_iter] == true) {
 			uint cur_node = *ts_iter;
 
 			isof.set(cur_node);
 
-			vector<DGEdge> edges_in;
+			while (cur_node != last_rc_node) {
 
-			DGInEdgeIter in_i, in_end;
-			tie(in_i, in_end) = in_edges(cur_node, graph.graph);
+				vector<uint> edges_in;
 
-			while (in_i != in_end) {
-				edges_in.push_back(*in_i);
-				++in_i;
+				DGInEdgeIter in_i, in_end;
+				tie(in_i, in_end) = in_edges(cur_node, graph.graph);
+
+				while (in_i != in_end) {
+					edges_in.push_back(source(*in_i, graph.graph));
+					++in_i;
+				}
+
+				GSLRngUnifInt rn_wrapper(rn);
+				std::random_shuffle(edges_in.begin(), edges_in.end(),
+						rn_wrapper);
+
+				for (vector<uint>::const_iterator i = edges_in.begin();
+						i != edges_in.end(); ++i) {
+					if (edge(last_rc_node, *i, graph.tc).second
+							|| *i == last_rc_node) {
+						cur_node = *i;
+						isof.set(cur_node);
+						break;
+					}
+				}
+
 			}
 
-			GSLRngUnifInt rn_wrapper(rn);
-			std::random_shuffle(edges_in.begin(), edges_in.end(), rn_wrapper);
-
-
-
-			last_rc_node = cur_node;
+			last_rc_node = *ts_iter;
 		}
 		++ts_iter;
 	}
@@ -182,7 +198,6 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 			tie(out_i, out_end) = out_edges(cur_node, graph.graph);
 		}
 	}
-
 }
 
 template<class RNodeLoc>
@@ -248,12 +263,6 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 						}
 					}
 				}
-			}
-
-			// TODO: remove this
-			for (IsoformSet::const_iterator j = isof_set_iter->begin();
-					j != isof_set_iter->end(); ++j) {
-				std::cout << *j << std::endl;
 			}
 
 		}
