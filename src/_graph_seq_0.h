@@ -43,6 +43,8 @@
 #include <iostream>
 #include <boost/graph/graph_utility.hpp>
 
+#define BOOST_DYNAMIC_BITSET_DONT_USE_FRIENDS
+
 namespace _graph_seq_0 {
 
 using std::vector;

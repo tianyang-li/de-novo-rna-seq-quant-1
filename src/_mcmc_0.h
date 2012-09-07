@@ -66,16 +66,6 @@ typedef boost::graph_traits<DirectedGraph>::in_edge_iterator DGInEdgeIter;
 typedef boost::graph_traits<DirectedGraph>::out_edge_iterator DGOutEdgeIter;
 typedef boost::graph_traits<DirectedGraph>::edge_descriptor DGEdge;
 
-// calculate the probability that a read
-// is from a the transcripts (isoforms)
-// IMPORTANT: never use without specializing
-template<class RNodeLoc>
-class ReadFromTransProb {
-	inline ldbl operator()(ReadInGraph<RNodeLoc> const &r) {
-		return 0.0;
-	}
-};
-
 class GSLRngUnifInt {
 public:
 	GSLRngUnifInt(gsl_rng *rn_) :
@@ -201,6 +191,37 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 	}
 }
 
+// in each step of MCMC
+// shows what isoforms are added and what isoforms are removed
+class IsoformAction {
+public:
+	enum Action {
+		ADD, DEL
+	};
+
+	IsoformAction(Isoform isoform_, Action action_) :
+			isoform(isoform_), action(action_) {
+	}
+
+	Isoform isoform;
+	Action action;
+};
+
+// calculate the probability that a read
+// is from a the transcripts (isoforms)
+// IMPORTANT: never use without specializing
+template<class RNodeLoc>
+class ReadFromTransProb {
+private:
+	inline ldbl operator()(ReadInGraph<RNodeLoc> const &r) {
+		return 0.0;
+	}
+};
+
+template<class RNodeLoc>
+class IsoformJump {
+};
+
 template<class RNodeLoc>
 void isoform_main(vector<GraphInfo> const &graph_info,
 		vector<SpliceGraph> &graphs,
@@ -269,7 +290,6 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		}
 
 		for (uint runs = 0; runs != max_run; ++runs) {
-
 
 		}
 

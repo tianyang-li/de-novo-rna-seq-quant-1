@@ -50,6 +50,7 @@ using _graph_seq_0::ReadInGraph;
 
 template<>
 class ReadFromTransProb<SingleNodeLoc> {
+public:
 	inline ldbl operator()(ReadInGraph<SingleNodeLoc> const &r) const {
 		return 0.0;
 	}
