@@ -56,6 +56,7 @@ typedef boost::property_map<DirectedGraph, boost::vertex_index_t>::type DGIndexM
 typedef boost::graph_traits<DirectedGraph>::vertex_iterator DGVertexIter;
 typedef boost::graph_traits<DirectedGraph>::adjacency_iterator DGAdjIter;
 typedef boost::graph_traits<DirectedGraph>::in_edge_iterator DGInEdgeIter;
+typedef boost::graph_traits<DirectedGraph>::out_edge_iterator DGOutEdgeIter;
 
 // calculate the probability that a read
 // is from a the transcripts (isoforms)
@@ -112,8 +113,35 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 
 	while (ts_iter != graph.topo_sort.end()) {
 		if (rc[*ts_iter] == true) {
+			isof.set(*ts_iter);
+			last_rc_node = *ts_iter;
 		}
 		++ts_iter;
+	}
+
+	{
+		// extend last node to end,
+		// go "down" to end
+
+		uint cur_node = last_rc_node;
+
+		isof.set(cur_node);
+
+		DGOutEdgeIter out_i, out_end;
+		tie(out_i, out_end) = boost::out_edges(cur_node, graph.graph);
+
+		while (out_i != out_end) {
+			uint go2node = gsl_rng_uniform_int(rn,
+					boost::out_degree(cur_node, graph.graph));
+
+			for (uint i = 0; i != go2node; ++i) {
+				++out_i;
+			}
+
+			cur_node = boost::target(*out_i, graph.graph);
+			isof.set(cur_node);
+			tie(out_i, out_end) = boost::out_edges(cur_node, graph.graph);
+		}
 	}
 
 }
@@ -134,9 +162,9 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		for (pair<DGVertexIter, DGVertexIter> j = boost::vertices(i->graph);
 				j.first != j.second; ++j.first) {
 			DGInEdgeIter in_i, in_end;
-			tie(in_i, in_end) = boost::in_edges(i->index[*j.first], i->graph);
+			tie(in_i, in_end) = boost::in_edges(*j.first, i->graph);
 			if (in_i == in_end) {
-				sn_iter->push_back(i->index[*j.first]);
+				sn_iter->push_back(*j.first);
 			}
 		}
 	}

@@ -136,13 +136,11 @@ public:
 	uint graph_id;
 	vector<SeqConstraint> read_constraints;
 	DirectedGraph graph;
-	DGIndexMap index;
 	IsoformSet isoforms;
 	DirectedGraph tc; // transitive closure
 	vector<DGVertex> topo_sort; // topological sort results
 
 	inline void setup() {
-		index = boost::get(boost::vertex_index, graph);
 		boost::transitive_closure(graph, tc);
 		boost::topological_sort(graph, std::back_inserter(topo_sort));
 		std::reverse(topo_sort.begin(), topo_sort.end());
