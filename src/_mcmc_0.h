@@ -207,19 +207,12 @@ public:
 	Action action;
 };
 
-// calculate the probability that a read
-// is from a the transcripts (isoforms)
-// IMPORTANT: never use without specializing
-template<class RNodeLoc>
-class ReadFromTransProb {
-private:
-	inline ldbl operator()(ReadInGraph<RNodeLoc> const &r) {
-		return 0.0;
-	}
-};
-
 template<class RNodeLoc>
 class IsoformJump {
+private:
+	inline ldbl operator()() {
+		return 0;
+	}
 };
 
 template<class RNodeLoc>

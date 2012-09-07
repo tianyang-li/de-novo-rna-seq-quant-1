@@ -48,15 +48,6 @@ namespace _mcmc_0 {
 using _single_1::SingleNodeLoc;
 using _graph_seq_0::ReadInGraph;
 
-template<>
-class ReadFromTransProb<SingleNodeLoc> {
-public:
-	inline ldbl operator()(ReadInGraph<SingleNodeLoc> const &r) const {
-		return 0.0;
-	}
-
-};
-
 }
 
 #endif // _SINGLE_1_H_
