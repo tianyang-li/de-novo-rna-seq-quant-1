@@ -29,6 +29,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/unordered_map.hpp>
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -292,9 +293,34 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 					}
 				}
 
-				// assign random expression levels according
-				// to a dirichlet distribution
+			}
 
+			// assign random expression levels according
+			// to a dirichlet distribution
+
+			uint isofs_size = isof_set_iter->size();
+
+			double *dir_alpha = new double[isofs_size];
+
+			std::fill(dir_alpha, dir_alpha + isofs_size, 1);
+
+			double *dir_theta = new double[isofs_size];
+
+			gsl_ran_dirichlet(rn, isofs_size, dir_alpha, dir_theta);
+
+			delete[] dir_alpha;
+
+			IsoformInfo::iterator cur_isof = isof_set_iter->begin();
+			for (uint i = 0; i != isofs_size; ++i, ++cur_isof) {
+				cur_isof->second = dir_theta[i];
+			}
+
+			delete[] dir_theta;
+
+			for (cur_isof = isof_set_iter->begin();
+					cur_isof != isof_set_iter->end(); ++cur_isof) {
+				std::cout << cur_isof->first << " " << cur_isof->second
+						<< std::endl;
 			}
 
 		}
