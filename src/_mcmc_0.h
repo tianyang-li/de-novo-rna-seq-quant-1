@@ -143,6 +143,10 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 
 			gsl_ran_shuffle(rn, in_perm->data, in_deg, sizeof(size_t));
 
+			for (uint i = 0; i != in_deg; ++i) {
+
+			}
+
 			gsl_permutation_free(in_perm);
 
 			last_rc_node = cur_node;
