@@ -19,6 +19,7 @@
 #ifndef _MCMC_0_H_
 #define _MCMC_0_H_
 
+#include <cstddef>
 #include <vector>
 #include <utility>
 #include <boost/graph/graph_traits.hpp>
@@ -27,6 +28,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_permutation.h>
+#include <gsl/gsl_randist.h>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -49,6 +51,12 @@ using boost::dynamic_bitset;
 using _graph_seq_0::DGVertex;
 using _graph_seq_0::SeqConstraint;
 using boost::tie;
+using boost::in_edges;
+using boost::in_degree;
+using boost::source;
+using boost::out_degree;
+using boost::out_edges;
+using boost::target;
 
 typedef _graph_seq_0::PyGraph GraphInfo;
 
@@ -57,6 +65,7 @@ typedef boost::graph_traits<DirectedGraph>::vertex_iterator DGVertexIter;
 typedef boost::graph_traits<DirectedGraph>::adjacency_iterator DGAdjIter;
 typedef boost::graph_traits<DirectedGraph>::in_edge_iterator DGInEdgeIter;
 typedef boost::graph_traits<DirectedGraph>::out_edge_iterator DGOutEdgeIter;
+typedef boost::graph_traits<DirectedGraph>::edge_descriptor DGEdge;
 
 // calculate the probability that a read
 // is from a the transcripts (isoforms)
@@ -91,19 +100,19 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 		isof.set(cur_node);
 
 		DGInEdgeIter in_i, in_end;
-		tie(in_i, in_end) = boost::in_edges(cur_node, graph.graph);
+		tie(in_i, in_end) = in_edges(cur_node, graph.graph);
 
 		while (in_i != in_end) {
 			uint go2node = gsl_rng_uniform_int(rn,
-					boost::in_degree(cur_node, graph.graph));
+					in_degree(cur_node, graph.graph));
 
 			for (uint i = 0; i != go2node; ++i) {
 				++in_i;
 			}
 
-			cur_node = boost::source(*in_i, graph.graph);
+			cur_node = source(*in_i, graph.graph);
 			isof.set(cur_node);
-			tie(in_i, in_end) = boost::in_edges(cur_node, graph.graph);
+			tie(in_i, in_end) = in_edges(cur_node, graph.graph);
 		}
 	}
 
@@ -113,8 +122,30 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 
 	while (ts_iter != graph.topo_sort.end()) {
 		if (rc[*ts_iter] == true) {
-			isof.set(*ts_iter);
-			last_rc_node = *ts_iter;
+			uint cur_node = *ts_iter;
+
+			isof.set(cur_node);
+
+			uint in_deg = in_degree(cur_node, graph.graph);
+
+			vector<DGEdge> edges_in;
+
+			DGInEdgeIter in_i, in_end;
+			tie(in_i, in_end) = in_edges(cur_node, graph.graph);
+
+			while (in_i != in_end) {
+				edges_in.push_back(*in_i);
+				++in_i;
+			}
+
+			gsl_permutation *in_perm = gsl_permutation_alloc(in_deg);
+			gsl_permutation_init(in_perm);
+
+			gsl_ran_shuffle(rn, in_perm->data, in_deg, sizeof(size_t));
+
+			gsl_permutation_free(in_perm);
+
+			last_rc_node = cur_node;
 		}
 		++ts_iter;
 	}
@@ -128,19 +159,19 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 		isof.set(cur_node);
 
 		DGOutEdgeIter out_i, out_end;
-		tie(out_i, out_end) = boost::out_edges(cur_node, graph.graph);
+		tie(out_i, out_end) = out_edges(cur_node, graph.graph);
 
 		while (out_i != out_end) {
 			uint go2node = gsl_rng_uniform_int(rn,
-					boost::out_degree(cur_node, graph.graph));
+					out_degree(cur_node, graph.graph));
 
 			for (uint i = 0; i != go2node; ++i) {
 				++out_i;
 			}
 
-			cur_node = boost::target(*out_i, graph.graph);
+			cur_node = target(*out_i, graph.graph);
 			isof.set(cur_node);
-			tie(out_i, out_end) = boost::out_edges(cur_node, graph.graph);
+			tie(out_i, out_end) = out_edges(cur_node, graph.graph);
 		}
 	}
 
@@ -162,7 +193,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		for (pair<DGVertexIter, DGVertexIter> j = boost::vertices(i->graph);
 				j.first != j.second; ++j.first) {
 			DGInEdgeIter in_i, in_end;
-			tie(in_i, in_end) = boost::in_edges(*j.first, i->graph);
+			tie(in_i, in_end) = in_edges(*j.first, i->graph);
 			if (in_i == in_end) {
 				sn_iter->push_back(*j.first);
 			}
