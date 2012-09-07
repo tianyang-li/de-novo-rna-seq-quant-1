@@ -13,6 +13,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 
+from libc.stdio cimport printf
+
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from cython.operator cimport dereference as deref, preincrement as inc
@@ -177,16 +179,17 @@ def get_isoforms(read_in_graph, graph_dict, max_run=1000000):
     get_read_in_graph_from_py(read_in_graph, id_maps, py_reads)
     
     cdef vector[Fasta] * _isoforms = new vector[Fasta]()
-    
+
     _get_isoforms(py_graphs, py_reads, _isoforms, max_run)
-    
+
     isoforms = []
     
     convert_isoforms(isoforms, _isoforms)
-    
+
     del py_graphs
     del py_reads
     del _isoforms
-    
+
     return isoforms
+
 

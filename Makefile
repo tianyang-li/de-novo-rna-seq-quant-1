@@ -1,12 +1,12 @@
 CC = g++
-CFLAGS = -Wall -fPIC -Wextra
+CFLAGS = -Wall -fPIC -Wextra -ggdb
 AR = ar
 INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0
 
 all: util/single_1.so
 
 util/single_1.so: src/single_1.pyx lib/quant.a setup.py lib/libgsl.a 
-	python setup.py build_ext -i
+	python setup.py build_ext -i 
 	mv single_1.so util/
 
 src/single_1.pyx: src/graph_seq_0.pxd

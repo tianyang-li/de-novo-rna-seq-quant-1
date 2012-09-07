@@ -108,11 +108,12 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 
 	// last node that has a constraint
 	uint last_rc_node = *ts_iter;
+	++ts_iter;
 
 	while (ts_iter != graph.topo_sort.end()) {
-		while (ts_iter != graph.topo_sort.end() && rc[*ts_iter] == false) {
-			++ts_iter;
+		if (rc[*ts_iter] == true) {
 		}
+		++ts_iter;
 	}
 
 }
@@ -142,60 +143,63 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 	// TODO: multiple chains pthread parallelization
 
-	gsl_rng *rn = gsl_rng_alloc(gsl_rng_mt19937);
+	{
 
-	// TODO: seed @rn
+		gsl_rng *rn = gsl_rng_alloc(gsl_rng_mt19937);
 
-	vector<IsoformSet> isoforms(graphs.size());
-	vector<IsoformSet>::iterator isof_set_iter = isoforms.begin();
-	sn_iter = start_nodes.begin();
+		// TODO: seed @rn
 
-	for (vector<SpliceGraph>::const_iterator i = graphs.begin();
-			i != graphs.end(); ++i, ++isof_set_iter, ++sn_iter) {
+		vector<IsoformSet> isoforms(graphs.size());
+		vector<IsoformSet>::iterator isof_set_iter = isoforms.begin();
+		sn_iter = start_nodes.begin();
 
-		uint rc_size = i->read_constraints.size();
+		for (vector<SpliceGraph>::const_iterator i = graphs.begin();
+				i != graphs.end(); ++i, ++isof_set_iter, ++sn_iter) {
 
-		// 1 - unsatisfied
-		// 0 - satisfied
-		dynamic_bitset<> satisfied_rc(rc_size);
-		satisfied_rc.set();
+			uint rc_size = i->read_constraints.size();
 
-		while (satisfied_rc.any()) {
-			uint un_rc = 0; // un-satisfied read constraint index
-			while (satisfied_rc[un_rc] == false) {
-				++un_rc;
-			}
-			satisfied_rc[un_rc] = false;
+			// 1 - unsatisfied
+			// 0 - satisfied
+			dynamic_bitset<> satisfied_rc(rc_size);
+			satisfied_rc.set();
 
-			Isoform isof(boost::num_vertices(i->graph));
-			rand_rc_isof(*i, isof, un_rc, rn);
-			isof_set_iter->insert(isof);
+			while (satisfied_rc.any()) {
+				uint un_rc = 0; // un-satisfied read constraint index
+				while (satisfied_rc[un_rc] == false) {
+					++un_rc;
+				}
+				satisfied_rc[un_rc] = false;
 
-			for (uint j = 0; j != rc_size; ++j) {
-				if (satisfied_rc[j] == true) {
-					if (isof == (isof | i->read_constraints[j])) {
-						satisfied_rc[j] = false;
+				Isoform isof(boost::num_vertices(i->graph));
+				rand_rc_isof(*i, isof, un_rc, rn);
+				isof_set_iter->insert(isof);
+
+				for (uint j = 0; j != rc_size; ++j) {
+					if (satisfied_rc[j] == true) {
+						if (isof == (isof | i->read_constraints[j])) {
+							satisfied_rc[j] = false;
+						}
 					}
 				}
 			}
+
+			// TODO: remove this
+			for (IsoformSet::const_iterator j = isof_set_iter->begin();
+					j != isof_set_iter->end(); ++j) {
+				std::cout << *j << std::endl;
+			}
+
 		}
 
-		// TODO: remove this
-		for (IsoformSet::const_iterator j = isof_set_iter->begin();
-				j != isof_set_iter->end(); ++j) {
-			std::cout << *j << std::endl;
+		uint runs = 0;
+
+		while (runs != max_run) {
+
+			++runs;
 		}
 
+		gsl_rng_free(rn);
 	}
-
-	uint runs = 0;
-
-	while (runs != max_run) {
-
-		++runs;
-	}
-
-	gsl_rng_free(rn);
 
 }
 
