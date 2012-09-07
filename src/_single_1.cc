@@ -174,10 +174,10 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 	// for each graph's alignments information:
 	//     @graph_reads will continue to be used
 
-	_mcmc_0::ReadFromTransProb<SingleNodeLoc> r_prob;
+	_mcmc_0::IsoformJump<SingleNodeLoc> isof_jump;
 
 	_mcmc_0::isoform_main<SingleNodeLoc>(*py_graphs, graphs, *py_reads,
-			graph_reads, r_prob, max_run);
+			graph_reads, isof_jump, max_run);
 
 	_graph_seq_0::get_isoform_FASTA(graphs, *py_graphs, *isoforms);
 }

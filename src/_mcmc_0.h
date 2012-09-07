@@ -207,10 +207,19 @@ public:
 	Action action;
 };
 
+// calculate the blob
+// in acceptance probability
+// IMPORTANT: cannot be used without
+// specializing
 template<class RNodeLoc>
 class IsoformJump {
 private:
-	inline ldbl operator()() {
+	ldbl operator()(vector<GraphInfo> const &graph_info,
+			vector<SpliceGraph> &graphs,
+			vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+			vector<GraphReads> const &graph_reads,
+			vector<IsoformSet> const &graph_isoforms,
+			vector<IsoformAction> &isof_acts /* an empty vector */) {
 		return 0;
 	}
 };
@@ -219,8 +228,8 @@ template<class RNodeLoc>
 void isoform_main(vector<GraphInfo> const &graph_info,
 		vector<SpliceGraph> &graphs,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		vector<GraphReads> const &graph_reads,
-		ReadFromTransProb<RNodeLoc> &r_prob, uint max_run) {
+		vector<GraphReads> const &graph_reads, IsoformJump<RNodeLoc> &isof_jump,
+		uint max_run) {
 
 	// all the nodes with in-dgree == 0
 	vector<vector<uint> > start_nodes(graphs.size());
@@ -246,8 +255,8 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 		// TODO: seed @rn
 
-		vector<IsoformSet> isoforms(graphs.size());
-		vector<IsoformSet>::iterator isof_set_iter = isoforms.begin();
+		vector<IsoformSet> graph_isoforms(graphs.size());
+		vector<IsoformSet>::iterator isof_set_iter = graph_isoforms.begin();
 		sn_iter = start_nodes.begin();
 
 		for (vector<SpliceGraph>::const_iterator i = graphs.begin();
@@ -283,7 +292,9 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		}
 
 		for (uint runs = 0; runs != max_run; ++runs) {
-
+			vector<IsoformAction> isof_acts;
+			ldbl accept_prob_blob = isof_jump(graph_info, graphs, read_in_graph,
+					graph_reads, graph_isoforms, isof_acts);
 		}
 
 		gsl_rng_free(rn);
