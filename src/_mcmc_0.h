@@ -355,7 +355,20 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 			if (gsl_rng_uniform(rn) <= accept_prob) {
 				// apply @isof_acts to @graph_isoforms
+
+				vector<IsoformAction>::const_iterator isof_act_iter =
+						isof_acts.begin();
+
+				vector<IsoformInfo>::iterator graph_isofs_iter =
+						graph_isoforms.begin();
+
+				while (isof_act_iter != isof_acts.end()) {
+
+					++isof_act_iter;
+
+				}
 			}
+
 		}
 
 		gsl_rng_free(rn);
