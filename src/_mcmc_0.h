@@ -364,6 +364,18 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 				while (isof_act_iter != isof_acts.end()) {
 
+					switch (isof_act_iter->action) {
+
+					case IsoformAction::ADD:
+
+						break;
+
+					case IsoformAction::DEL:
+
+						break;
+
+					}
+
 					++isof_act_iter;
 
 				}
