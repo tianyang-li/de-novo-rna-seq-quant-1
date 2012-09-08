@@ -56,7 +56,7 @@ public:
 			vector<SpliceGraph> &graphs,
 			vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
 			vector<GraphReads> const &graph_reads,
-			vector<IsoformInfo> const &graph_isoforms, gsl_rng *rn,
+			vector<IsoformInfo> &graph_isoforms, gsl_rng *rn,
 			vector<IsoformAction> &isof_acts) {
 		return 0;
 	}

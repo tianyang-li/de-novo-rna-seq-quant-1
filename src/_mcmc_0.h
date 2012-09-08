@@ -200,6 +200,8 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 // in each graph
 class IsoformAction {
 public:
+	// TODO: allow NOTHING
+	// so that only expression levels are changed?
 	enum Action {
 		ADD, DEL
 	};
@@ -223,7 +225,7 @@ private:
 			vector<SpliceGraph> &graphs,
 			vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 			vector<GraphReads> const &graph_reads,
-			vector<IsoformInfo> const &graph_isoforms, gsl_rng *rn,
+			vector<IsoformInfo> &graph_isoforms, gsl_rng *rn,
 			vector<IsoformAction> &isof_acts /* an empty vector */) {
 		return 0;
 	}
@@ -339,6 +341,9 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 			delete[] dir_theta;
 
 		}
+
+		// main part of MCMC
+		// the real stuff is in @isof_jump
 
 		for (uint runs = 0; runs != max_run; ++runs) {
 			vector<IsoformAction> isof_acts; // for each graph
