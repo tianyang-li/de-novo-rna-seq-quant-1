@@ -383,7 +383,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 						break;
 
 					case IsoformAction::DEL:
-
+						graph_isofs_iter->erase(isof_act_iter->isoform);
 						break;
 
 					}
