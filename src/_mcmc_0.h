@@ -261,36 +261,43 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		// TODO: seed @rn
 
 		vector<IsoformInfo> graph_isoforms(graphs.size());
-		vector<IsoformInfo>::iterator isof_set_iter = graph_isoforms.begin();
-		sn_iter = start_nodes.begin();
 
-		for (vector<SpliceGraph>::const_iterator i = graphs.begin();
-				i != graphs.end(); ++i, ++isof_set_iter, ++sn_iter) {
+		{
+			// initialize isoforms
 
-			uint rc_size = i->read_constraints.size();
+			vector<IsoformInfo>::iterator isof_set_iter =
+					graph_isoforms.begin();
+			sn_iter = start_nodes.begin();
 
-			// 1 - unsatisfied
-			// 0 - satisfied
-			dynamic_bitset<> satisfied_rc(rc_size);
-			satisfied_rc.set();
+			for (vector<SpliceGraph>::const_iterator i = graphs.begin();
+					i != graphs.end(); ++i, ++isof_set_iter, ++sn_iter) {
 
-			while (satisfied_rc.any()) {
-				uint un_rc = 0; // un-satisfied read constraint index
-				while (satisfied_rc[un_rc] == false) {
-					++un_rc;
-				}
-				satisfied_rc[un_rc] = false;
+				uint rc_size = i->read_constraints.size();
 
-				Isoform isof(boost::num_vertices(i->graph));
-				rand_rc_isof(*i, isof, un_rc, rn);
-				isof_set_iter->insert(pair<Isoform, ldbl>(isof, 0.0L));
+				// 1 - unsatisfied
+				// 0 - satisfied
+				dynamic_bitset<> satisfied_rc(rc_size);
+				satisfied_rc.set();
 
-				for (uint j = 0; j != rc_size; ++j) {
-					if (satisfied_rc[j] == true) {
-						if (isof == (isof | i->read_constraints[j])) {
-							satisfied_rc[j] = false;
+				while (satisfied_rc.any()) {
+					uint un_rc = 0; // un-satisfied read constraint index
+					while (satisfied_rc[un_rc] == false) {
+						++un_rc;
+					}
+					satisfied_rc[un_rc] = false;
+
+					Isoform isof(boost::num_vertices(i->graph));
+					rand_rc_isof(*i, isof, un_rc, rn);
+					isof_set_iter->insert(pair<Isoform, ldbl>(isof, 0.0L));
+
+					for (uint j = 0; j != rc_size; ++j) {
+						if (satisfied_rc[j] == true) {
+							if (isof == (isof | i->read_constraints[j])) {
+								satisfied_rc[j] = false;
+							}
 						}
 					}
+
 				}
 
 			}
@@ -298,7 +305,11 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 			// assign random expression levels according
 			// to a dirichlet distribution
 
-			uint isofs_size = isof_set_iter->size();
+			uint isofs_size = 0;
+			for (isof_set_iter = graph_isoforms.begin();
+					isof_set_iter != graph_isoforms.end(); ++isof_set_iter) {
+				isofs_size += isof_set_iter->size();
+			}
 
 			double *dir_alpha = new double[isofs_size];
 
@@ -310,18 +321,22 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 			delete[] dir_alpha;
 
-			IsoformInfo::iterator cur_isof = isof_set_iter->begin();
-			for (uint i = 0; i != isofs_size; ++i, ++cur_isof) {
-				cur_isof->second = dir_theta[i];
+			uint isof_exp_ind = 0;
+
+			for (isof_set_iter = graph_isoforms.begin();
+					isof_set_iter != graph_isoforms.end(); ++isof_set_iter) {
+
+				for (IsoformInfo::iterator cur_isof = isof_set_iter->begin();
+						cur_isof != isof_set_iter->end(); ++cur_isof) {
+					cur_isof->second = dir_theta[isof_exp_ind];
+					++isof_exp_ind;
+					std::cout << cur_isof->first << " " << cur_isof->second
+							<< std::endl; // TODO:remove
+				}
+
 			}
 
 			delete[] dir_theta;
-
-			for (cur_isof = isof_set_iter->begin();
-					cur_isof != isof_set_iter->end(); ++cur_isof) {
-				std::cout << cur_isof->first << " " << cur_isof->second
-						<< std::endl;
-			}
 
 		}
 
