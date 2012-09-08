@@ -60,6 +60,7 @@ using boost::out_edges;
 using boost::target;
 using boost::edge;
 using _graph_seq_0::IsoformInfo;
+using std::make_pair;
 
 typedef _graph_seq_0::PyGraph GraphInfo;
 
@@ -206,11 +207,12 @@ public:
 		ADD, DEL
 	};
 
-	IsoformAction(Isoform isoform_, Action action_) :
-			isoform(isoform_), action(action_) {
+	IsoformAction(Isoform isoform_, ldbl expr_level_, Action action_) :
+			isoform(isoform_), expr_level(expr_level_), action(action_) {
 	}
 
 	Isoform isoform;
+	ldbl expr_level; // expression level
 	Action action;
 };
 
@@ -294,7 +296,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 					Isoform isof(boost::num_vertices(i->graph));
 					rand_rc_isof(*i, isof, un_rc, rn);
-					isof_set_iter->insert(pair<Isoform, ldbl>(isof, 0.0L));
+					isof_set_iter->insert(make_pair(isof, 0.0L));
 
 					for (uint j = 0; j != rc_size; ++j) {
 						if (satisfied_rc[j] == true) {
@@ -375,7 +377,9 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 					switch (isof_act_iter->action) {
 
 					case IsoformAction::ADD:
-
+						graph_isofs_iter->insert(
+								make_pair(isof_act_iter->isoform,
+										isof_act_iter->expr_level));
 						break;
 
 					case IsoformAction::DEL:
@@ -385,8 +389,10 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 					}
 
 					++isof_act_iter;
+					++graph_isofs_iter;
 
 				}
+
 			}
 
 		}
