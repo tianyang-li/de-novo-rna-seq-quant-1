@@ -244,13 +244,17 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 	for (vector<SpliceGraph>::const_iterator i = graphs.begin();
 			i != graphs.end(); ++i, ++sn_iter) {
+
 		for (pair<DGVertexIter, DGVertexIter> j = boost::vertices(i->graph);
 				j.first != j.second; ++j.first) {
+
 			DGInEdgeIter in_i, in_end;
 			tie(in_i, in_end) = in_edges(*j.first, i->graph);
+
 			if (in_i == in_end) {
 				sn_iter->push_back(*j.first);
 			}
+
 		}
 	}
 
@@ -330,10 +334,10 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 				for (IsoformInfo::iterator cur_isof = isof_set_iter->begin();
 						cur_isof != isof_set_iter->end(); ++cur_isof) {
+
 					cur_isof->second = dir_theta[isof_exp_ind];
 					++isof_exp_ind;
-					std::cout << cur_isof->first << " " << cur_isof->second
-							<< std::endl; // TODO:remove
+
 				}
 
 			}
@@ -345,6 +349,8 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		// main part of MCMC
 		// the real stuff is in @isof_jump
 
+		vector<vector<IsoformInfo> > mcmc_results;
+
 		for (uint runs = 0; runs != max_run; ++runs) {
 			vector<IsoformAction> isof_acts; // for each graph
 
@@ -354,6 +360,8 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 			ldbl accept_prob = std::min(1.0L, accept_prob_blob);
 
 			if (gsl_rng_uniform(rn) <= accept_prob) {
+				mcmc_results.push_back(graph_isoforms);
+
 				// apply @isof_acts to @graph_isoforms
 
 				vector<IsoformAction>::const_iterator isof_act_iter =
