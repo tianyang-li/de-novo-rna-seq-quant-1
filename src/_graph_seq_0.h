@@ -135,7 +135,7 @@ typedef boost::property_map<DirectedGraph, boost::vertex_index_t>::type DGIndexM
 typedef boost::graph_traits<DirectedGraph>::vertex_descriptor DGVertex;
 
 // stores isoform and its corresponding expression level
-typedef boost::unordered_map<Isoform, ldbl, IsoformHash> IsoformInfo;
+typedef boost::unordered_map<Isoform, double, IsoformHash> IsoformInfo;
 
 class SpliceGraph {
 public:
@@ -145,6 +145,7 @@ public:
 	IsoformInfo isoforms;
 	DirectedGraph tc; // transitive closure
 	vector<DGVertex> topo_sort; // topological sort results
+	vector<uint> start_nodes;
 
 	inline void setup() {
 		boost::transitive_closure(graph, tc);

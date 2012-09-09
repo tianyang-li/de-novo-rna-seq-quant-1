@@ -158,6 +158,8 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 
 	vector<_graph_seq_0::SpliceGraph> graphs(py_graphs->size());
 
+	// setup graphs
+
 	graph_id = 0;
 	vector<GraphReads>::const_iterator graph_read = graph_reads.begin();
 	vector<_graph_seq_0::PyGraph>::const_iterator py_graph = py_graphs->begin();

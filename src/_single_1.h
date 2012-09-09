@@ -52,14 +52,17 @@ using _graph_seq_0::ReadInGraph;
 template<>
 class IsoformJump<SingleNodeLoc> {
 public:
-	inline ldbl operator()(vector<GraphInfo> const &graph_info,
+	inline double operator()(vector<GraphInfo> const &graph_info,
 			vector<SpliceGraph> &graphs,
 			vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
 			vector<GraphReads> const &graph_reads,
 			vector<IsoformInfo> &graph_isoforms, gsl_rng *rn,
 			vector<IsoformAction> &isof_acts) {
+
 		return 0;
+
 	}
+
 };
 
 }

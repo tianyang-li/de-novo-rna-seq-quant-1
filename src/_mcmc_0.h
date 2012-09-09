@@ -207,12 +207,12 @@ public:
 		ADD, DEL
 	};
 
-	IsoformAction(Isoform isoform_, ldbl expr_level_, Action action_) :
+	IsoformAction(Isoform isoform_, double expr_level_, Action action_) :
 			isoform(isoform_), expr_level(expr_level_), action(action_) {
 	}
 
 	Isoform isoform;
-	ldbl expr_level; // expression level
+	double expr_level; // expression level
 	Action action;
 };
 
@@ -223,7 +223,7 @@ public:
 template<class RNodeLoc>
 class IsoformJump {
 private:
-	ldbl operator()(vector<GraphInfo> const &graph_info,
+	double operator()(vector<GraphInfo> const &graph_info,
 			vector<SpliceGraph> &graphs,
 			vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 			vector<GraphReads> const &graph_reads,
@@ -334,10 +334,10 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 	for (uint runs = 0; runs != max_run; ++runs) {
 		vector<IsoformAction> isof_acts; // for each graph
 
-		ldbl accept_prob_blob = isof_jump(graph_info, graphs, read_in_graph,
+		double accept_prob_blob = isof_jump(graph_info, graphs, read_in_graph,
 				graph_reads, graph_isoforms, rn, isof_acts);
 
-		ldbl accept_prob = std::min(1.0L, accept_prob_blob);
+		double accept_prob = std::min(1.0, accept_prob_blob);
 
 		if (gsl_rng_uniform(rn) <= accept_prob) {
 			mcmc_results.push_back(graph_isoforms);
