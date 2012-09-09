@@ -233,8 +233,7 @@ private:
 	}
 };
 
-inline void isoform_MCMC_init(vector<GraphInfo> const &graph_info,
-		vector<SpliceGraph> &graphs, gsl_rng *rn,
+inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 		vector<IsoformInfo> &graph_isoforms) {
 
 	vector<IsoformInfo>::iterator isof_set_iter = graph_isoforms.begin();
@@ -327,7 +326,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 		vector<IsoformInfo> graph_isoforms(graphs.size());
 
-		isoform_MCMC_init(graph_info, graphs, rn, graph_isoforms);
+		isoform_MCMC_init(graphs, rn, graph_isoforms);
 
 		// main part of MCMC
 		// the real stuff is in @isof_jump
