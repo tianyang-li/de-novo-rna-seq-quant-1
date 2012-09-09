@@ -318,67 +318,64 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 	// TODO: multiple chains pthread parallelization
 
-	{
+	gsl_rng *rn = gsl_rng_alloc(gsl_rng_mt19937);
 
-		gsl_rng *rn = gsl_rng_alloc(gsl_rng_mt19937);
+	// TODO: seed @rn
 
-		// TODO: seed @rn
+	vector<IsoformInfo> graph_isoforms(graphs.size());
 
-		vector<IsoformInfo> graph_isoforms(graphs.size());
+	isoform_MCMC_init(graphs, rn, graph_isoforms);
 
-		isoform_MCMC_init(graphs, rn, graph_isoforms);
+	// main part of MCMC
+	// the real stuff is in @isof_jump
 
-		// main part of MCMC
-		// the real stuff is in @isof_jump
+	vector<vector<IsoformInfo> > mcmc_results;
 
-		vector<vector<IsoformInfo> > mcmc_results;
+	for (uint runs = 0; runs != max_run; ++runs) {
+		vector<IsoformAction> isof_acts; // for each graph
 
-		for (uint runs = 0; runs != max_run; ++runs) {
-			vector<IsoformAction> isof_acts; // for each graph
+		ldbl accept_prob_blob = isof_jump(graph_info, graphs, read_in_graph,
+				graph_reads, graph_isoforms, rn, isof_acts);
 
-			ldbl accept_prob_blob = isof_jump(graph_info, graphs, read_in_graph,
-					graph_reads, graph_isoforms, rn, isof_acts);
+		ldbl accept_prob = std::min(1.0L, accept_prob_blob);
 
-			ldbl accept_prob = std::min(1.0L, accept_prob_blob);
+		if (gsl_rng_uniform(rn) <= accept_prob) {
+			mcmc_results.push_back(graph_isoforms);
 
-			if (gsl_rng_uniform(rn) <= accept_prob) {
-				mcmc_results.push_back(graph_isoforms);
+			// apply @isof_acts to @graph_isoforms
 
-				// apply @isof_acts to @graph_isoforms
+			vector<IsoformAction>::const_iterator isof_act_iter =
+					isof_acts.begin();
 
-				vector<IsoformAction>::const_iterator isof_act_iter =
-						isof_acts.begin();
+			vector<IsoformInfo>::iterator graph_isofs_iter =
+					graph_isoforms.begin();
 
-				vector<IsoformInfo>::iterator graph_isofs_iter =
-						graph_isoforms.begin();
+			while (isof_act_iter != isof_acts.end()) {
 
-				while (isof_act_iter != isof_acts.end()) {
+				switch (isof_act_iter->action) {
 
-					switch (isof_act_iter->action) {
+				case IsoformAction::ADD:
+					graph_isofs_iter->insert(
+							make_pair(isof_act_iter->isoform,
+									isof_act_iter->expr_level));
+					break;
 
-					case IsoformAction::ADD:
-						graph_isofs_iter->insert(
-								make_pair(isof_act_iter->isoform,
-										isof_act_iter->expr_level));
-						break;
-
-					case IsoformAction::DEL:
-						graph_isofs_iter->erase(isof_act_iter->isoform);
-						break;
-
-					}
-
-					++isof_act_iter;
-					++graph_isofs_iter;
+				case IsoformAction::DEL:
+					graph_isofs_iter->erase(isof_act_iter->isoform);
+					break;
 
 				}
+
+				++isof_act_iter;
+				++graph_isofs_iter;
 
 			}
 
 		}
 
-		gsl_rng_free(rn);
 	}
+
+	gsl_rng_free(rn);
 
 }
 

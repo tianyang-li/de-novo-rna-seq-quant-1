@@ -36,7 +36,9 @@ using _graph_seq_0::ReadIndex;
 inline void setup_graph_rc(_graph_seq_0::SpliceGraph &graph,
 		_graph_seq_0::PyGraph const &py_graph, GraphReads const &graph_read,
 		vector<ReadInGraph<SingleNodeLoc> > &py_reads) {
+
 	// read constraints
+
 	boost::unordered_set<SeqConstraint, _graph_seq_0::SeqConstraintHash> rcs_set;
 
 	for (vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
