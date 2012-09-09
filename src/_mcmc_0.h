@@ -329,8 +329,6 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 	// main part of MCMC
 	// the real stuff is in @isof_jump
 
-	vector<vector<IsoformInfo> > mcmc_results;
-
 	for (uint runs = 0; runs != max_run; ++runs) {
 		vector<IsoformAction> isof_acts; // for each graph
 
@@ -340,7 +338,12 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		double accept_prob = std::min(1.0, accept_prob_blob);
 
 		if (gsl_rng_uniform(rn) <= accept_prob) {
-			mcmc_results.push_back(graph_isoforms);
+			vector<IsoformInfo>::const_iterator graph_isof_iter =
+					graph_isoforms.begin();
+			for (vector<SpliceGraph>::iterator i = graphs.begin();
+					i != graphs.end(); ++i, ++graph_isof_iter) {
+				i->mcmc_results.push_back(*graph_isof_iter);
+			}
 
 			// apply @isof_acts to @graph_isoforms
 

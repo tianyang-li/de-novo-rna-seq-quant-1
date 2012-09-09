@@ -140,17 +140,36 @@ typedef boost::unordered_map<Isoform, double, IsoformHash> IsoformInfo;
 class SpliceGraph {
 public:
 	uint graph_id;
+
 	vector<SeqConstraint> read_constraints;
+
 	DirectedGraph graph;
-	IsoformInfo isoforms;
 	DirectedGraph tc; // transitive closure
 	vector<DGVertex> topo_sort; // topological sort results
+
+	vector<IsoformInfo> mcmc_results;
+
 	vector<uint> start_nodes;
+
+	// whether it's OK or not to start
+	// an isoform at this node
+	vector<bool> vert_start_ok;
+
+	// whether it's OK to pass through this node
+	// calculated from vert_start_ok
+	// by using @get_vert_passable
+	vector<bool> vert_passable;
 
 	inline void setup() {
 		boost::transitive_closure(graph, tc);
 		boost::topological_sort(graph, std::back_inserter(topo_sort));
 		std::reverse(topo_sort.begin(), topo_sort.end());
+	}
+
+	inline void get_vert_passable() {
+		// put whether it's OK to pass through
+		// a vertex by examining @vert_start_ok
+		// using DFS
 	}
 };
 

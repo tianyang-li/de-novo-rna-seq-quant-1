@@ -22,6 +22,7 @@ namespace _graph_seq_0 {
 
 void get_isoform_FASTA(vector<SpliceGraph> const &graphs,
 		vector<PyGraph> const &py_graphs, vector<Fasta> &isoforms) {
+	// TODO: get output in FASTA
 }
 
 }
