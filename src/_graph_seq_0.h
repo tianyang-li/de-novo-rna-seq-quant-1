@@ -147,6 +147,7 @@ public:
 	DirectedGraph tc; // transitive closure
 	vector<DGVertex> topo_sort; // topological sort results
 
+	// TODO: get stuff out of MCMC results
 	vector<IsoformInfo> mcmc_results;
 
 	vector<uint> start_nodes;

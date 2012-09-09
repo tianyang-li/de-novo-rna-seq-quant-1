@@ -271,6 +271,8 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 
 	}
 
+	// TODO: graph contraints given isoforms
+
 	// assign random expression levels according
 	// to a dirichlet distribution
 
@@ -338,6 +340,8 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		double accept_prob = std::min(1.0, accept_prob_blob);
 
 		if (gsl_rng_uniform(rn) <= accept_prob) {
+
+			// save MCMC results
 			vector<IsoformInfo>::const_iterator graph_isof_iter =
 					graph_isoforms.begin();
 			for (vector<SpliceGraph>::iterator i = graphs.begin();
