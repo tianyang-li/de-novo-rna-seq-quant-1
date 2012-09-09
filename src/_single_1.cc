@@ -33,6 +33,62 @@ using std::vector;
 using _graph_seq_0::SeqConstraint;
 using _graph_seq_0::ReadIndex;
 
+inline void setup_graph_rc(_graph_seq_0::SpliceGraph &graph,
+		_graph_seq_0::PyGraph const &py_graph, GraphReads const &graph_read,
+		vector<ReadInGraph<SingleNodeLoc> > &py_reads) {
+	// read constraints
+	boost::unordered_set<SeqConstraint, _graph_seq_0::SeqConstraintHash> rcs_set;
+
+	for (vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
+			i != graph_read.reads.end(); ++i) {
+		SeqConstraint rc(py_graph.nodes.size());
+
+		for (_graph_seq_0::ReadNodeLoc::const_iterator j =
+				py_reads[i->read_id].graph_locs[i->graph_index].locs[i->align_index].begin();
+				j
+						!= py_reads[i->read_id].graph_locs[i->graph_index].locs[i->align_index].end();
+				++j) {
+			rc.set(j->node_id);
+		}
+
+		rcs_set.insert(rc);
+	}
+
+	// read constraints
+	vector<SeqConstraint> rcs_vec;
+
+	for (boost::unordered_set<SeqConstraint, _graph_seq_0::SeqConstraintHash>::const_iterator i =
+			rcs_set.begin(); i != rcs_set.end(); ++i) {
+		rcs_vec.push_back(*i);
+	}
+
+	// build a partial order on read constraints
+	// count in-degree
+	vector<uint> rc_in(rcs_vec.size(), 0);
+
+	for (uint i = 1; i < rcs_vec.size(); ++i) {
+		for (uint j = 0; j < i; ++j) {
+			SeqConstraint ij_or = rcs_vec[i] | rcs_vec[j];
+			if (ij_or == rcs_vec[i]) {
+				rc_in[j] += 1;
+			} else {
+				if (ij_or == rcs_vec[j]) {
+					rc_in[i] += 1;
+				}
+			}
+		}
+	}
+
+	uint rc_id = 0;
+
+	for (vector<uint>::const_iterator i = rc_in.begin(); i != rc_in.end();
+			++i, ++rc_id) {
+		if (*i == 0) {
+			graph.read_constraints.push_back(rcs_vec[rc_id]);
+		}
+	}
+}
+
 inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 		_graph_seq_0::PyGraph const &py_graph, GraphReads const &graph_read,
 		vector<ReadInGraph<SingleNodeLoc> > &py_reads) {
@@ -57,63 +113,12 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 
 	// TODO: fix graph node when segmentation is done
 
+	// TODO: remove low coverage
+
 	graph.setup();
 
-	{
-		// setup read constraints
+	setup_graph_rc(graph, py_graph, graph_read, py_reads);
 
-		// read constraints
-		boost::unordered_set<SeqConstraint, _graph_seq_0::SeqConstraintHash> rcs_set;
-
-		for (vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
-				i != graph_read.reads.end(); ++i) {
-			SeqConstraint rc(py_graph.nodes.size());
-
-			for (_graph_seq_0::ReadNodeLoc::const_iterator j =
-					py_reads[i->read_id].graph_locs[i->graph_index].locs[i->align_index].begin();
-					j
-							!= py_reads[i->read_id].graph_locs[i->graph_index].locs[i->align_index].end();
-					++j) {
-				rc.set(j->node_id);
-			}
-
-			rcs_set.insert(rc);
-		}
-
-		// read constraints
-		vector<SeqConstraint> rcs_vec;
-
-		for (boost::unordered_set<SeqConstraint, _graph_seq_0::SeqConstraintHash>::const_iterator i =
-				rcs_set.begin(); i != rcs_set.end(); ++i) {
-			rcs_vec.push_back(*i);
-		}
-
-		// build a partial order on read constraints
-		// count in-degree
-		vector<uint> rc_in(rcs_vec.size(), 0);
-
-		for (uint i = 1; i < rcs_vec.size(); ++i) {
-			for (uint j = 0; j < i; ++j) {
-				SeqConstraint ij_or = rcs_vec[i] | rcs_vec[j];
-				if (ij_or == rcs_vec[i]) {
-					rc_in[j] += 1;
-				} else {
-					if (ij_or == rcs_vec[j]) {
-						rc_in[i] += 1;
-					}
-				}
-			}
-		}
-
-		uint rc_id = 0;
-
-		for (vector<uint>::const_iterator i = rc_in.begin(); i != rc_in.end();
-				++i, ++rc_id) {
-			if (*i == 0) {
-				graph.read_constraints.push_back(rcs_vec[rc_id]);
-			}
-		}
-	}
 }
 
 void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,

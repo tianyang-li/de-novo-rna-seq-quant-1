@@ -233,32 +233,89 @@ private:
 	}
 };
 
+inline void isoform_MCMC_init(vector<GraphInfo> const &graph_info,
+		vector<SpliceGraph> &graphs, gsl_rng *rn,
+		vector<IsoformInfo> &graph_isoforms) {
+
+	vector<IsoformInfo>::iterator isof_set_iter = graph_isoforms.begin();
+
+	for (vector<SpliceGraph>::const_iterator i = graphs.begin();
+			i != graphs.end(); ++i, ++isof_set_iter) {
+
+		uint rc_size = i->read_constraints.size();
+
+		// 1 - unsatisfied
+		// 0 - satisfied
+		dynamic_bitset<> satisfied_rc(rc_size);
+		satisfied_rc.set();
+
+		while (satisfied_rc.any()) {
+			uint un_rc = 0; // un-satisfied read constraint index
+			while (satisfied_rc[un_rc] == false) {
+				++un_rc;
+			}
+			satisfied_rc[un_rc] = false;
+
+			Isoform isof(boost::num_vertices(i->graph));
+			rand_rc_isof(*i, isof, un_rc, rn);
+			isof_set_iter->insert(make_pair(isof, 0.0L));
+
+			for (uint j = 0; j != rc_size; ++j) {
+				if (satisfied_rc[j] == true) {
+					if (isof == (isof | i->read_constraints[j])) {
+						satisfied_rc[j] = false;
+					}
+				}
+			}
+
+		}
+
+	}
+
+	// assign random expression levels according
+	// to a dirichlet distribution
+
+	uint isofs_size = 0;
+	for (isof_set_iter = graph_isoforms.begin();
+			isof_set_iter != graph_isoforms.end(); ++isof_set_iter) {
+		isofs_size += isof_set_iter->size();
+	}
+
+	double *dir_alpha = new double[isofs_size];
+
+	std::fill(dir_alpha, dir_alpha + isofs_size, 1);
+
+	double *dir_theta = new double[isofs_size];
+
+	gsl_ran_dirichlet(rn, isofs_size, dir_alpha, dir_theta);
+
+	delete[] dir_alpha;
+
+	uint isof_exp_ind = 0;
+
+	for (isof_set_iter = graph_isoforms.begin();
+			isof_set_iter != graph_isoforms.end(); ++isof_set_iter) {
+
+		for (IsoformInfo::iterator cur_isof = isof_set_iter->begin();
+				cur_isof != isof_set_iter->end(); ++cur_isof) {
+
+			cur_isof->second = dir_theta[isof_exp_ind];
+			++isof_exp_ind;
+
+		}
+
+	}
+
+	delete[] dir_theta;
+
+}
+
 template<class RNodeLoc>
 void isoform_main(vector<GraphInfo> const &graph_info,
 		vector<SpliceGraph> &graphs,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads, IsoformJump<RNodeLoc> &isof_jump,
 		uint max_run) {
-
-	// all the nodes with in-dgree == 0
-	vector<vector<uint> > start_nodes(graphs.size());
-	vector<vector<uint> >::iterator sn_iter = start_nodes.begin();
-
-	for (vector<SpliceGraph>::const_iterator i = graphs.begin();
-			i != graphs.end(); ++i, ++sn_iter) {
-
-		for (pair<DGVertexIter, DGVertexIter> j = boost::vertices(i->graph);
-				j.first != j.second; ++j.first) {
-
-			DGInEdgeIter in_i, in_end;
-			tie(in_i, in_end) = in_edges(*j.first, i->graph);
-
-			if (in_i == in_end) {
-				sn_iter->push_back(*j.first);
-			}
-
-		}
-	}
 
 	// TODO: multiple chains pthread parallelization
 
@@ -270,83 +327,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 		vector<IsoformInfo> graph_isoforms(graphs.size());
 
-		{
-			// initialize isoforms
-
-			vector<IsoformInfo>::iterator isof_set_iter =
-					graph_isoforms.begin();
-			sn_iter = start_nodes.begin();
-
-			for (vector<SpliceGraph>::const_iterator i = graphs.begin();
-					i != graphs.end(); ++i, ++isof_set_iter, ++sn_iter) {
-
-				uint rc_size = i->read_constraints.size();
-
-				// 1 - unsatisfied
-				// 0 - satisfied
-				dynamic_bitset<> satisfied_rc(rc_size);
-				satisfied_rc.set();
-
-				while (satisfied_rc.any()) {
-					uint un_rc = 0; // un-satisfied read constraint index
-					while (satisfied_rc[un_rc] == false) {
-						++un_rc;
-					}
-					satisfied_rc[un_rc] = false;
-
-					Isoform isof(boost::num_vertices(i->graph));
-					rand_rc_isof(*i, isof, un_rc, rn);
-					isof_set_iter->insert(make_pair(isof, 0.0L));
-
-					for (uint j = 0; j != rc_size; ++j) {
-						if (satisfied_rc[j] == true) {
-							if (isof == (isof | i->read_constraints[j])) {
-								satisfied_rc[j] = false;
-							}
-						}
-					}
-
-				}
-
-			}
-
-			// assign random expression levels according
-			// to a dirichlet distribution
-
-			uint isofs_size = 0;
-			for (isof_set_iter = graph_isoforms.begin();
-					isof_set_iter != graph_isoforms.end(); ++isof_set_iter) {
-				isofs_size += isof_set_iter->size();
-			}
-
-			double *dir_alpha = new double[isofs_size];
-
-			std::fill(dir_alpha, dir_alpha + isofs_size, 1);
-
-			double *dir_theta = new double[isofs_size];
-
-			gsl_ran_dirichlet(rn, isofs_size, dir_alpha, dir_theta);
-
-			delete[] dir_alpha;
-
-			uint isof_exp_ind = 0;
-
-			for (isof_set_iter = graph_isoforms.begin();
-					isof_set_iter != graph_isoforms.end(); ++isof_set_iter) {
-
-				for (IsoformInfo::iterator cur_isof = isof_set_iter->begin();
-						cur_isof != isof_set_iter->end(); ++cur_isof) {
-
-					cur_isof->second = dir_theta[isof_exp_ind];
-					++isof_exp_ind;
-
-				}
-
-			}
-
-			delete[] dir_theta;
-
-		}
+		isoform_MCMC_init(graph_info, graphs, rn, graph_isoforms);
 
 		// main part of MCMC
 		// the real stuff is in @isof_jump
