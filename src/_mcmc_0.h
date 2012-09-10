@@ -272,6 +272,10 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 	}
 
 	// TODO: graph contraints given isoforms
+	for (vector<SpliceGraph>::iterator i = graphs.begin(); i != graphs.end();
+			++i) {
+		i->vert_start_ok.assign(num_vertices(i->graph), false);
+	}
 
 	// assign random expression levels according
 	// to a dirichlet distribution
