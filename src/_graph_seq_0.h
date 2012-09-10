@@ -88,6 +88,8 @@ public:
 	vector<Node> nodes;
 };
 
+typedef PyGraph GraphInfo;
+
 /*
  * assumes that we already know which graph it is
  */
@@ -165,12 +167,16 @@ public:
 	vector<bool> vert_start_ok;
 
 	// whether it's OK to pass through this node
+	// when choosing a vertex to start
+	// an isoform
+	//
 	// calculated from vert_start_ok
 	// by using @get_vert_passable
 	vector<bool> vert_passable;
 
 	inline void setup() {
 		vert_start_ok.assign(num_vertices(graph), true);
+		vert_passable.assign(num_vertices(graph), false);
 
 		boost::transitive_closure(graph, tc);
 
@@ -207,9 +213,22 @@ private:
 			return;
 		}
 
+		bool passable = false;
 		while (out_i != out_end) {
+
+			uint next_vert = target(*out_i, graph);
+			if (!visited[next_vert]) {
+				_get_vert_passable(next_vert, visited);
+			}
+
+			if (vert_start_ok[next_vert] || vert_passable[next_vert]) {
+				passable = true;
+				break;
+			}
+
 			++out_i;
 		}
+		vert_passable[cur_vert] = passable;
 
 	}
 

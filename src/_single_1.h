@@ -32,6 +32,7 @@ namespace _single_1 {
 using _graph_seq_0::ReadInGraph;
 using _graph_seq_0::ReadGraphLoc;
 using _graph_seq_0::GraphReads;
+using _graph_seq_0::GraphInfo;
 
 typedef _graph_seq_0::ReadNodeLoc SingleNodeLoc;
 

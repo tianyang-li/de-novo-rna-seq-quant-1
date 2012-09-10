@@ -62,13 +62,12 @@ using boost::edge;
 using _graph_seq_0::IsoformMap;
 using std::make_pair;
 
-typedef _graph_seq_0::PyGraph GraphInfo;
-
 using _graph_seq_0::DGVertexIter;
 using _graph_seq_0::DGAdjIter;
 using _graph_seq_0::DGInEdgeIter;
 using _graph_seq_0::DGOutEdgeIter;
 using _graph_seq_0::DGEdge;
+using _graph_seq_0::GraphInfo;
 
 class GSLRngUnifInt {
 public:
@@ -311,6 +310,7 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 		i->get_vert_passable();
 
 		// TODO: remove
+		std::cout << "######\n" << std::endl;
 		for (IsoformMap::const_iterator j = graph_isof_iter->begin();
 				j != graph_isof_iter->end(); ++j) {
 			std::cout << j->first << " ";
@@ -318,6 +318,11 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 		std::cout << std::endl;
 		for (vector<bool>::const_iterator j = i->vert_start_ok.begin();
 				j != i->vert_start_ok.end(); ++j) {
+			std::cout << *j << " ";
+		}
+		std::cout << std::endl;
+		for (vector<bool>::const_iterator j = i->vert_passable.begin();
+				j != i->vert_passable.end(); ++j) {
 			std::cout << *j << " ";
 		}
 		std::cout << std::endl;
