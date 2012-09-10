@@ -59,7 +59,7 @@ using boost::out_degree;
 using boost::out_edges;
 using boost::target;
 using boost::edge;
-using _graph_seq_0::IsoformInfo;
+using _graph_seq_0::IsoformMap;
 using std::make_pair;
 
 typedef _graph_seq_0::PyGraph GraphInfo;
@@ -227,16 +227,20 @@ private:
 			vector<SpliceGraph> &graphs,
 			vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 			vector<GraphReads> const &graph_reads,
-			vector<IsoformInfo> &graph_isoforms, gsl_rng *rn,
+			vector<IsoformMap> &graph_isoforms, gsl_rng *rn,
 			vector<IsoformAction> &isof_acts /* an empty vector */) {
 		return 0;
 	}
 };
 
-inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
-		vector<IsoformInfo> &graph_isoforms) {
+inline bool isof_start_ok(DirectedGraph const &graph, uint vert,
+		IsoformMap const &isofs) {
+}
 
-	vector<IsoformInfo>::iterator isof_set_iter = graph_isoforms.begin();
+inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
+		vector<IsoformMap> &graph_isoforms) {
+
+	vector<IsoformMap>::iterator isof_set_iter = graph_isoforms.begin();
 
 	for (vector<SpliceGraph>::const_iterator i = graphs.begin();
 			i != graphs.end(); ++i, ++isof_set_iter) {
@@ -274,7 +278,11 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 	// TODO: graph contraints given isoforms
 	for (vector<SpliceGraph>::iterator i = graphs.begin(); i != graphs.end();
 			++i) {
-		i->vert_start_ok.assign(num_vertices(i->graph), false);
+		for (vector<uint>::const_iterator j = i->start_nodes.begin();
+				j != i->start_nodes.end(); ++j) {
+		}
+
+		i->get_vert_passable();
 	}
 
 	// assign random expression levels according
@@ -301,7 +309,7 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 	for (isof_set_iter = graph_isoforms.begin();
 			isof_set_iter != graph_isoforms.end(); ++isof_set_iter) {
 
-		for (IsoformInfo::iterator cur_isof = isof_set_iter->begin();
+		for (IsoformMap::iterator cur_isof = isof_set_iter->begin();
 				cur_isof != isof_set_iter->end(); ++cur_isof) {
 
 			cur_isof->second = dir_theta[isof_exp_ind];
@@ -328,7 +336,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 	// TODO: seed @rn
 
-	vector<IsoformInfo> graph_isoforms(graphs.size());
+	vector<IsoformMap> graph_isoforms(graphs.size());
 
 	isoform_MCMC_init(graphs, rn, graph_isoforms);
 
@@ -346,7 +354,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		if (gsl_rng_uniform(rn) <= accept_prob) {
 
 			// save MCMC results
-			vector<IsoformInfo>::const_iterator graph_isof_iter =
+			vector<IsoformMap>::const_iterator graph_isof_iter =
 					graph_isoforms.begin();
 			for (vector<SpliceGraph>::iterator i = graphs.begin();
 					i != graphs.end(); ++i, ++graph_isof_iter) {
@@ -358,7 +366,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 			vector<IsoformAction>::const_iterator isof_act_iter =
 					isof_acts.begin();
 
-			vector<IsoformInfo>::iterator graph_isofs_iter =
+			vector<IsoformMap>::iterator graph_isofs_iter =
 					graph_isoforms.begin();
 
 			while (isof_act_iter != isof_acts.end()) {

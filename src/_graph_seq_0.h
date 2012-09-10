@@ -135,7 +135,7 @@ typedef boost::property_map<DirectedGraph, boost::vertex_index_t>::type DGIndexM
 typedef boost::graph_traits<DirectedGraph>::vertex_descriptor DGVertex;
 
 // stores isoform and its corresponding expression level
-typedef boost::unordered_map<Isoform, double, IsoformHash> IsoformInfo;
+typedef boost::unordered_map<Isoform, double, IsoformHash> IsoformMap;
 
 class SpliceGraph {
 public:
@@ -148,7 +148,7 @@ public:
 	vector<DGVertex> topo_sort; // topological sort results
 
 	// TODO: get stuff out of MCMC results
-	vector<IsoformInfo> mcmc_results;
+	vector<IsoformMap> mcmc_results;
 
 	vector<uint> start_nodes;
 
@@ -162,7 +162,10 @@ public:
 	vector<bool> vert_passable;
 
 	inline void setup() {
+		vert_start_ok.assign(num_vertices(graph), true);
+
 		boost::transitive_closure(graph, tc);
+
 		boost::topological_sort(graph, std::back_inserter(topo_sort));
 		std::reverse(topo_sort.begin(), topo_sort.end());
 	}
