@@ -36,6 +36,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/transitive_closure.hpp>
 #include <boost/graph/topological_sort.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include "_misc_0.h"
 
@@ -50,6 +51,8 @@ namespace _graph_seq_0 {
 
 using std::vector;
 using std::string;
+using boost::num_vertices;
+using boost::out_edges;
 
 /*
  * makes it easy to get graph information from
@@ -131,8 +134,13 @@ typedef boost::adjacency_list<boost::hash_setS, boost::vecS,
 typedef SeqConstraintHash IsoformHash;
 typedef boost::dynamic_bitset<> Isoform;
 typedef boost::unordered_set<Isoform, IsoformHash> IsoformSet;
-typedef boost::property_map<DirectedGraph, boost::vertex_index_t>::type DGIndexMap;
 typedef boost::graph_traits<DirectedGraph>::vertex_descriptor DGVertex;
+
+typedef boost::graph_traits<DirectedGraph>::vertex_iterator DGVertexIter;
+typedef boost::graph_traits<DirectedGraph>::adjacency_iterator DGAdjIter;
+typedef boost::graph_traits<DirectedGraph>::in_edge_iterator DGInEdgeIter;
+typedef boost::graph_traits<DirectedGraph>::out_edge_iterator DGOutEdgeIter;
+typedef boost::graph_traits<DirectedGraph>::edge_descriptor DGEdge;
 
 // stores isoform and its corresponding expression level
 typedef boost::unordered_map<Isoform, double, IsoformHash> IsoformMap;
@@ -174,7 +182,37 @@ public:
 		// put whether it's OK to pass through
 		// a vertex by examining @vert_start_ok
 		// using DFS
+
+		uint graph_size = num_vertices(graph);
+
+		vector<bool> visited(graph_size, false);
+
+		for (uint i = 0; i != graph_size; ++i) {
+			if (!visited[i]) {
+				_get_vert_passable(i, visited);
+			}
+		}
+
 	}
+
+private:
+	inline void _get_vert_passable(uint cur_vert, vector<bool> &visited) {
+		visited[cur_vert] = true;
+
+		DGOutEdgeIter out_i, out_end;
+		tie(out_i, out_end) = out_edges(cur_vert, graph);
+
+		if (out_i == out_end) {
+			vert_passable[cur_vert] = false;
+			return;
+		}
+
+		while (out_i != out_end) {
+			++out_i;
+		}
+
+	}
+
 };
 
 /*

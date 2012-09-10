@@ -64,12 +64,11 @@ using std::make_pair;
 
 typedef _graph_seq_0::PyGraph GraphInfo;
 
-typedef boost::property_map<DirectedGraph, boost::vertex_index_t>::type DGIndexMap;
-typedef boost::graph_traits<DirectedGraph>::vertex_iterator DGVertexIter;
-typedef boost::graph_traits<DirectedGraph>::adjacency_iterator DGAdjIter;
-typedef boost::graph_traits<DirectedGraph>::in_edge_iterator DGInEdgeIter;
-typedef boost::graph_traits<DirectedGraph>::out_edge_iterator DGOutEdgeIter;
-typedef boost::graph_traits<DirectedGraph>::edge_descriptor DGEdge;
+using _graph_seq_0::DGVertexIter;
+using _graph_seq_0::DGAdjIter;
+using _graph_seq_0::DGInEdgeIter;
+using _graph_seq_0::DGOutEdgeIter;
+using _graph_seq_0::DGEdge;
 
 class GSLRngUnifInt {
 public:
@@ -233,8 +232,31 @@ private:
 	}
 };
 
+inline bool _isof_start_ok(DirectedGraph const &graph, uint cur_vert,
+		IsoformMap const &isofs, Isoform &isof) {
+	isof.set(cur_vert);
+
+	if (isofs.find(isof) == isofs.end()) {
+		return true;
+	}
+
+	DGOutEdgeIter out_i, out_end;
+	tie(out_i, out_end) = out_edges(cur_vert, graph);
+
+	while (out_i != out_end) {
+		if (_isof_start_ok(graph, target(*out_i, graph), isofs, isof)) {
+			return true;
+		}
+	}
+
+	return false;
+
+}
+
 inline bool isof_start_ok(DirectedGraph const &graph, uint vert,
 		IsoformMap const &isofs) {
+	Isoform isof(num_vertices(graph));
+	return _isof_start_ok(graph, vert, isofs, isof);
 }
 
 inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
@@ -275,14 +297,31 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 
 	}
 
-	// TODO: graph contraints given isoforms
+	// graph contraints given isoforms
+
+	vector<IsoformMap>::const_iterator graph_isof_iter = graph_isoforms.begin();
 	for (vector<SpliceGraph>::iterator i = graphs.begin(); i != graphs.end();
-			++i) {
+			++i, ++graph_isof_iter) {
 		for (vector<uint>::const_iterator j = i->start_nodes.begin();
 				j != i->start_nodes.end(); ++j) {
+			i->vert_start_ok[*j] = isof_start_ok(i->graph, *j,
+					*graph_isof_iter);
 		}
 
 		i->get_vert_passable();
+
+		// TODO: remove
+		for (IsoformMap::const_iterator j = graph_isof_iter->begin();
+				j != graph_isof_iter->end(); ++j) {
+			std::cout << j->first << " ";
+		}
+		std::cout << std::endl;
+		for (vector<bool>::const_iterator j = i->vert_start_ok.begin();
+				j != i->vert_start_ok.end(); ++j) {
+			std::cout << *j << " ";
+		}
+		std::cout << std::endl;
+
 	}
 
 	// assign random expression levels according
