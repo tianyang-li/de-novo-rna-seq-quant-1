@@ -176,60 +176,11 @@ public:
 
 	inline void setup() {
 		vert_start_ok.assign(num_vertices(graph), true);
-		vert_passable.assign(num_vertices(graph), false);
 
 		boost::transitive_closure(graph, tc);
 
 		boost::topological_sort(graph, std::back_inserter(topo_sort));
 		std::reverse(topo_sort.begin(), topo_sort.end());
-	}
-
-	inline void get_vert_passable() {
-		// put whether it's OK to pass through
-		// a vertex by examining @vert_start_ok
-		// using DFS
-
-		uint graph_size = num_vertices(graph);
-
-		vector<bool> visited(graph_size, false);
-
-		for (uint i = 0; i != graph_size; ++i) {
-			if (!visited[i]) {
-				_get_vert_passable(i, visited);
-			}
-		}
-
-	}
-
-private:
-	inline void _get_vert_passable(uint cur_vert, vector<bool> &visited) {
-		visited[cur_vert] = true;
-
-		DGOutEdgeIter out_i, out_end;
-		tie(out_i, out_end) = out_edges(cur_vert, graph);
-
-		if (out_i == out_end) {
-			vert_passable[cur_vert] = false;
-			return;
-		}
-
-		bool passable = false;
-		while (out_i != out_end) {
-
-			uint next_vert = target(*out_i, graph);
-			if (!visited[next_vert]) {
-				_get_vert_passable(next_vert, visited);
-			}
-
-			if (vert_start_ok[next_vert] || vert_passable[next_vert]) {
-				passable = true;
-				break;
-			}
-
-			++out_i;
-		}
-		vert_passable[cur_vert] = passable;
-
 	}
 
 };

@@ -307,8 +307,6 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 					*graph_isof_iter);
 		}
 
-		i->get_vert_passable();
-
 		// TODO: remove
 		std::cout << "######\n" << std::endl;
 		for (IsoformMap::const_iterator j = graph_isof_iter->begin();
@@ -318,11 +316,6 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 		std::cout << std::endl;
 		for (vector<bool>::const_iterator j = i->vert_start_ok.begin();
 				j != i->vert_start_ok.end(); ++j) {
-			std::cout << *j << " ";
-		}
-		std::cout << std::endl;
-		for (vector<bool>::const_iterator j = i->vert_passable.begin();
-				j != i->vert_passable.end(); ++j) {
 			std::cout << *j << " ";
 		}
 		std::cout << std::endl;
