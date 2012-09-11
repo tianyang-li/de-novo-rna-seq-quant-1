@@ -214,22 +214,6 @@ public:
 	Action action;
 };
 
-// calculate the blob
-// in acceptance probability
-template<class RNodeLoc>
-class IsoformJump {
-public:
-	double operator()(vector<GraphInfo> const &graph_info,
-			vector<SpliceGraph> const &graphs,
-			vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-			vector<GraphReads> const &graph_reads,
-			vector<IsoformMap> &graph_isoforms, gsl_rng *rn,
-			vector<IsoformAction> &isof_acts /* an empty vector */) {
-
-		return 0;
-	}
-};
-
 inline bool _isof_start_ok(DirectedGraph const &graph, uint cur_vert,
 		IsoformMap const &isofs, Isoform &isof) {
 	isof.set(cur_vert);
@@ -360,11 +344,41 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 }
 
 template<class RNodeLoc>
+double isof_add_del_prob();
+
+// calculate the blob
+// in acceptance probability
+template<class RNodeLoc>
+double isof_jump(vector<GraphInfo> const &graph_info,
+		vector<SpliceGraph> const &graphs,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		vector<GraphReads> const &graph_reads,
+		vector<IsoformMap> &graph_isoforms, gsl_rng *rn,
+		vector<IsoformAction> &isof_acts /* an empty vector */) {
+
+	vector<GraphInfo>::const_iterator graph_info_iter = graph_info.begin();
+	vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+	vector<GraphReads>::const_iterator graph_read_iter = graph_reads.begin();
+	vector<IsoformMap>::iterator graph_isoform_iter = graph_isoforms.begin();
+
+	for (uint i = 0; i != graphs.size(); ++i) {
+
+
+
+		++graph_info_iter;
+		++graph_iter;
+		++graph_read_iter;
+		++graph_isoform_iter;
+	}
+
+	return 0;
+}
+
+template<class RNodeLoc>
 void isoform_main(vector<GraphInfo> const &graph_info,
 		vector<SpliceGraph> &graphs,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		vector<GraphReads> const &graph_reads, IsoformJump<RNodeLoc> &isof_jump,
-		uint max_run) {
+		vector<GraphReads> const &graph_reads, uint max_run) {
 
 	// TODO: multiple chains pthread parallelization
 	{
@@ -434,10 +448,11 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 
 		}
 
-		// TODO: put @mcmc_results into @graphs
-
 		gsl_rng_free(rn);
+
 	}
+
+	// TODO: put @mcmc_results into @graphs
 
 }
 
