@@ -381,7 +381,9 @@ double isof_jump(vector<GraphInfo> const &graph_infos,
 				read_in_graph, *graph_isoform_iter);
 
 		if (add_isof_weight == 0 && del_isof_weight == 0) {
+
 			isof_acts.push_back(IsoformAction(IsoformAction::SAME));
+
 		} else {
 			auto_ptr<IsoformAction> action;
 
@@ -425,6 +427,18 @@ double isof_jump(vector<GraphInfo> const &graph_infos,
 					}
 
 				}
+			}
+
+			switch (action->action) {
+
+			case IsoformAction::ADD:
+				break;
+
+			case IsoformAction::DEL:
+				break;
+
+			default:
+				break;
 			}
 		}
 
