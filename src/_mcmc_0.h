@@ -199,8 +199,6 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 // in each graph
 class IsoformAction {
 public:
-	// TODO: allow NOTHING
-	// so that only expression levels are changed?
 	enum Action {
 		ADD, DEL
 	};
@@ -344,9 +342,9 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 }
 
 // return the probability of adding an isoform
-// TODO: no add or del, just change expr levels?
+// del probability is (1 - return_val)
 template<class RNodeLoc>
-double isof_add_del_prob(GraphInfo const &graph_info, SpliceGraph const &graph,
+double isof_add_prob(GraphInfo const &graph_info, SpliceGraph const &graph,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		IsoformMap const &graph_isoform);
 
@@ -366,6 +364,15 @@ double isof_jump(vector<GraphInfo> const &graph_infos,
 	vector<IsoformMap>::iterator graph_isoform_iter = graph_isoforms.begin();
 
 	for (uint i = 0; i != graphs.size(); ++i) {
+		if (gsl_rng_uniform(rn)
+				<= isof_add_prob(*graph_info_iter, *graph_iter, read_in_graph,
+						*graph_isoform_iter)) {
+			// ADD isoform
+
+		} else {
+			// DEL isoform
+
+		}
 
 		++graph_info_iter;
 		++graph_iter;
