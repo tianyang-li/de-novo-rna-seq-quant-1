@@ -61,7 +61,7 @@ using boost::target;
 using boost::edge;
 using _graph_seq_0::IsoformMap;
 using std::make_pair;
-
+using boost::unordered_map;
 using _graph_seq_0::DGVertexIter;
 using _graph_seq_0::DGAdjIter;
 using _graph_seq_0::DGInEdgeIter;
@@ -200,11 +200,13 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 class IsoformAction {
 public:
 	enum Action {
-		ADD, DEL
+		ADD, // add an isoform
+		DEL, // del an isoform
+		SAME, // keep the set of isoforms unchanged
 	};
 
-	IsoformAction(Isoform isoform_, double expr_level_, Action action_) :
-			isoform(isoform_), expr_level(expr_level_), action(action_) {
+	IsoformAction(Action action_) :
+			action(action_) {
 	}
 
 	Isoform isoform;
@@ -341,12 +343,24 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 
 }
 
-// return the probability of adding an isoform
-// del probability is (1 - return_val)
+// get weight for each kind of IsoformAction::Action
+
 template<class RNodeLoc>
-double isof_add_prob(GraphInfo const &graph_info, SpliceGraph const &graph,
+uint add_isof_weight(GraphInfo const &graph_info, SpliceGraph const &graph,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		IsoformMap const &graph_isoform);
+
+template<class RNodeLoc>
+uint del_isof_weight(GraphInfo const &graph_info, SpliceGraph const &graph,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		IsoformMap const &graph_isoform);
+
+template<class RNodeLoc>
+uint same_isof_weight(GraphInfo const &graph_info, SpliceGraph const &graph,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		IsoformMap const &graph_isoform) {
+	return 1;
+}
 
 // calculate the blob
 // in acceptance probability
@@ -364,15 +378,10 @@ double isof_jump(vector<GraphInfo> const &graph_infos,
 	vector<IsoformMap>::iterator graph_isoform_iter = graph_isoforms.begin();
 
 	for (uint i = 0; i != graphs.size(); ++i) {
-		if (gsl_rng_uniform(rn)
-				<= isof_add_prob(*graph_info_iter, *graph_iter, read_in_graph,
-						*graph_isoform_iter)) {
-			// ADD isoform
 
-		} else {
-			// DEL isoform
-
-		}
+		unordered_map<IsoformAction::Action, uint> action_weight_index;
+		uint weight_ind = 0;
+		double action_weights[3];
 
 		++graph_info_iter;
 		++graph_iter;
@@ -380,7 +389,8 @@ double isof_jump(vector<GraphInfo> const &graph_infos,
 		++graph_isoform_iter;
 	}
 
-	return 0;
+	double accept_prob_blob = 1;
+	return accept_prob_blob;
 }
 
 template<class RNodeLoc>
@@ -444,6 +454,9 @@ void isoform_main(vector<GraphInfo> const &graph_infos,
 
 					case IsoformAction::DEL:
 						graph_isofs_iter->erase(isof_act_iter->isoform);
+						break;
+
+					default:
 						break;
 
 					}
