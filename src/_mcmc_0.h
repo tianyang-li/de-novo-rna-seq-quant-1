@@ -374,9 +374,9 @@ double isof_jump(vector<GraphInfo> const &graph_infos,
 
 	for (uint i = 0; i != graphs.size(); ++i) {
 
-		// if val == 3, then its weight is zero
 		uint add_isof_weight = _add_isof_weight(*graph_info_iter, *graph_iter,
 				read_in_graph, *graph_isoform_iter);
+
 		uint del_isof_weight = _del_isof_weight(*graph_info_iter, *graph_iter,
 				read_in_graph, *graph_isoform_iter);
 
@@ -403,6 +403,26 @@ double isof_jump(vector<GraphInfo> const &graph_infos,
 							new IsoformAction(IsoformAction::ADD));
 
 				} else {
+
+					double add_prob = double(add_isof_weight)
+							/ double(add_isof_weight + del_isof_weight);
+
+					if (gsl_rng_uniform(rn) <= add_prob) {
+
+						action_prob = add_prob;
+
+						action = auto_ptr<IsoformAction>(
+								new IsoformAction(IsoformAction::ADD));
+
+					} else {
+
+						action_prob = double(del_isof_weight)
+								/ double(add_isof_weight + del_isof_weight);
+
+						action = auto_ptr<IsoformAction>(
+								new IsoformAction(IsoformAction::DEL));
+
+					}
 
 				}
 			}
