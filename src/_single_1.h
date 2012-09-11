@@ -50,6 +50,22 @@ namespace _mcmc_0 {
 using _single_1::SingleNodeLoc;
 using _graph_seq_0::ReadInGraph;
 
+template<>
+inline uint _add_isof_weight<SingleNodeLoc>(GraphInfo const &graph_info,
+		SpliceGraph const &graph,
+		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
+		IsoformMap const &graph_isoform) {
+	return 1;
+}
+
+template<>
+inline uint _del_isof_weight<SingleNodeLoc>(GraphInfo const &graph_info,
+		SpliceGraph const &graph,
+		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
+		IsoformMap const &graph_isoform) {
+	return 1;
+}
+
 }
 
 #endif // _SINGLE_1_H_

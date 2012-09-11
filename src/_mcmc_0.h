@@ -23,6 +23,7 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <memory>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
@@ -68,6 +69,7 @@ using _graph_seq_0::DGInEdgeIter;
 using _graph_seq_0::DGOutEdgeIter;
 using _graph_seq_0::DGEdge;
 using _graph_seq_0::GraphInfo;
+using std::auto_ptr;
 
 class GSLRngUnifInt {
 public:
@@ -346,21 +348,14 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 // get weight for each kind of IsoformAction::Action
 
 template<class RNodeLoc>
-uint add_isof_weight(GraphInfo const &graph_info, SpliceGraph const &graph,
+uint _add_isof_weight(GraphInfo const &graph_info, SpliceGraph const &graph,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		IsoformMap const &graph_isoform);
 
 template<class RNodeLoc>
-uint del_isof_weight(GraphInfo const &graph_info, SpliceGraph const &graph,
+uint _del_isof_weight(GraphInfo const &graph_info, SpliceGraph const &graph,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		IsoformMap const &graph_isoform);
-
-template<class RNodeLoc>
-uint same_isof_weight(GraphInfo const &graph_info, SpliceGraph const &graph,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		IsoformMap const &graph_isoform) {
-	return 1;
-}
 
 // calculate the blob
 // in acceptance probability
@@ -379,9 +374,33 @@ double isof_jump(vector<GraphInfo> const &graph_infos,
 
 	for (uint i = 0; i != graphs.size(); ++i) {
 
-		unordered_map<IsoformAction::Action, uint> action_weight_index;
-		uint weight_ind = 0;
-		double action_weights[3];
+		// if val == 3, then its weight is zero
+		uint add_isof_weight = _add_isof_weight(*graph_info_iter, *graph_iter,
+				read_in_graph, *graph_isoform_iter);
+		uint del_isof_weight = _del_isof_weight(*graph_info_iter, *graph_iter,
+				read_in_graph, *graph_isoform_iter);
+
+		if (add_isof_weight == 0 && del_isof_weight == 0) {
+			isof_acts.push_back(IsoformAction(IsoformAction::SAME));
+		} else {
+			auto_ptr<IsoformAction> action;
+
+			if (add_isof_weight == 0) {
+
+				action = auto_ptr<IsoformAction>(
+						new IsoformAction(IsoformAction::DEL));
+
+			} else {
+				if (del_isof_weight == 0) {
+
+					action = auto_ptr<IsoformAction>(
+							new IsoformAction(IsoformAction::ADD));
+
+				} else {
+
+				}
+			}
+		}
 
 		++graph_info_iter;
 		++graph_iter;
