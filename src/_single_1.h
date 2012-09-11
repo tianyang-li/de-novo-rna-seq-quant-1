@@ -50,6 +50,14 @@ namespace _mcmc_0 {
 using _single_1::SingleNodeLoc;
 using _graph_seq_0::ReadInGraph;
 
+template<>
+inline double isof_add_del_prob<SingleNodeLoc>(GraphInfo const &graph_info,
+		SpliceGraph const &graph,
+		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
+		IsoformMap const &graph_isoform) {
+	return 0;
+}
+
 }
 
 #endif // _SINGLE_1_H_

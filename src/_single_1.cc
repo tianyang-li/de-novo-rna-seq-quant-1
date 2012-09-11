@@ -173,7 +173,7 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 	}
 
 	// for graph information:
-	//     @py_graphs sequences, seq_len, est_len -> @graph_info
+	//     @py_graphs sequences, seq_len, est_len -> @graph_infos
 	// 	   @graphs structure and isoforms
 
 	// for read to graph alignment information:

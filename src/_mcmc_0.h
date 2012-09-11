@@ -343,27 +343,29 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 
 }
 
+// return the probability of adding an isoform
+// TODO: no add or del, just change expr levels?
 template<class RNodeLoc>
-double isof_add_del_prob();
+double isof_add_del_prob(GraphInfo const &graph_info, SpliceGraph const &graph,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		IsoformMap const &graph_isoform);
 
 // calculate the blob
 // in acceptance probability
 template<class RNodeLoc>
-double isof_jump(vector<GraphInfo> const &graph_info,
+double isof_jump(vector<GraphInfo> const &graph_infos,
 		vector<SpliceGraph> const &graphs,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
 		vector<IsoformMap> &graph_isoforms, gsl_rng *rn,
 		vector<IsoformAction> &isof_acts /* an empty vector */) {
 
-	vector<GraphInfo>::const_iterator graph_info_iter = graph_info.begin();
+	vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
 	vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
 	vector<GraphReads>::const_iterator graph_read_iter = graph_reads.begin();
 	vector<IsoformMap>::iterator graph_isoform_iter = graph_isoforms.begin();
 
 	for (uint i = 0; i != graphs.size(); ++i) {
-
-
 
 		++graph_info_iter;
 		++graph_iter;
@@ -375,7 +377,7 @@ double isof_jump(vector<GraphInfo> const &graph_info,
 }
 
 template<class RNodeLoc>
-void isoform_main(vector<GraphInfo> const &graph_info,
+void isoform_main(vector<GraphInfo> const &graph_infos,
 		vector<SpliceGraph> &graphs,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads, uint max_run) {
@@ -399,7 +401,7 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		for (uint runs = 0; runs != max_run; ++runs) {
 			vector<IsoformAction> isof_acts; // for each graph
 
-			double accept_prob_blob = isof_jump(graph_info, graphs,
+			double accept_prob_blob = isof_jump(graph_infos, graphs,
 					read_in_graph, graph_reads, graph_isoforms, rn, isof_acts);
 
 			double accept_prob = std::min(1.0, accept_prob_blob);

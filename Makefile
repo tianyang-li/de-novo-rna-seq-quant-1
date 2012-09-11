@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wall -fPIC -Wextra -ggdb -std=c++0x
+CFLAGS = -Wall -fPIC -Wextra -ggdb 
 AR = ar
 INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0
 
