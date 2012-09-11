@@ -29,6 +29,7 @@
 #include <cstddef>
 #include <iterator>
 #include <algorithm>
+#include <utility>
 #include <boost/functional/hash.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -181,6 +182,10 @@ public:
 
 		boost::topological_sort(graph, std::back_inserter(topo_sort));
 		std::reverse(topo_sort.begin(), topo_sort.end());
+	}
+
+	inline void get_passable_edges() {
+		// TODO:
 	}
 
 };

@@ -50,22 +50,6 @@ namespace _mcmc_0 {
 using _single_1::SingleNodeLoc;
 using _graph_seq_0::ReadInGraph;
 
-template<>
-class IsoformJump<SingleNodeLoc> {
-public:
-	inline double operator()(vector<GraphInfo> const &graph_info,
-			vector<SpliceGraph> &graphs,
-			vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
-			vector<GraphReads> const &graph_reads,
-			vector<IsoformMap> &graph_isoforms, gsl_rng *rn,
-			vector<IsoformAction> &isof_acts) {
-
-		return 0;
-
-	}
-
-};
-
 }
 
 #endif // _SINGLE_1_H_

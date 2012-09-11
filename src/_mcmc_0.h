@@ -216,17 +216,16 @@ public:
 
 // calculate the blob
 // in acceptance probability
-// IMPORTANT: cannot be used without
-// specializing
 template<class RNodeLoc>
 class IsoformJump {
-private:
+public:
 	double operator()(vector<GraphInfo> const &graph_info,
-			vector<SpliceGraph> &graphs,
+			vector<SpliceGraph> const &graphs,
 			vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 			vector<GraphReads> const &graph_reads,
 			vector<IsoformMap> &graph_isoforms, gsl_rng *rn,
 			vector<IsoformAction> &isof_acts /* an empty vector */) {
+
 		return 0;
 	}
 };
@@ -368,70 +367,77 @@ void isoform_main(vector<GraphInfo> const &graph_info,
 		uint max_run) {
 
 	// TODO: multiple chains pthread parallelization
+	{
 
-	gsl_rng *rn = gsl_rng_alloc(gsl_rng_mt19937);
+		gsl_rng *rn = gsl_rng_alloc(gsl_rng_mt19937);
 
-	// TODO: seed @rn
+		// TODO: seed @rn
 
-	vector<IsoformMap> graph_isoforms(graphs.size());
+		vector<IsoformMap> graph_isoforms(graphs.size());
 
-	isoform_MCMC_init(graphs, rn, graph_isoforms);
+		isoform_MCMC_init(graphs, rn, graph_isoforms);
 
-	// main part of MCMC
-	// the real stuff is in @isof_jump
+		// main part of MCMC
+		// the real stuff is in @isof_jump
 
-	for (uint runs = 0; runs != max_run; ++runs) {
-		vector<IsoformAction> isof_acts; // for each graph
+		vector<vector<IsoformMap> > mcmc_results;
 
-		double accept_prob_blob = isof_jump(graph_info, graphs, read_in_graph,
-				graph_reads, graph_isoforms, rn, isof_acts);
+		for (uint runs = 0; runs != max_run; ++runs) {
+			vector<IsoformAction> isof_acts; // for each graph
 
-		double accept_prob = std::min(1.0, accept_prob_blob);
+			double accept_prob_blob = isof_jump(graph_info, graphs,
+					read_in_graph, graph_reads, graph_isoforms, rn, isof_acts);
 
-		if (gsl_rng_uniform(rn) <= accept_prob) {
+			double accept_prob = std::min(1.0, accept_prob_blob);
 
-			// save MCMC results
-			vector<IsoformMap>::const_iterator graph_isof_iter =
-					graph_isoforms.begin();
-			for (vector<SpliceGraph>::iterator i = graphs.begin();
-					i != graphs.end(); ++i, ++graph_isof_iter) {
-				i->mcmc_results.push_back(*graph_isof_iter);
-			}
+			if (gsl_rng_uniform(rn) <= accept_prob) {
 
-			// apply @isof_acts to @graph_isoforms
-
-			vector<IsoformAction>::const_iterator isof_act_iter =
-					isof_acts.begin();
-
-			vector<IsoformMap>::iterator graph_isofs_iter =
-					graph_isoforms.begin();
-
-			while (isof_act_iter != isof_acts.end()) {
-
-				switch (isof_act_iter->action) {
-
-				case IsoformAction::ADD:
-					graph_isofs_iter->insert(
-							make_pair(isof_act_iter->isoform,
-									isof_act_iter->expr_level));
-					break;
-
-				case IsoformAction::DEL:
-					graph_isofs_iter->erase(isof_act_iter->isoform);
-					break;
-
+				// save MCMC results
+				vector<IsoformMap>::const_iterator graph_isof_iter =
+						graph_isoforms.begin();
+				for (vector<vector<IsoformMap> >::iterator i =
+						mcmc_results.begin(); i != mcmc_results.end();
+						++i, ++graph_isof_iter) {
+					i->push_back(*graph_isof_iter);
 				}
 
-				++isof_act_iter;
-				++graph_isofs_iter;
+				// apply @isof_acts to @graph_isoforms
+
+				vector<IsoformAction>::const_iterator isof_act_iter =
+						isof_acts.begin();
+
+				vector<IsoformMap>::iterator graph_isofs_iter =
+						graph_isoforms.begin();
+
+				while (isof_act_iter != isof_acts.end()) {
+
+					switch (isof_act_iter->action) {
+
+					case IsoformAction::ADD:
+						graph_isofs_iter->insert(
+								make_pair(isof_act_iter->isoform,
+										isof_act_iter->expr_level));
+						break;
+
+					case IsoformAction::DEL:
+						graph_isofs_iter->erase(isof_act_iter->isoform);
+						break;
+
+					}
+
+					++isof_act_iter;
+					++graph_isofs_iter;
+
+				}
 
 			}
 
 		}
 
-	}
+		// TODO: put @mcmc_results into @graphs
 
-	gsl_rng_free(rn);
+		gsl_rng_free(rn);
+	}
 
 }
 
