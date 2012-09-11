@@ -385,13 +385,19 @@ double isof_jump(vector<GraphInfo> const &graph_infos,
 		} else {
 			auto_ptr<IsoformAction> action;
 
+			double action_prob;
+
 			if (add_isof_weight == 0) {
+
+				action_prob = 1.0;
 
 				action = auto_ptr<IsoformAction>(
 						new IsoformAction(IsoformAction::DEL));
 
 			} else {
 				if (del_isof_weight == 0) {
+
+					action_prob = 1.0;
 
 					action = auto_ptr<IsoformAction>(
 							new IsoformAction(IsoformAction::ADD));
