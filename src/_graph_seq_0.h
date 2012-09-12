@@ -252,4 +252,3 @@ inline bool check_isoform_rc(Isoform const &isoform,
 }
 
 #endif // _GRAPH_SEQ_0_H_
-
