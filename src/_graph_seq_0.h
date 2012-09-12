@@ -243,12 +243,6 @@ public:
 void get_isoform_FASTA(vector<SpliceGraph> const &graphs,
 		vector<PyGraph> const &py_graphs, vector<Fasta> &isoforms);
 
-// check isoform constraint
-inline bool check_isoform_rc(Isoform const &isoform,
-		SeqConstraint const &rc /* read constraints */) {
-	return isoform == (isoform | rc);
-}
-
 }
 
 #endif // _GRAPH_SEQ_0_H_

@@ -126,6 +126,7 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 		vector<ReadInGraph<SingleNodeLoc> > *py_reads,
 		vector<_graph_seq_0::Fasta> *isoforms, uint max_run) {
+	std::cout << "enter extension" << std::endl; // TODO: remove
 
 	// the reads that a graph has
 	vector<GraphReads> graph_reads(py_graphs->size());
@@ -187,6 +188,8 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 			graph_reads, max_run);
 
 	_graph_seq_0::get_isoform_FASTA(graphs, *py_graphs, *isoforms);
+
+	std::cout << "exit extension" << std::endl; // TODO: remove
 }
 
 }

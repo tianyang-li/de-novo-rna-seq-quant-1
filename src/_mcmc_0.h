@@ -45,7 +45,6 @@ using _graph_seq_0::SpliceGraph;
 using _graph_seq_0::GraphReads;
 using std::vector;
 using _graph_seq_0::ReadInGraph;
-using _graph_seq_0::check_isoform_rc;
 using _graph_seq_0::IsoformSet;
 using _graph_seq_0::Isoform;
 using _graph_seq_0::DirectedGraph;
@@ -196,26 +195,6 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 	}
 }
 
-// in each step of MCMC
-// shows what isoforms are added and what isoforms are removed
-// in each graph
-class IsoformAction {
-public:
-	enum Action {
-		ADD, // add an isoform
-		DEL, // del an isoform
-		SAME, // keep the set of isoforms unchanged
-	};
-
-	IsoformAction(Action action_) :
-			action(action_) {
-	}
-
-	Isoform isoform;
-	double expr_level; // expression level
-	Action action;
-};
-
 inline bool _isof_start_ok(DirectedGraph const &graph, uint cur_vert,
 		IsoformMap const &isofs, Isoform &isof) {
 	isof.set(cur_vert);
@@ -345,114 +324,10 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 
 }
 
-// get weight for each kind of IsoformAction::Action
-
 template<class RNodeLoc>
-uint _add_isof_weight(GraphInfo const &graph_info, SpliceGraph const &graph,
+double get_graph_weight(SpliceGraph const &graph, IsoformMap const &graph_isof,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		IsoformMap const &graph_isoform);
-
-template<class RNodeLoc>
-uint _del_isof_weight(GraphInfo const &graph_info, SpliceGraph const &graph,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		IsoformMap const &graph_isoform);
-
-// calculate the blob
-// in acceptance probability
-template<class RNodeLoc>
-double isof_jump(vector<GraphInfo> const &graph_infos,
-		vector<SpliceGraph> const &graphs,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		vector<GraphReads> const &graph_reads,
-		vector<IsoformMap> &graph_isoforms, gsl_rng *rn,
-		vector<IsoformAction> &isof_acts /* an empty vector */) {
-
-	vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
-	vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
-	vector<GraphReads>::const_iterator graph_read_iter = graph_reads.begin();
-	vector<IsoformMap>::iterator graph_isoform_iter = graph_isoforms.begin();
-
-	double accept_prob_blob = 1;
-
-	for (uint i = 0; i != graphs.size(); ++i) {
-
-		uint add_isof_weight = _add_isof_weight(*graph_info_iter, *graph_iter,
-				read_in_graph, *graph_isoform_iter);
-
-		uint del_isof_weight = _del_isof_weight(*graph_info_iter, *graph_iter,
-				read_in_graph, *graph_isoform_iter);
-
-		if (add_isof_weight == 0 && del_isof_weight == 0) {
-
-			isof_acts.push_back(IsoformAction(IsoformAction::SAME));
-
-		} else {
-			auto_ptr<IsoformAction> action;
-
-			double action_prob;
-
-			if (add_isof_weight == 0) {
-
-				action_prob = 1.0;
-
-				action = auto_ptr<IsoformAction>(
-						new IsoformAction(IsoformAction::DEL));
-
-			} else {
-				if (del_isof_weight == 0) {
-
-					action_prob = 1.0;
-
-					action = auto_ptr<IsoformAction>(
-							new IsoformAction(IsoformAction::ADD));
-
-				} else {
-
-					double add_prob = double(add_isof_weight)
-							/ double(add_isof_weight + del_isof_weight);
-
-					if (gsl_rng_uniform(rn) <= add_prob) {
-
-						action_prob = add_prob;
-
-						action = auto_ptr<IsoformAction>(
-								new IsoformAction(IsoformAction::ADD));
-
-					} else {
-
-						action_prob = double(del_isof_weight)
-								/ double(add_isof_weight + del_isof_weight);
-
-						action = auto_ptr<IsoformAction>(
-								new IsoformAction(IsoformAction::DEL));
-
-					}
-
-				}
-			}
-
-			switch (action->action) {
-
-			case IsoformAction::ADD:
-				break;
-
-			case IsoformAction::DEL:
-				break;
-
-			default:
-				break;
-			}
-		}
-
-		++graph_info_iter;
-		++graph_iter;
-		++graph_read_iter;
-		++graph_isoform_iter;
-	}
-
-	return accept_prob_blob;
-
-}
+		GraphReads const &graph_read);
 
 template<class RNodeLoc>
 void isoform_main(vector<GraphInfo> const &graph_infos,
@@ -476,66 +351,49 @@ void isoform_main(vector<GraphInfo> const &graph_infos,
 
 		vector<vector<IsoformMap> > mcmc_results;
 
+		// number of graphs
+		uint graph_num = graphs.size();
+
+		// used to choose a graph to
+		// modify the graph's isoform set
+		double *graph_weights = new double[graph_num];
+
 		for (uint runs = 0; runs != max_run; ++runs) {
-			vector<IsoformAction> isof_acts; // for each graph
 
-			double accept_prob_blob = isof_jump(graph_infos, graphs,
-					read_in_graph, graph_reads, graph_isoforms, rn, isof_acts);
+			uint graph_weight_ind = 0;
+			vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+			vector<IsoformMap>::const_iterator graph_isof_iter =
+					graph_isoforms.begin();
+			vector<GraphReads>::const_iterator graph_read_iter =
+					graph_reads.begin();
 
-			double accept_prob = std::min(1.0, accept_prob_blob);
+			while (graph_weight_ind != graph_num) {
 
-			if (gsl_rng_uniform(rn) <= accept_prob) {
+				graph_weights[graph_weight_ind] = get_graph_weight(*graph_iter,
+						*graph_isof_iter, read_in_graph, *graph_read_iter);
 
-				// save MCMC results
-				vector<IsoformMap>::const_iterator graph_isof_iter =
-						graph_isoforms.begin();
-				for (vector<vector<IsoformMap> >::iterator i =
-						mcmc_results.begin(); i != mcmc_results.end();
-						++i, ++graph_isof_iter) {
-					i->push_back(*graph_isof_iter);
-				}
-
-				// apply @isof_acts to @graph_isoforms
-
-				vector<IsoformAction>::const_iterator isof_act_iter =
-						isof_acts.begin();
-
-				vector<IsoformMap>::iterator graph_isofs_iter =
-						graph_isoforms.begin();
-
-				while (isof_act_iter != isof_acts.end()) {
-
-					switch (isof_act_iter->action) {
-
-					case IsoformAction::ADD:
-						graph_isofs_iter->insert(
-								make_pair(isof_act_iter->isoform,
-										isof_act_iter->expr_level));
-						break;
-
-					case IsoformAction::DEL:
-						graph_isofs_iter->erase(isof_act_iter->isoform);
-						break;
-
-					default:
-						break;
-
-					}
-
-					++isof_act_iter;
-					++graph_isofs_iter;
-
-				}
-
+				++graph_weight_ind;
+				++graph_iter;
+				++graph_isof_iter;
+				++graph_read_iter;
 			}
 
+			gsl_ran_discrete_t *choose_graph = gsl_ran_discrete_preproc(
+					graph_num, graph_weights);
+
+			uint chosen_graph_ind = gsl_ran_discrete(rn, choose_graph);
+
+			gsl_ran_discrete_free(choose_graph);
+
 		}
+
+		delete[] graph_weights;
 
 		gsl_rng_free(rn);
 
 	}
 
-	// TODO: put @mcmc_results into @graphs
+// TODO: put @mcmc_results into @graphs
 
 }
 
