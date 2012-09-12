@@ -385,6 +385,13 @@ void isoform_main(vector<GraphInfo> const &graph_infos,
 
 			gsl_ran_discrete_free(choose_graph);
 
+			double chosen_graph_amount = 0;
+			for (IsoformMap::const_iterator i =
+					graph_isoforms[chosen_graph_ind].begin();
+					i != graph_isoforms[chosen_graph_ind].end(); ++i) {
+				chosen_graph_amount += i->second;
+			}
+
 		}
 
 		delete[] graph_weights;
