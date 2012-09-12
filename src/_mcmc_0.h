@@ -372,6 +372,8 @@ double isof_jump(vector<GraphInfo> const &graph_infos,
 	vector<GraphReads>::const_iterator graph_read_iter = graph_reads.begin();
 	vector<IsoformMap>::iterator graph_isoform_iter = graph_isoforms.begin();
 
+	double accept_prob_blob = 1;
+
 	for (uint i = 0; i != graphs.size(); ++i) {
 
 		uint add_isof_weight = _add_isof_weight(*graph_info_iter, *graph_iter,
@@ -448,8 +450,8 @@ double isof_jump(vector<GraphInfo> const &graph_infos,
 		++graph_isoform_iter;
 	}
 
-	double accept_prob_blob = 1;
 	return accept_prob_blob;
+
 }
 
 template<class RNodeLoc>
