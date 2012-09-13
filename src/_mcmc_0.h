@@ -338,6 +338,7 @@ void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
 		double * const dir_graph_weights) {
+	// TODO: test this
 
 	// used to update expression value
 	// of each graph
@@ -351,13 +352,16 @@ void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 
 	uint graph_num = graphs.size();
 
-	double const kDirGraphWeightInit = 1.0;
-	fill(dir_graph_weights, dir_graph_weights + graph_num, kDirGraphWeightInit);
+	// initial weight a graph gets
+	double const kGraphWeightInit = 1.0;
+	fill(dir_graph_weights, dir_graph_weights + graph_num, kGraphWeightInit);
 
 	vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
 	vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
 	vector<GraphReads>::const_iterator graph_read_iter = graph_reads.begin();
 	uint cur_graph = 0;
+
+	double tot_unique_weight = double(graph_num) * kGraphWeightInit;
 
 	while (cur_graph != graph_num) {
 
@@ -367,11 +371,36 @@ void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 			graph_len += i->est_len;
 		}
 
+		// get initial weight for unique reads
 		for (vector<ReadIndex>::const_iterator i =
 				graph_read_iter->reads.begin();
 				i != graph_read_iter->reads.end(); ++i) {
+
 			if (i->get_align_num(read_in_graph) == 1) {
+				// weight of a unique read
+				double const kUniqueWeight = 1.0;
+				dir_graph_weights[cur_graph] += kUniqueWeight;
+				tot_unique_weight += kUniqueWeight;
 			}
+
+		}
+
+		// adjust weight for multi-reads
+		for (vector<ReadIndex>::const_iterator i =
+				graph_read_iter->reads.begin();
+				i != graph_read_iter->reads.end(); ++i) {
+
+			uint align_num = i->get_align_num(read_in_graph);
+
+			if (align_num != 1) {
+				// weight of a unique read
+				double const kMultiWeight = 1.0;
+				double unique_weight = dir_graph_weights[cur_graph];
+				dir_graph_weights[cur_graph] +=
+						(kMultiWeight * double(align_num) * unique_weight
+								/ tot_unique_weight);
+			}
+
 		}
 
 		++cur_graph;
