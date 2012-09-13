@@ -300,11 +300,11 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 		isofs_size += isof_set_iter->size();
 	}
 
-	double* dir_alpha = new double[isofs_size];
+	double *dir_alpha = new double[isofs_size];
 
 	fill(dir_alpha, dir_alpha + isofs_size, 1);
 
-	double* dir_theta = new double[isofs_size];
+	double *dir_theta = new double[isofs_size];
 
 	gsl_ran_dirichlet(rn, isofs_size, dir_alpha, dir_theta);
 
@@ -352,7 +352,7 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		vector<SpliceGraph> const &graphs,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
-		double* const dir_graph_weights) {
+		double * const dir_graph_weights) {
 	// TODO: test this
 
 	// TODO: remove
@@ -444,7 +444,7 @@ inline uint choose_graph_to_mod(gsl_rng *rn, vector<SpliceGraph> const &graphs,
 		vector<IsoformMap> const &graph_isoforms,
 		vector<GraphReads> const &graph_reads,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		double* const graph_weights) {
+		double * const graph_weights) {
 
 	uint graph_weight_ind = 0;
 	vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
@@ -475,7 +475,7 @@ inline uint choose_graph_to_mod(gsl_rng *rn, vector<SpliceGraph> const &graphs,
 }
 
 inline void update_isof_expr_val(vector<IsoformMap> &graph_isoforms,
-		double* const graph_expr_vals, double* const new_graph_expr_vals) {
+		double * const graph_expr_vals, double * const new_graph_expr_vals) {
 
 	uint graph_ind = 0;
 
@@ -517,7 +517,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 		vector<IsoformMap> graph_isoforms(graphs.size());
 
-		double* graph_expr_vals = new double[graph_num];
+		double *graph_expr_vals = new double[graph_num];
 
 		isoform_MCMC_init(graphs, rn, graph_isoforms, graph_expr_vals);
 
@@ -528,9 +528,9 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 		// used to choose a graph to
 		// modify the graph's isoform set
-		double* graph_weights = new double[graph_num];
+		double *graph_weights = new double[graph_num];
 
-		double* new_graph_expr_vals = new double[graph_num];
+		double *new_graph_expr_vals = new double[graph_num];
 
 		for (uint runs = 0; runs != max_run; ++runs) {
 
