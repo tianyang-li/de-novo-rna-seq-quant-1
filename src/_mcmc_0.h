@@ -227,6 +227,8 @@ inline bool isof_start_ok(DirectedGraph const &graph, uint vert,
 
 inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 		vector<IsoformMap> &graph_isoforms) {
+	// TODO: remove
+	std::cout << "enter isoform_MCMC_init\n";
 
 	vector<IsoformMap>::iterator isof_set_iter = graph_isoforms.begin();
 
@@ -325,6 +327,9 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 
 	delete[] dir_theta;
 
+	// TODO: remove
+	std::cout << "exit isoform_MCMC_init\n";
+
 }
 
 template<class RNodeLoc>
@@ -339,6 +344,9 @@ void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		vector<GraphReads> const &graph_reads,
 		double * const dir_graph_weights) {
 	// TODO: test this
+
+	// TODO: remove
+	std::cout << "enter get_dir_graph_weights\n";
 
 	// used to update expression value
 	// of each graph
@@ -409,6 +417,16 @@ void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		++graph_read_iter;
 	}
 
+	for (uint i = 0; i != graph_num; ++i) {
+		dir_graph_weights[i] /= 8.0;
+	}
+
+	// TODO: remove
+	for (uint i = 0; i != graph_num; ++i) {
+		std::cout << dir_graph_weights[i] << " ";
+	}
+	std::cout << std::endl;
+	std::cout << "exit get_dir_graph_weights\n";
 }
 
 template<class RNodeLoc>
