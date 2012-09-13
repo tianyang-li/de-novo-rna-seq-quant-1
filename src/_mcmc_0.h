@@ -330,10 +330,33 @@ double get_graph_weight(SpliceGraph const &graph, IsoformMap const &graph_isof,
 		GraphReads const &graph_read);
 
 template<class RNodeLoc>
+void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
+		vector<SpliceGraph> const &graphs,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		vector<GraphReads> const &graph_reads,
+		double * const dir_graph_weights) {
+	// based on the method used in this paper
+	//
+	// Ali Mortazavi, Brian A. Williams, Kenneth McCue, Lorian Schaeffer,
+	// and Barbara Wold. Mapping and quantifying mammalian
+	// transcriptomes by RNA-seq. Nature Methods, 5(7):621–628, May 2008.
+}
+
+template<class RNodeLoc>
 void isoform_main(vector<GraphInfo> const &graph_infos,
 		vector<SpliceGraph> &graphs,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads, uint max_run) {
+
+	// number of graphs
+	uint graph_num = graphs.size();
+
+	// used to update expression value
+	// of each graph
+	double *dir_graph_weights = new double[graph_num];
+
+	get_dir_graph_weights(graph_infos, graphs, read_in_graph, graph_reads,
+			dir_graph_weights);
 
 	// TODO: multiple chains pthread parallelization
 	{
@@ -350,9 +373,6 @@ void isoform_main(vector<GraphInfo> const &graph_infos,
 		// the real stuff is in @isof_jump
 
 		vector<vector<IsoformMap> > mcmc_results;
-
-		// number of graphs
-		uint graph_num = graphs.size();
 
 		// used to choose a graph to
 		// modify the graph's isoform set
@@ -385,11 +405,11 @@ void isoform_main(vector<GraphInfo> const &graph_infos,
 
 			gsl_ran_discrete_free(choose_graph);
 
-			double chosen_graph_amount = 0;
-			for (IsoformMap::const_iterator i =
-					graph_isoforms[chosen_graph_ind].begin();
-					i != graph_isoforms[chosen_graph_ind].end(); ++i) {
-				chosen_graph_amount += i->second;
+			uint tot_isof_num = 0;
+			for (graph_isof_iter = graph_isoforms.begin();
+					graph_isof_iter != graph_isoforms.end();
+					++graph_isof_iter) {
+				tot_isof_num += graph_isof_iter->size();
 			}
 
 		}
@@ -400,7 +420,9 @@ void isoform_main(vector<GraphInfo> const &graph_infos,
 
 	}
 
-// TODO: put @mcmc_results into @graphs
+	delete[] dir_graph_weights;
+
+	// TODO: put @mcmc_results into @graphs
 
 }
 
