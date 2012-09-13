@@ -69,6 +69,8 @@ using _graph_seq_0::DGOutEdgeIter;
 using _graph_seq_0::DGEdge;
 using _graph_seq_0::GraphInfo;
 using std::auto_ptr;
+using _graph_seq_0::Node;
+using std::fill;
 
 class GSLRngUnifInt {
 public:
@@ -297,7 +299,7 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 
 	double *dir_alpha = new double[isofs_size];
 
-	std::fill(dir_alpha, dir_alpha + isofs_size, 1);
+	fill(dir_alpha, dir_alpha + isofs_size, 1);
 
 	double *dir_theta = new double[isofs_size];
 
@@ -336,20 +338,32 @@ void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		vector<GraphReads> const &graph_reads,
 		double * const dir_graph_weights) {
 
+	// used to update expression value
+	// of each graph
+	// using a dirichlet distribution
+	//
 	// based on the method used in this paper
 	//
 	// Ali Mortazavi, Brian A. Williams, Kenneth McCue, Lorian Schaeffer,
 	// and Barbara Wold. Mapping and quantifying mammalian
 	// transcriptomes by RNA-seq. Nature Methods, 5(7):621–628, May 2008.
 
+	uint graph_num = graphs.size();
+
+	fill(dir_graph_weights, dir_graph_weights + graph_num, 1.0);
+
 	vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
 	vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
 	vector<GraphReads>::const_iterator graph_read_iter = graph_reads.begin();
 	uint cur_graph = 0;
 
-	uint graph_num = graphs.size();
-
 	while (cur_graph != graph_num) {
+
+		uint graph_len = 0;
+		for (vector<Node>::const_iterator i = graph_info_iter->nodes.begin();
+				i != graph_info_iter->nodes.end(); ++i) {
+			graph_len += i->est_len;
+		}
 
 		++cur_graph;
 		++graph_iter;
@@ -370,6 +384,7 @@ void isoform_main(vector<GraphInfo> const &graph_infos,
 
 	// used to update expression value
 	// of each graph
+	// using a dirichlet distribution
 	double *dir_graph_weights = new double[graph_num];
 
 	get_dir_graph_weights(graph_infos, graphs, read_in_graph, graph_reads,
