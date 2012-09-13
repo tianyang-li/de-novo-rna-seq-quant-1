@@ -56,6 +56,7 @@ inline double get_graph_weight<SingleNodeLoc>(SpliceGraph const &graph,
 		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
 		GraphReads const &graph_read) {
 
+	//TODO
 	return 0;
 
 }

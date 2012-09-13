@@ -201,7 +201,9 @@ public:
 	}
 
 	uint graph_id;
-	std::vector<RNodeLoc> locs;
+
+	// distinct location(s) of the read in the graph
+	vector<RNodeLoc> locs;
 };
 
 template<class RNodeLoc>
@@ -211,7 +213,9 @@ public:
 	}
 
 	uint read_id;
-	std::vector<ReadGraphLoc<RNodeLoc> > graph_locs;
+
+	// graphs that contain the read
+	vector<ReadGraphLoc<RNodeLoc> > graph_locs;
 };
 
 /*
@@ -229,6 +233,27 @@ public:
 	uint read_id;
 	uint graph_index;
 	uint align_index;
+
+	template<class RNodeLoc>
+	inline uint get_align_num(
+			vector<ReadInGraph<RNodeLoc> > const &read_in_graph) const {
+		uint align_num = 0;
+
+		ReadInGraph<RNodeLoc> const &cur_read_in_graph = read_in_graph[read_id];
+
+		for (typename vector<ReadGraphLoc<RNodeLoc> >::const_iterator i =
+				cur_read_in_graph.graph_locs.begin();
+				i != cur_read_in_graph.graph_locs.end(); ++i) {
+
+			for (typename vector<RNodeLoc>::const_iterator j = i->locs.begin();
+					j != i->locs.end(); ++j) {
+				++align_num;
+			}
+
+		}
+
+		return align_num;
+	}
 };
 
 /*
@@ -237,12 +262,12 @@ public:
 class GraphReads {
 public:
 	uint graph_id;
-	std::vector<ReadIndex> reads;
+	vector<ReadIndex> reads;
 };
 
 void get_isoform_FASTA(vector<SpliceGraph> const &graphs,
 		vector<PyGraph> const &py_graphs, vector<Fasta> &isoforms);
-
+//TODO
 }
 
 #endif // _GRAPH_SEQ_0_H_

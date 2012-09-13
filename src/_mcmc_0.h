@@ -71,6 +71,7 @@ using _graph_seq_0::GraphInfo;
 using std::auto_ptr;
 using _graph_seq_0::Node;
 using std::fill;
+using _graph_seq_0::ReadIndex;
 
 class GSLRngUnifInt {
 public:
@@ -350,7 +351,8 @@ void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 
 	uint graph_num = graphs.size();
 
-	fill(dir_graph_weights, dir_graph_weights + graph_num, 1.0);
+	double const kDirGraphWeightInit = 1.0;
+	fill(dir_graph_weights, dir_graph_weights + graph_num, kDirGraphWeightInit);
 
 	vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
 	vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
@@ -363,6 +365,13 @@ void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		for (vector<Node>::const_iterator i = graph_info_iter->nodes.begin();
 				i != graph_info_iter->nodes.end(); ++i) {
 			graph_len += i->est_len;
+		}
+
+		for (vector<ReadIndex>::const_iterator i =
+				graph_read_iter->reads.begin();
+				i != graph_read_iter->reads.end(); ++i) {
+			if (i->get_align_num(read_in_graph) == 1) {
+			}
 		}
 
 		++cur_graph;
