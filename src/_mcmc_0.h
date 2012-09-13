@@ -335,11 +335,28 @@ void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
 		double * const dir_graph_weights) {
+
 	// based on the method used in this paper
 	//
 	// Ali Mortazavi, Brian A. Williams, Kenneth McCue, Lorian Schaeffer,
 	// and Barbara Wold. Mapping and quantifying mammalian
 	// transcriptomes by RNA-seq. Nature Methods, 5(7):621–628, May 2008.
+
+	vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
+	vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+	vector<GraphReads>::const_iterator graph_read_iter = graph_reads.begin();
+	uint cur_graph = 0;
+
+	uint graph_num = graphs.size();
+
+	while (cur_graph != graph_num) {
+
+		++cur_graph;
+		++graph_iter;
+		++graph_info_iter;
+		++graph_read_iter;
+	}
+
 }
 
 template<class RNodeLoc>
