@@ -226,7 +226,7 @@ inline bool isof_start_ok(DirectedGraph const &graph, uint vert,
 }
 
 inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
-		vector<IsoformMap> &graph_isoforms) {
+		vector<IsoformMap> &graph_isoforms, double * const graph_expr_vals) {
 	// TODO: remove
 	std::cout << "enter isoform_MCMC_init\n";
 
@@ -311,17 +311,26 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 	delete[] dir_alpha;
 
 	uint isof_exp_ind = 0;
+	uint graph_ind = 0;
 
 	for (isof_set_iter = graph_isoforms.begin();
-			isof_set_iter != graph_isoforms.end(); ++isof_set_iter) {
+			isof_set_iter != graph_isoforms.end();
+			++isof_set_iter, ++graph_ind) {
+
+		double graph_expr_val = 0;
 
 		for (IsoformMap::iterator cur_isof = isof_set_iter->begin();
 				cur_isof != isof_set_iter->end(); ++cur_isof) {
 
 			cur_isof->second = dir_theta[isof_exp_ind];
+
+			graph_expr_val += dir_theta[isof_exp_ind];
+
 			++isof_exp_ind;
 
 		}
+
+		graph_expr_vals[graph_ind] = graph_expr_val;
 
 	}
 
@@ -333,12 +342,13 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 }
 
 template<class RNodeLoc>
-double get_graph_weight(SpliceGraph const &graph, IsoformMap const &graph_isof,
+inline double get_graph_weight(SpliceGraph const &graph,
+		IsoformMap const &graph_isof,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		GraphReads const &graph_read);
 
 template<class RNodeLoc>
-void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
+inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		vector<SpliceGraph> const &graphs,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
@@ -430,7 +440,42 @@ void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 }
 
 template<class RNodeLoc>
-void isoform_main(vector<GraphInfo> const &graph_infos,
+inline uint choose_graph_to_mod(gsl_rng *rn, vector<SpliceGraph> const &graphs,
+		vector<IsoformMap> const &graph_isoforms,
+		vector<GraphReads> const &graph_reads,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		double * const graph_weights) {
+
+	uint graph_weight_ind = 0;
+	vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+	vector<IsoformMap>::const_iterator graph_isof_iter = graph_isoforms.begin();
+	vector<GraphReads>::const_iterator graph_read_iter = graph_reads.begin();
+
+	uint graph_num = graphs.size();
+
+	while (graph_weight_ind != graph_num) {
+
+		graph_weights[graph_weight_ind] = get_graph_weight(*graph_iter,
+				*graph_isof_iter, read_in_graph, *graph_read_iter);
+
+		++graph_weight_ind;
+		++graph_iter;
+		++graph_isof_iter;
+		++graph_read_iter;
+	}
+
+	gsl_ran_discrete_t *choose_graph = gsl_ran_discrete_preproc(graph_num,
+			graph_weights);
+
+	uint chosen_graph_ind = gsl_ran_discrete(rn, choose_graph);
+
+	gsl_ran_discrete_free(choose_graph);
+
+	return chosen_graph_ind;
+}
+
+template<class RNodeLoc>
+inline void isoform_main(vector<GraphInfo> const &graph_infos,
 		vector<SpliceGraph> &graphs,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads, uint max_run) {
@@ -455,7 +500,9 @@ void isoform_main(vector<GraphInfo> const &graph_infos,
 
 		vector<IsoformMap> graph_isoforms(graphs.size());
 
-		isoform_MCMC_init(graphs, rn, graph_isoforms);
+		double *graph_expr_vals = new double[graph_num];
+
+		isoform_MCMC_init(graphs, rn, graph_isoforms, graph_expr_vals);
 
 		// main part of MCMC
 		// the real stuff is in @isof_jump
@@ -466,43 +513,21 @@ void isoform_main(vector<GraphInfo> const &graph_infos,
 		// modify the graph's isoform set
 		double *graph_weights = new double[graph_num];
 
+		double *new_graph_expr_vals = new double[graph_num];
+
 		for (uint runs = 0; runs != max_run; ++runs) {
 
-			uint graph_weight_ind = 0;
-			vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
-			vector<IsoformMap>::const_iterator graph_isof_iter =
-					graph_isoforms.begin();
-			vector<GraphReads>::const_iterator graph_read_iter =
-					graph_reads.begin();
+			uint chosen_graph_ind = choose_graph_to_mod(rn, graphs,
+					graph_isoforms, graph_reads, read_in_graph, graph_weights);
 
-			while (graph_weight_ind != graph_num) {
-
-				graph_weights[graph_weight_ind] = get_graph_weight(*graph_iter,
-						*graph_isof_iter, read_in_graph, *graph_read_iter);
-
-				++graph_weight_ind;
-				++graph_iter;
-				++graph_isof_iter;
-				++graph_read_iter;
-			}
-
-			gsl_ran_discrete_t *choose_graph = gsl_ran_discrete_preproc(
-					graph_num, graph_weights);
-
-			uint chosen_graph_ind = gsl_ran_discrete(rn, choose_graph);
-
-			gsl_ran_discrete_free(choose_graph);
-
-			uint tot_isof_num = 0;
-			for (graph_isof_iter = graph_isoforms.begin();
-					graph_isof_iter != graph_isoforms.end();
-					++graph_isof_iter) {
-				tot_isof_num += graph_isof_iter->size();
-			}
+			gsl_ran_dirichlet(rn, graph_num, dir_graph_weights,
+					new_graph_expr_vals);
 
 		}
 
 		delete[] graph_weights;
+		delete[] graph_expr_vals;
+		delete[] new_graph_expr_vals;
 
 		gsl_rng_free(rn);
 
