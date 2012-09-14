@@ -61,6 +61,38 @@ inline double get_graph_weight<SingleNodeLoc>(SpliceGraph const &graph,
 
 }
 
+template<>
+inline uint _add_isof_weight<SingleNodeLoc>(IsoformMap const &opt_graph_ratio,
+		GraphInfo const &graph_info, SpliceGraph const &graph,
+		GraphReads const &graph_read,
+		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph) {
+
+	//TODO
+	return 0;
+
+}
+
+template<>
+inline uint _del_isof_weight<SingleNodeLoc>(IsoformMap const &opt_graph_ratio,
+		GraphInfo const &graph_info, SpliceGraph const &graph,
+		GraphReads const &graph_read,
+		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph) {
+
+	//TODO
+	return 0;
+
+}
+
+template<>
+inline void get_opt_graph_ratio<SingleNodeLoc>(IsoformMap const &graph_isoform,
+		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
+		SpliceGraph const &graph, GraphReads const &graph_read,
+		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph) {
+
+	// TODO
+
+}
+
 }
 
 #endif // _SINGLE_1_H_

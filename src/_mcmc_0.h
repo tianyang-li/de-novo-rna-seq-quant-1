@@ -492,12 +492,20 @@ inline void update_isof_expr_val(vector<IsoformMap> &graph_isoforms,
 }
 
 template<class RNodeLoc>
-inline uint add_isof_weight(GraphInfo const &graph_info,
-		SpliceGraph const &graph, GraphReads const &graph_read,
+inline uint _add_isof_weight(IsoformMap const &opt_graph_ratio,
+		GraphInfo const &graph_info, SpliceGraph const &graph,
+		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
 
 template<class RNodeLoc>
-inline uint del_isof_weight(GraphInfo const &graph_info,
+inline uint _del_isof_weight(IsoformMap const &opt_graph_ratio,
+		GraphInfo const &graph_info, SpliceGraph const &graph,
+		GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
+
+template<class RNodeLoc>
+inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
+		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
 
@@ -512,6 +520,15 @@ inline void update_chosen_graph_isoform(IsoformMap &graph_isoform,
 			i != graph_isoform.end(); ++i) {
 		graph_expr_val += i->second;
 	}
+
+	IsoformMap opt_graph_ratio;
+	get_opt_graph_ratio(graph_isoform, opt_graph_ratio, graph_info, graph,
+			graph_read, read_in_graph);
+
+	uint add_isof_weight = _add_isof_weight(opt_graph_ratio, graph_info, graph,
+			graph_read, read_in_graph);
+	uint del_isof_weight = _del_isof_weight(opt_graph_ratio, graph_info, graph,
+			graph_read, read_in_graph);
 
 }
 
