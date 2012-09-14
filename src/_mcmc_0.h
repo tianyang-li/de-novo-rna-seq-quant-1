@@ -35,8 +35,9 @@
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
 
-// TODO: remove this
+#ifdef DEBUG
 #include <iostream>
+#endif
 
 namespace _mcmc_0 {
 
@@ -72,6 +73,11 @@ using std::auto_ptr;
 using _graph_seq_0::Node;
 using std::fill;
 using _graph_seq_0::ReadIndex;
+
+#ifdef DEBUG
+using std::cerr;
+using std::endl;
+#endif
 
 class GSLRngUnifInt {
 public:
@@ -225,10 +231,19 @@ inline bool isof_start_ok(DirectedGraph const &graph, uint vert,
 	return _isof_start_ok(graph, vert, isofs, isof);
 }
 
+template<class RNodeLoc>
+inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
+		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
+		SpliceGraph const &graph, GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
+
 inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
-		vector<IsoformMap> &graph_isoforms, double * const graph_expr_vals) {
-	// TODO: remove
-	std::cout << "enter isoform_MCMC_init\n";
+		vector<IsoformMap> &graph_isoforms, double * const graph_expr_vals,
+		vector<IsoformMap> &opt_graph_ratio) {
+
+#ifdef DEBUG
+	cerr << "enter isoform_MCMC_init\n";
+#endif
 
 	vector<IsoformMap>::iterator isof_set_iter = graph_isoforms.begin();
 
@@ -336,8 +351,9 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 
 	delete[] dir_theta;
 
-	// TODO: remove
-	std::cout << "exit isoform_MCMC_init\n";
+#ifdef DEBUG
+	cerr << "exit isoform_MCMC_init\n";
+#endif
 
 }
 
@@ -355,8 +371,9 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		double * const dir_graph_weights) {
 	// TODO: test this
 
-	// TODO: remove
-	std::cout << "enter get_dir_graph_weights\n";
+#ifdef DEBUG
+	cerr << "enter get_dir_graph_weights\n";
+#endif
 
 	// used to update expression value
 	// of each graph
@@ -431,12 +448,14 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		dir_graph_weights[i] /= 8.0;
 	}
 
-	// TODO: remove
+#ifdef DEBUG
 	for (uint i = 0; i != graph_num; ++i) {
-		std::cout << dir_graph_weights[i] << " ";
+		cerr << dir_graph_weights[i] << " ";
 	}
-	std::cout << std::endl;
-	std::cout << "exit get_dir_graph_weights\n";
+	cerr << endl;
+	cerr << "exit get_dir_graph_weights\n";
+#endif
+
 }
 
 template<class RNodeLoc>
@@ -483,7 +502,7 @@ inline void update_isof_expr_val(vector<IsoformMap> &graph_isoforms,
 			i != graph_isoforms.end(); ++i, ++graph_ind) {
 		for (IsoformMap::iterator j = i->begin(); j != i->end(); ++j) {
 
-			// XXX: numerical problems?
+			// TODO: numerical problems?
 			j->second *= (new_graph_expr_vals[graph_ind]
 					/ graph_expr_vals[graph_ind]);
 
@@ -504,16 +523,14 @@ inline uint _del_isof_weight(IsoformMap const &opt_graph_ratio,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
 
 template<class RNodeLoc>
-inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
+inline double update_chosen_graph_isoform(IsoformMap &graph_isoform,
 		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
-
-template<class RNodeLoc>
-inline void update_chosen_graph_isoform(IsoformMap &graph_isoform,
-		GraphInfo const &graph_info, SpliceGraph const &graph,
-		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
+
+	// return the ratio of adding or removing the isoform, or 1
+
+	double model_graph_ratio = 1.0;
 
 	double graph_expr_val = 0;
 	for (IsoformMap::const_iterator i = graph_isoform.begin();
@@ -521,14 +538,39 @@ inline void update_chosen_graph_isoform(IsoformMap &graph_isoform,
 		graph_expr_val += i->second;
 	}
 
-	IsoformMap opt_graph_ratio;
-	get_opt_graph_ratio(graph_isoform, opt_graph_ratio, graph_info, graph,
-			graph_read, read_in_graph);
-
 	uint add_isof_weight = _add_isof_weight(opt_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph);
 	uint del_isof_weight = _del_isof_weight(opt_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph);
+
+	if (add_isof_weight == 0 && del_isof_weight == 0) {
+		return 1.0;
+	}
+
+	enum Action {
+		ADD, DEL,
+	};
+
+	Action action;
+
+	if (add_isof_weight == 0) {
+
+		action = ADD;
+
+	} else {
+
+		if (del_isof_weight == 0) {
+			action = DEL;
+		} else {
+
+			double add_prob = double(add_isof_weight)
+					/ double(add_isof_weight + del_isof_weight);
+
+		}
+
+	}
+
+	return model_graph_ratio;
 
 }
 
@@ -556,11 +598,14 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 		// TODO: seed @rn
 
-		vector<IsoformMap> graph_isoforms(graphs.size());
+		vector<IsoformMap> graph_isoforms(graph_num);
 
 		double *graph_expr_vals = new double[graph_num];
 
-		isoform_MCMC_init(graphs, rn, graph_isoforms, graph_expr_vals);
+		vector<IsoformMap> opt_graph_ratios(graph_num);
+
+		isoform_MCMC_init(graphs, rn, graph_isoforms, graph_expr_vals,
+				opt_graph_ratios);
 
 		// main part of MCMC
 		// the real stuff is in @isof_jump
@@ -581,7 +626,10 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 			IsoformMap old_chosen_graph_isof_map =
 					graph_isoforms[chosen_graph_ind];
 
-			update_chosen_graph_isoform(graph_isoforms[chosen_graph_ind],
+			// the ratio of adding or deleting an isoform
+			double model_graph_ratio = update_chosen_graph_isoform(
+					graph_isoforms[chosen_graph_ind],
+					opt_graph_ratios[chosen_graph_ind],
 					graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
 					graph_reads[chosen_graph_ind], read_in_graph);
 

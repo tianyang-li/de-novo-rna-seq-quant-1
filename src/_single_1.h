@@ -34,6 +34,11 @@ using _graph_seq_0::ReadGraphLoc;
 using _graph_seq_0::GraphReads;
 using _graph_seq_0::GraphInfo;
 
+#ifdef DEBUG
+using std::cerr;
+using std::endl;
+#endif
+
 typedef _graph_seq_0::ReadNodeLoc SingleNodeLoc;
 
 /*

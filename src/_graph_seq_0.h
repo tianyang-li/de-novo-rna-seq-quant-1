@@ -38,15 +38,14 @@
 #include <boost/graph/transitive_closure.hpp>
 #include <boost/graph/topological_sort.hpp>
 #include <boost/tuple/tuple.hpp>
-
-#include "_misc_0.h"
-
-// TODO: remove this
-#include <iostream>
 #include <boost/graph/graph_utility.hpp>
 #include <boost/unordered_map.hpp>
 
-#define BOOST_DYNAMIC_BITSET_DONT_USE_FRIENDS
+#include "_misc_0.h"
+
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 namespace _graph_seq_0 {
 
@@ -54,6 +53,11 @@ using std::vector;
 using std::string;
 using boost::num_vertices;
 using boost::out_edges;
+
+#ifdef DEBUG
+using std::cerr;
+using std::endl;
+#endif
 
 /*
  * makes it easy to get graph information from

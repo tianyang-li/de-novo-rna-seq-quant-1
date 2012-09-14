@@ -24,14 +24,20 @@
 #include "_graph_seq_0.h"
 #include "_mcmc_0.h"
 
-// TODO: remove this
+#ifdef DEBUG
 #include <iostream>
+#endif
 
 namespace _single_1 {
 
 using std::vector;
 using _graph_seq_0::SeqConstraint;
 using _graph_seq_0::ReadIndex;
+
+#ifdef DEBUG
+using std::cerr;
+using std::endl;
+#endif
 
 inline void setup_graph_rc(_graph_seq_0::SpliceGraph &graph,
 		_graph_seq_0::PyGraph const &py_graph, GraphReads const &graph_read,
@@ -126,7 +132,10 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 		vector<ReadInGraph<SingleNodeLoc> > *py_reads,
 		vector<_graph_seq_0::Fasta> *isoforms, uint max_run) {
-	std::cout << "enter extension" << std::endl; // TODO: remove
+
+#ifdef DEBUG
+	cerr << "enter extension" << endl;
+#endif
 
 	// the reads that a graph has
 	vector<GraphReads> graph_reads(py_graphs->size());
@@ -189,7 +198,10 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 
 	_graph_seq_0::get_isoform_FASTA(graphs, *py_graphs, *isoforms);
 
-	std::cout << "exit extension" << std::endl; // TODO: remove
+#ifdef DEBUG
+	cerr << "exit extension" << endl;
+#endif
+
 }
 
 }
