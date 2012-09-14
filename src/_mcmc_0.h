@@ -646,6 +646,10 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 					graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
 					graph_reads[chosen_graph_ind], read_in_graph, rn);
 
+			double new_chosen_graph_portion = gsl_ran_beta(rn,
+					dir_graph_weights[chosen_graph_ind],
+					tot_dir_graph_weight - dir_graph_weights[chosen_graph_ind]);
+
 		}
 
 		delete[] graph_weights;
