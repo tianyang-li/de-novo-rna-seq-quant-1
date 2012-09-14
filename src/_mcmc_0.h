@@ -483,12 +483,20 @@ inline void update_isof_expr_val(vector<IsoformMap> &graph_isoforms,
 			i != graph_isoforms.end(); ++i, ++graph_ind) {
 		for (IsoformMap::iterator j = i->begin(); j != i->end(); ++j) {
 
-			// XXX: numerical problems
+			// XXX: numerical problems?
 			j->second *= (new_graph_expr_vals[graph_ind]
 					/ graph_expr_vals[graph_ind]);
 
 		}
 	}
+}
+
+template<class RNodeLoc>
+inline void update_chosen_graph_isoform(IsoformMap &graph_isoform,
+		GraphInfo const &graph_info, SpliceGraph const &graph,
+		GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
+
 }
 
 template<class RNodeLoc>
@@ -536,6 +544,10 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 			uint chosen_graph_ind = choose_graph_to_mod(rn, graphs,
 					graph_isoforms, graph_reads, read_in_graph, graph_weights);
+
+			update_chosen_graph_isoform(graph_isoforms[chosen_graph_ind],
+					graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
+					graph_reads[chosen_graph_ind], read_in_graph);
 
 			gsl_ran_dirichlet(rn, graph_num, dir_graph_weights,
 					new_graph_expr_vals);
