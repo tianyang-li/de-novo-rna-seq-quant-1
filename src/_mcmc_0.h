@@ -237,9 +237,13 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
 
-inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
-		vector<IsoformMap> &graph_isoforms, double * const graph_expr_vals,
-		vector<IsoformMap> &opt_graph_ratio) {
+template<class RNodeLoc>
+inline void isoform_MCMC_init(
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		vector<GraphReads> const &graph_reads,
+		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> &graphs,
+		gsl_rng *rn, vector<IsoformMap> &graph_isoforms,
+		double * const graph_expr_vals, vector<IsoformMap> &opt_graph_ratios) {
 
 #ifdef DEBUG
 	cerr << "enter isoform_MCMC_init\n";
@@ -291,8 +295,8 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 					*graph_isof_iter);
 		}
 
-		// TODO: remove
-		std::cout << "######\n" << std::endl;
+#ifdef DEBUG
+		std::cout << "######\nisoform expr val\n" << std::endl;
 		for (IsoformMap::const_iterator j = graph_isof_iter->begin();
 				j != graph_isof_iter->end(); ++j) {
 			std::cout << j->first << " ";
@@ -302,7 +306,8 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 				j != i->vert_start_ok.end(); ++j) {
 			std::cout << *j << " ";
 		}
-		std::cout << std::endl;
+		std::cout << "################\n";
+#endif
 
 	}
 
@@ -350,6 +355,20 @@ inline void isoform_MCMC_init(vector<SpliceGraph> &graphs, gsl_rng *rn,
 	}
 
 	delete[] dir_theta;
+
+	// get optimal ratios for graphs to
+	// use in proposal distributions
+
+	isof_set_iter = graph_isoforms.begin();
+	graph_ind = 0;
+	for (vector<IsoformMap>::iterator i = opt_graph_ratios.begin();
+			i != opt_graph_ratios.end(); ++i) {
+
+		get_opt_graph_ratio(graph_isoforms[graph_ind], *i,
+				graph_infos[graph_ind], graphs[graph_ind],
+				graph_reads[graph_ind], read_in_graph);
+
+	}
 
 #ifdef DEBUG
 	cerr << "exit isoform_MCMC_init\n";
@@ -604,11 +623,10 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 		vector<IsoformMap> opt_graph_ratios(graph_num);
 
-		isoform_MCMC_init(graphs, rn, graph_isoforms, graph_expr_vals,
-				opt_graph_ratios);
+		isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs, rn,
+				graph_isoforms, graph_expr_vals, opt_graph_ratios);
 
 		// main part of MCMC
-		// the real stuff is in @isof_jump
 
 		vector<vector<IsoformMap> > mcmc_results;
 
