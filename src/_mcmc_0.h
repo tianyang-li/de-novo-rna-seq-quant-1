@@ -492,10 +492,26 @@ inline void update_isof_expr_val(vector<IsoformMap> &graph_isoforms,
 }
 
 template<class RNodeLoc>
+inline uint add_isof_weight(GraphInfo const &graph_info,
+		SpliceGraph const &graph, GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
+
+template<class RNodeLoc>
+inline uint del_isof_weight(GraphInfo const &graph_info,
+		SpliceGraph const &graph, GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
+
+template<class RNodeLoc>
 inline void update_chosen_graph_isoform(IsoformMap &graph_isoform,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
+
+	double graph_expr_val = 0;
+	for (IsoformMap::const_iterator i = graph_isoform.begin();
+			i != graph_isoform.end(); ++i) {
+		graph_expr_val += i->second;
+	}
 
 }
 
@@ -544,6 +560,9 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 			uint chosen_graph_ind = choose_graph_to_mod(rn, graphs,
 					graph_isoforms, graph_reads, read_in_graph, graph_weights);
+
+			IsoformMap old_chosen_graph_isof_map =
+					graph_isoforms[chosen_graph_ind];
 
 			update_chosen_graph_isoform(graph_isoforms[chosen_graph_ind],
 					graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
