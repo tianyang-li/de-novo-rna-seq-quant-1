@@ -243,7 +243,7 @@ inline void isoform_MCMC_init(
 		vector<GraphReads> const &graph_reads,
 		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> &graphs,
 		gsl_rng *rn, vector<IsoformMap> &graph_isoforms,
-		double * const graph_expr_vals, vector<IsoformMap> &opt_graph_ratios) {
+		vector<IsoformMap> &opt_graph_ratios) {
 
 #ifdef DEBUG
 	cerr << "enter isoform_MCMC_init\n";
@@ -337,20 +337,14 @@ inline void isoform_MCMC_init(
 			isof_set_iter != graph_isoforms.end();
 			++isof_set_iter, ++graph_ind) {
 
-		double graph_expr_val = 0;
-
 		for (IsoformMap::iterator cur_isof = isof_set_iter->begin();
 				cur_isof != isof_set_iter->end(); ++cur_isof) {
 
 			cur_isof->second = dir_theta[isof_exp_ind];
 
-			graph_expr_val += dir_theta[isof_exp_ind];
-
 			++isof_exp_ind;
 
 		}
-
-		graph_expr_vals[graph_ind] = graph_expr_val;
 
 	}
 
@@ -512,23 +506,6 @@ inline uint choose_graph_to_mod(gsl_rng *rn, vector<SpliceGraph> const &graphs,
 	return chosen_graph_ind;
 }
 
-inline void update_isof_expr_val(vector<IsoformMap> &graph_isoforms,
-		double * const graph_expr_vals, double * const new_graph_expr_vals) {
-
-	uint graph_ind = 0;
-
-	for (vector<IsoformMap>::iterator i = graph_isoforms.begin();
-			i != graph_isoforms.end(); ++i, ++graph_ind) {
-		for (IsoformMap::iterator j = i->begin(); j != i->end(); ++j) {
-
-			// TODO: numerical problems?
-			j->second *= (new_graph_expr_vals[graph_ind]
-					/ graph_expr_vals[graph_ind]);
-
-		}
-	}
-}
-
 template<class RNodeLoc>
 inline uint _add_isof_weight(IsoformMap const &opt_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
@@ -545,7 +522,7 @@ template<class RNodeLoc>
 inline double update_chosen_graph_isoform(IsoformMap &graph_isoform,
 		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn) {
 
 	// return the ratio of adding or removing the isoform, or 1
 
@@ -572,6 +549,8 @@ inline double update_chosen_graph_isoform(IsoformMap &graph_isoform,
 
 	Action action;
 
+	double action_prob = 1.0;
+
 	if (add_isof_weight == 0) {
 
 		action = ADD;
@@ -584,6 +563,21 @@ inline double update_chosen_graph_isoform(IsoformMap &graph_isoform,
 
 			double add_prob = double(add_isof_weight)
 					/ double(add_isof_weight + del_isof_weight);
+
+			if (gsl_rng_uniform(rn) <= add_prob) {
+
+				action = ADD;
+
+				action_prob = add_prob;
+
+			} else {
+
+				action = DEL;
+
+				action_prob = double(del_isof_weight)
+						/ double(add_isof_weight + del_isof_weight);
+
+			}
 
 		}
 
@@ -610,6 +604,11 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 	get_dir_graph_weights(graph_infos, graphs, read_in_graph, graph_reads,
 			dir_graph_weights);
 
+	double tot_dir_graph_weight = 0;
+	for (uint i = 0; i != graph_num; ++i) {
+		tot_dir_graph_weight += dir_graph_weights[i];
+	}
+
 	// TODO: multiple chains pthread parallelization
 	{
 
@@ -619,12 +618,10 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 		vector<IsoformMap> graph_isoforms(graph_num);
 
-		double *graph_expr_vals = new double[graph_num];
-
 		vector<IsoformMap> opt_graph_ratios(graph_num);
 
 		isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs, rn,
-				graph_isoforms, graph_expr_vals, opt_graph_ratios);
+				graph_isoforms, opt_graph_ratios);
 
 		// main part of MCMC
 
@@ -633,8 +630,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 		// used to choose a graph to
 		// modify the graph's isoform set
 		double *graph_weights = new double[graph_num];
-
-		double *new_graph_expr_vals = new double[graph_num];
 
 		for (uint runs = 0; runs != max_run; ++runs) {
 
@@ -649,23 +644,11 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 					graph_isoforms[chosen_graph_ind],
 					opt_graph_ratios[chosen_graph_ind],
 					graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
-					graph_reads[chosen_graph_ind], read_in_graph);
-
-			gsl_ran_dirichlet(rn, graph_num, dir_graph_weights,
-					new_graph_expr_vals);
-
-			update_isof_expr_val(graph_isoforms, graph_expr_vals,
-					new_graph_expr_vals);
-
-			for (uint i = 0; i != graph_num; ++i) {
-				graph_expr_vals[i] = new_graph_expr_vals[i];
-			}
+					graph_reads[chosen_graph_ind], read_in_graph, rn);
 
 		}
 
 		delete[] graph_weights;
-		delete[] graph_expr_vals;
-		delete[] new_graph_expr_vals;
 
 		gsl_rng_free(rn);
 
