@@ -233,8 +233,9 @@ inline bool isof_start_ok(DirectedGraph const &graph, uint vert,
 
 template<class RNodeLoc>
 inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
-		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
-		SpliceGraph const &graph, GraphReads const &graph_read,
+		IsoformMap &opt_graph_ratio /* this map is empty */,
+		GraphInfo const &graph_info, SpliceGraph const &graph,
+		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
 
 template<class RNodeLoc>
@@ -580,6 +581,16 @@ inline double update_chosen_graph_isoform(IsoformMap &graph_isoform,
 			}
 
 		}
+
+	}
+
+	switch (action) {
+
+	case ADD:
+		break;
+
+	case DEL:
+		break;
 
 	}
 
