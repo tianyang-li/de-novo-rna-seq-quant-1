@@ -1,6 +1,15 @@
 CC = g++
-CFLAGS = -Wall -fPIC -Wextra -ggdb -DDEBUG
+
+CFLAGS = -Wall -fPIC -Wconversion -Wextra -ggdb -DDEBUG \
+#-Wall -W -Wmissing-prototypes \
+-ansi -pedantic \
+-Wstrict-prototypes -Wshadow \
+-Wpointer-arith -Wcast-qual -Wcast-align \
+-Wwrite-strings -Wnested-externs \
+-fshort-enums -fno-common 
+ 
 AR = ar
+
 INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0
 
 all: util/single_1.so

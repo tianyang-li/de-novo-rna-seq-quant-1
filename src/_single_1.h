@@ -89,16 +89,6 @@ inline uint _del_isof_weight<SingleNodeLoc>(IsoformMap const &opt_graph_ratio,
 }
 
 template<>
-inline void get_opt_graph_ratio<SingleNodeLoc>(IsoformMap const &graph_isoform,
-		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
-		SpliceGraph const &graph, GraphReads const &graph_read,
-		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph) {
-
-	// TODO
-
-}
-
-template<>
 inline void get_vert_start_info<SingleNodeLoc>(IsoformMap const &graph_isoform,
 		IsoformMap const &opt_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,

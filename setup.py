@@ -13,11 +13,24 @@
 #
 #  You should have received a copy of the GNU General Public License
 
+
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
-cflags = ['-Wall', '-Wextra']
+cflags = ['-Wall', '-Wextra', '-Wconversion', ]
+"""
+'-ansi', '-pedantic',
+'-Wall',
+'-W', '-Wmissing-prototypes',
+'-Wstrict-prototypes', 
+'-Wshadow', '-Wpointer-arith',
+'-Wcast-qual', '-Wcast-align',
+'-Wwrite-strings', '-Wnested-externs',
+'-fshort-enums',
+'-fno-common',
+"""
+
 
 setup(
     cmdclass={'build_ext': build_ext},

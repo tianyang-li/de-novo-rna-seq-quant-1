@@ -31,6 +31,7 @@
 #include <boost/unordered_map.hpp>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+#include <gsl/gsl_multimin.h>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -237,7 +238,8 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &opt_graph_ratio /* this map is empty */,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
+}
 
 template<class RNodeLoc>
 inline void isoform_MCMC_init(
@@ -562,12 +564,14 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	get_vert_start_info(graph_isoform, opt_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph, vert_start_probs);
 
-	// TODO: get @new_graph_isof, @new_opt_ratio, update @model_graph_ratio
+	// TODO: get @new_graph_isof, @new_opt_ratio
 
 	double *new_isof_del_probs = new double[graph_isoform.size()];
 
 	get_isof_del_info(new_graph_isof, new_opt_ratio, graph_info, graph,
 			graph_read, read_in_graph, new_isof_del_probs);
+
+	// update @model_graph_ratio
 
 	delete[] vert_start_probs;
 
@@ -591,12 +595,14 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 	get_isof_del_info(graph_isoform, opt_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph, isof_del_probs);
 
-	// TODO: get @new_graph_isof, @new_opt_ratio, update @model_graph_ratio
+	// TODO: get @new_graph_isof, @new_opt_ratio
 
 	double *new_vert_start_probs = new double[num_vertices(graph.graph)];
 
 	get_vert_start_info(new_graph_isof, new_opt_ratio, graph_info, graph,
 			graph_read, read_in_graph, new_vert_start_probs);
+
+	// update @model_graph_ratio
 
 	delete[] new_vert_start_probs;
 
