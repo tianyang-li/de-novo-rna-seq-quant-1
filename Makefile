@@ -1,12 +1,13 @@
 CC = g++
 
 CFLAGS = -Wall -fPIC -Wconversion -Wextra -ggdb -DDEBUG \
-#-Wall -W -Wmissing-prototypes \
--ansi -pedantic \
--Wstrict-prototypes -Wshadow \
--Wpointer-arith -Wcast-qual -Wcast-align \
+-Wall -W -Wmissing-prototypes \
+-Wstrict-prototypes \
 -Wwrite-strings -Wnested-externs \
--fshort-enums -fno-common 
+-fshort-enums -fno-common \
+#-Wshadow \
+-ansi -pedantic \
+-Wpointer-arith -Wcast-qual -Wcast-align 
  
 AR = ar
 

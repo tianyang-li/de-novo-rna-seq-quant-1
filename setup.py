@@ -18,18 +18,18 @@ from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
-cflags = ['-Wall', '-Wextra', '-Wconversion', ]
-"""
-'-ansi', '-pedantic',
-'-Wall',
-'-W', '-Wmissing-prototypes',
-'-Wstrict-prototypes', 
-'-Wshadow', '-Wpointer-arith',
-'-Wcast-qual', '-Wcast-align',
-'-Wwrite-strings', '-Wnested-externs',
-'-fshort-enums',
-'-fno-common',
-"""
+
+cflags = ['-Wall', '-Wextra', '-Wconversion',
+          #'-ansi', '-pedantic',
+          '-Wall',
+          '-W', '-Wmissing-prototypes',
+          '-Wstrict-prototypes',
+          # '-Wpointer-arith', '-Wcast-qual', '-Wcast-align',
+          '-Wwrite-strings', '-Wnested-externs',
+          '-fshort-enums',
+          '-fno-common',
+          #'-Wshadow',
+          ]
 
 
 setup(
