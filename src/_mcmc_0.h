@@ -534,6 +534,20 @@ inline uint _del_isof_weight(IsoformMap const &opt_graph_ratio,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
 
 template<class RNodeLoc>
+void get_vert_start_info(IsoformMap const &graph_isoform,
+		IsoformMap const &opt_graph_ratio, GraphInfo const &graph_info,
+		SpliceGraph const &graph, GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		double * const vert_start_probs);
+
+template<class RNodeLoc>
+void get_isof_del_info(IsoformMap const &graph_isoform,
+		IsoformMap const &opt_graph_ratio, GraphInfo const &graph_info,
+		SpliceGraph const &graph, GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		double * const isof_del_probs);
+
+template<class RNodeLoc>
 inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap const &opt_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
@@ -542,6 +556,23 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_opt_ratio /* empty, if accepted @opt_graph_ratio <- */) {
 	double model_graph_ratio = 1;
+
+	double *vert_start_probs = new double[num_vertices(graph.graph)];
+
+	get_vert_start_info(graph_isoform, opt_graph_ratio, graph_info, graph,
+			graph_read, read_in_graph, vert_start_probs);
+
+	// TODO: get @new_graph_isof, @new_opt_ratio, update @model_graph_ratio
+
+	double *new_isof_del_probs = new double[graph_isoform.size()];
+
+	get_isof_del_info(new_graph_isof, new_opt_ratio, graph_info, graph,
+			graph_read, read_in_graph, new_isof_del_probs);
+
+	delete[] vert_start_probs;
+
+	delete[] new_isof_del_probs;
+
 	return model_graph_ratio;
 }
 
@@ -554,6 +585,23 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_opt_ratio /* empty, if accepted @opt_graph_ratio <- */) {
 	double model_graph_ratio = 1;
+
+	double *isof_del_probs = new double[graph_isoform.size()];
+
+	get_isof_del_info(graph_isoform, opt_graph_ratio, graph_info, graph,
+			graph_read, read_in_graph, isof_del_probs);
+
+	// TODO: get @new_graph_isof, @new_opt_ratio, update @model_graph_ratio
+
+	double *new_vert_start_probs = new double[num_vertices(graph.graph)];
+
+	get_vert_start_info(new_graph_isof, new_opt_ratio, graph_info, graph,
+			graph_read, read_in_graph, new_vert_start_probs);
+
+	delete[] new_vert_start_probs;
+
+	delete[] isof_del_probs;
+
 	return model_graph_ratio;
 }
 
@@ -712,8 +760,10 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 			}
 
-			if (gsl_rng_uniform(rn) <= min(1.0, model_graph_ratio)) {
+			// TODO: calculate @model_graph_ratio
 
+			if (gsl_rng_uniform(rn) <= min(1.0, model_graph_ratio)) {
+				// TODO update to accepted state
 				if (graph_num != 1) {
 
 				}

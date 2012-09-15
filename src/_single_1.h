@@ -98,6 +98,24 @@ inline void get_opt_graph_ratio<SingleNodeLoc>(IsoformMap const &graph_isoform,
 
 }
 
+template<>
+inline void get_vert_start_info<SingleNodeLoc>(IsoformMap const &graph_isoform,
+		IsoformMap const &opt_graph_ratio, GraphInfo const &graph_info,
+		SpliceGraph const &graph, GraphReads const &graph_read,
+		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
+		double * const vert_start_probs) {
+	// TODO
+}
+
+template<>
+inline void get_isof_del_info<SingleNodeLoc>(IsoformMap const &graph_isoform,
+		IsoformMap const &opt_graph_ratio, GraphInfo const &graph_info,
+		SpliceGraph const &graph, GraphReads const &graph_read,
+		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
+		double * const isof_del_probs) {
+	// TODO
+}
+
 }
 
 #endif // _SINGLE_1_H_
