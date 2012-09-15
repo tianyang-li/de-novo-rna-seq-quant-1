@@ -32,6 +32,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_multimin.h>
+#include <NLP.h>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -239,6 +240,7 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
+
 }
 
 template<class RNodeLoc>

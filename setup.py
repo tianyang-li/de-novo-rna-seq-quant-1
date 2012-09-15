@@ -29,6 +29,7 @@ cflags = ['-Wall', '-Wextra', '-Wconversion',
           '-fshort-enums',
           '-fno-common',
           #'-Wshadow',
+          '-DHAVE_STD' , '-DHAVE_NAMESPACES',
           ]
 
 
@@ -44,7 +45,8 @@ setup(
                                           "lib/libnewmat.a",
                                           "lib/libopt.a", ],
                            language="c++",
-                           include_dirs=["src", "gsl-1.15", "boost_1_51_0"],
+                           include_dirs=["src", "gsl-1.15", "optpp-2.4/newmat11",
+                                         "boost_1_51_0", "optpp-2.4/include", ],
                            library_dirs=["lib"]
                            )
                  ]
