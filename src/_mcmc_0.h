@@ -73,6 +73,7 @@ using std::auto_ptr;
 using _graph_seq_0::Node;
 using std::fill;
 using _graph_seq_0::ReadIndex;
+using std::min;
 
 #ifdef DEBUG
 using std::cerr;
@@ -321,47 +322,60 @@ inline void isoform_MCMC_init(
 		isofs_size += isof_set_iter->size();
 	}
 
-	double *dir_alpha = new double[isofs_size];
+	if (isofs_size != 1) {
 
-	fill(dir_alpha, dir_alpha + isofs_size, 1);
+		double *dir_alpha = new double[isofs_size];
 
-	double *dir_theta = new double[isofs_size];
+		fill(dir_alpha, dir_alpha + isofs_size, 1);
 
-	gsl_ran_dirichlet(rn, isofs_size, dir_alpha, dir_theta);
+		double *dir_theta = new double[isofs_size];
 
-	delete[] dir_alpha;
+		gsl_ran_dirichlet(rn, isofs_size, dir_alpha, dir_theta);
 
-	uint isof_exp_ind = 0;
-	uint graph_ind = 0;
+		delete[] dir_alpha;
 
-	for (isof_set_iter = graph_isoforms.begin();
-			isof_set_iter != graph_isoforms.end();
-			++isof_set_iter, ++graph_ind) {
+		uint isof_exp_ind = 0;
+		uint graph_ind = 0;
 
-		for (IsoformMap::iterator cur_isof = isof_set_iter->begin();
-				cur_isof != isof_set_iter->end(); ++cur_isof) {
+		for (isof_set_iter = graph_isoforms.begin();
+				isof_set_iter != graph_isoforms.end();
+				++isof_set_iter, ++graph_ind) {
 
-			cur_isof->second = dir_theta[isof_exp_ind];
+			for (IsoformMap::iterator cur_isof = isof_set_iter->begin();
+					cur_isof != isof_set_iter->end(); ++cur_isof) {
 
-			++isof_exp_ind;
+				cur_isof->second = dir_theta[isof_exp_ind];
+
+				++isof_exp_ind;
+
+			}
 
 		}
 
+		delete[] dir_theta;
+
+	} else {
+
+		// special case when there's only 1 isoform
+
+		graph_isoforms[0].begin()->second = 1.0;
+
 	}
 
-	delete[] dir_theta;
+	{
+		// get optimal ratios for graphs to
+		// use in proposal distributions
 
-	// get optimal ratios for graphs to
-	// use in proposal distributions
+		isof_set_iter = graph_isoforms.begin();
+		uint graph_ind = 0;
+		for (vector<IsoformMap>::iterator i = opt_graph_ratios.begin();
+				i != opt_graph_ratios.end(); ++i) {
 
-	isof_set_iter = graph_isoforms.begin();
-	graph_ind = 0;
-	for (vector<IsoformMap>::iterator i = opt_graph_ratios.begin();
-			i != opt_graph_ratios.end(); ++i) {
+			get_opt_graph_ratio(graph_isoforms[graph_ind], *i,
+					graph_infos[graph_ind], graphs[graph_ind],
+					graph_reads[graph_ind], read_in_graph);
 
-		get_opt_graph_ratio(graph_isoforms[graph_ind], *i,
-				graph_infos[graph_ind], graphs[graph_ind],
-				graph_reads[graph_ind], read_in_graph);
+		}
 
 	}
 
@@ -666,9 +680,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 			uint chosen_graph_ind = choose_graph_to_mod(rn, graphs,
 					graph_isoforms, graph_reads, read_in_graph, graph_weights);
 
-			IsoformMap old_chosen_graph_isof_map =
-					graph_isoforms[chosen_graph_ind];
-
 			// the ratio of adding or deleting an isoform
 			double model_graph_ratio = update_chosen_graph_isoform(
 					graph_isoforms[chosen_graph_ind],
@@ -678,10 +689,20 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 			double new_chosen_graph_portion = 1.0;
 			if (graph_num != 1) {
+
 				new_chosen_graph_portion = gsl_ran_beta(rn,
 						dir_graph_weights[chosen_graph_ind],
 						tot_dir_graph_weight
 								- dir_graph_weights[chosen_graph_ind]);
+
+			}
+
+			if (gsl_rng_uniform(rn) <= min(1.0, model_graph_ratio)) {
+
+				if (graph_num != 1) {
+
+				}
+
 			}
 
 		}
