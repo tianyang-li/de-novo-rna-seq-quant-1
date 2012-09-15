@@ -520,14 +520,32 @@ inline uint _del_isof_weight(IsoformMap const &opt_graph_ratio,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
 
 template<class RNodeLoc>
+inline double add_isof_ratio(IsoformMap &graph_isoform,
+		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
+		SpliceGraph const &graph, GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
+		double action_prob) {
+	double model_graph_ratio = 1;
+	return model_graph_ratio;
+}
+
+template<class RNodeLoc>
+inline double del_isof_ratio(IsoformMap &graph_isoform,
+		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
+		SpliceGraph const &graph, GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
+		double action_prob) {
+	double model_graph_ratio = 1;
+	return model_graph_ratio;
+}
+
+template<class RNodeLoc>
 inline double update_chosen_graph_isoform(IsoformMap &graph_isoform,
 		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn) {
 
 	// return the ratio of adding or removing the isoform, or 1
-
-	double model_graph_ratio = 1.0;
 
 	double graph_expr_val = 0;
 	for (IsoformMap::const_iterator i = graph_isoform.begin();
@@ -587,15 +605,16 @@ inline double update_chosen_graph_isoform(IsoformMap &graph_isoform,
 	switch (action) {
 
 	case ADD:
+		return add_isof_ratio(graph_isoform, opt_graph_ratio, graph_info, graph,
+				graph_read, read_in_graph, rn, action_prob);
 		break;
 
 	case DEL:
+		return del_isof_ratio(graph_isoform, opt_graph_ratio, graph_info, graph,
+				graph_read, read_in_graph, rn, action_prob);
 		break;
 
 	}
-
-	return model_graph_ratio;
-
 }
 
 template<class RNodeLoc>
@@ -657,9 +676,13 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 					graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
 					graph_reads[chosen_graph_ind], read_in_graph, rn);
 
-			double new_chosen_graph_portion = gsl_ran_beta(rn,
-					dir_graph_weights[chosen_graph_ind],
-					tot_dir_graph_weight - dir_graph_weights[chosen_graph_ind]);
+			double new_chosen_graph_portion = 1.0;
+			if (graph_num != 1) {
+				new_chosen_graph_portion = gsl_ran_beta(rn,
+						dir_graph_weights[chosen_graph_ind],
+						tot_dir_graph_weight
+								- dir_graph_weights[chosen_graph_ind]);
+			}
 
 		}
 
