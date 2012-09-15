@@ -534,30 +534,36 @@ inline uint _del_isof_weight(IsoformMap const &opt_graph_ratio,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
 
 template<class RNodeLoc>
-inline double add_isof_ratio(IsoformMap &graph_isoform,
-		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
+inline double add_isof_ratio(IsoformMap const &graph_isoform,
+		IsoformMap const &opt_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
-		double action_prob) {
+		double action_prob,
+		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
+		IsoformMap &new_opt_ratio /* empty, if accepted @opt_graph_ratio <- */) {
 	double model_graph_ratio = 1;
 	return model_graph_ratio;
 }
 
 template<class RNodeLoc>
-inline double del_isof_ratio(IsoformMap &graph_isoform,
-		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
+inline double del_isof_ratio(IsoformMap const &graph_isoform,
+		IsoformMap const &opt_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
-		double action_prob) {
+		double action_prob,
+		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
+		IsoformMap &new_opt_ratio /* empty, if accepted @opt_graph_ratio <- */) {
 	double model_graph_ratio = 1;
 	return model_graph_ratio;
 }
 
 template<class RNodeLoc>
-inline double update_chosen_graph_isoform(IsoformMap &graph_isoform,
-		IsoformMap &opt_graph_ratio, GraphInfo const &graph_info,
+inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
+		IsoformMap const &opt_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn) {
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
+		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
+		IsoformMap &new_opt_ratio /* empty, if accepted @opt_graph_ratio <- */) {
 
 	// return the ratio of adding or removing the isoform, or 1
 
@@ -620,12 +626,14 @@ inline double update_chosen_graph_isoform(IsoformMap &graph_isoform,
 
 	case ADD:
 		return add_isof_ratio(graph_isoform, opt_graph_ratio, graph_info, graph,
-				graph_read, read_in_graph, rn, action_prob);
+				graph_read, read_in_graph, rn, action_prob, new_graph_isof,
+				new_opt_ratio);
 		break;
 
 	case DEL:
 		return del_isof_ratio(graph_isoform, opt_graph_ratio, graph_info, graph,
-				graph_read, read_in_graph, rn, action_prob);
+				graph_read, read_in_graph, rn, action_prob, new_graph_isof,
+				new_opt_ratio);
 		break;
 
 	}
@@ -680,12 +688,19 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 			uint chosen_graph_ind = choose_graph_to_mod(rn, graphs,
 					graph_isoforms, graph_reads, read_in_graph, graph_weights);
 
+			// if accepted @graph_isoform ->
+			IsoformMap new_graph_isof;
+
+			// if accepted @opt_graph_ratio ->
+			IsoformMap new_opt_ratio;
+
 			// the ratio of adding or deleting an isoform
 			double model_graph_ratio = update_chosen_graph_isoform(
 					graph_isoforms[chosen_graph_ind],
 					opt_graph_ratios[chosen_graph_ind],
 					graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
-					graph_reads[chosen_graph_ind], read_in_graph, rn);
+					graph_reads[chosen_graph_ind], read_in_graph, rn,
+					new_graph_isof, new_opt_ratio);
 
 			double new_chosen_graph_portion = 1.0;
 			if (graph_num != 1) {
