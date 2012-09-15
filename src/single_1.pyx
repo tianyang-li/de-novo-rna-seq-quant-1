@@ -21,7 +21,7 @@ from cython.operator cimport dereference as deref, preincrement as inc
 
 from graph_seq_0 cimport SeqLoc, ReadNodeLoc, PyGraph, Node, Fasta, ReadInGraph, ReadGraphLoc
 from fasta_0 import FastaSeq
-from misc_0 cimport uint
+from misc_0 cimport ulong
 
 cdef extern from "_single_1.h" namespace "_single_1":   
     ctypedef ReadNodeLoc SingleNodeLoc
@@ -29,7 +29,7 @@ cdef extern from "_single_1.h" namespace "_single_1":
     cdef void _get_isoforms(vector[PyGraph] * py_graphs,
                             vector[ReadInGraph[SingleNodeLoc]] * py_reads,
                             vector[Fasta] * isoforms,
-                            uint max_run)
+                            ulong max_run)
 
 
 class IdMap(object):
@@ -53,9 +53,9 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
         is a IdMap that says where the graph is in py_graphs
     """
     
-    cdef uint graph_id = 0
+    cdef ulong graph_id = 0
     
-    cdef uint node_id
+    cdef ulong node_id
     
     cdef Node * py_node 
     
@@ -97,8 +97,8 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
 
 cdef void get_read_in_graph_from_py(read_in_graph, id_maps,
                                     vector[ReadInGraph[SingleNodeLoc]] * py_reads):        
-    cdef uint read_id = 0
-    cdef uint graph_id, node_id
+    cdef ulong read_id = 0
+    cdef ulong graph_id, node_id
     
     cdef vector[ReadInGraph[SingleNodeLoc]].iterator py_read_iter = py_reads.begin()
     

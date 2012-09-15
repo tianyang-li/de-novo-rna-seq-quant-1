@@ -72,10 +72,10 @@ inline void setup_graph_rc(_graph_seq_0::SpliceGraph &graph,
 
 	// build a partial order on read constraints
 	// count in-degree
-	vector<uint> rc_in(rcs_vec.size(), 0);
+	vector<ulong> rc_in(rcs_vec.size(), 0);
 
-	for (uint i = 1; i < rcs_vec.size(); ++i) {
-		for (uint j = 0; j < i; ++j) {
+	for (ulong i = 1; i < rcs_vec.size(); ++i) {
+		for (ulong j = 0; j < i; ++j) {
 			SeqConstraint ij_or = rcs_vec[i] | rcs_vec[j];
 			if (ij_or == rcs_vec[i]) {
 				rc_in[j] += 1;
@@ -87,9 +87,9 @@ inline void setup_graph_rc(_graph_seq_0::SpliceGraph &graph,
 		}
 	}
 
-	uint rc_id = 0;
+	ulong rc_id = 0;
 
-	for (vector<uint>::const_iterator i = rc_in.begin(); i != rc_in.end();
+	for (vector<ulong>::const_iterator i = rc_in.begin(); i != rc_in.end();
 			++i, ++rc_id) {
 		if (*i == 0) {
 			graph.read_constraints.push_back(rcs_vec[rc_id]);
@@ -108,12 +108,12 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 	// or trimming is done
 	// transcript length is also not estimated
 
-	for (uint i = 0; i != py_graph.nodes.size(); ++i) {
+	for (ulong i = 0; i != py_graph.nodes.size(); ++i) {
 		boost::add_vertex(graph.graph);
 	}
 	for (vector<_graph_seq_0::Node>::const_iterator i = py_graph.nodes.begin();
 			i != py_graph.nodes.end(); ++i) {
-		for (vector<uint>::const_iterator j = i->edges.begin();
+		for (vector<ulong>::const_iterator j = i->edges.begin();
 				j != i->edges.end(); ++j) {
 			boost::add_edge(i->node_id, *j, graph.graph);
 		}
@@ -131,7 +131,7 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 
 void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 		vector<ReadInGraph<SingleNodeLoc> > *py_reads,
-		vector<_graph_seq_0::Fasta> *isoforms, uint max_run) {
+		vector<_graph_seq_0::Fasta> *isoforms, ulong max_run) {
 
 #ifdef DEBUG
 	cerr << "enter extension" << endl;
@@ -140,23 +140,23 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 	// the reads that a graph has
 	vector<GraphReads> graph_reads(py_graphs->size());
 
-	uint graph_id = 0;
+	ulong graph_id = 0;
 
 	for (vector<GraphReads>::iterator i = graph_reads.begin();
 			i != graph_reads.end(); ++i, ++graph_id) {
 		i->graph_id = graph_id;
 	}
 
-	uint read_id = 0;
+	ulong read_id = 0;
 
 	for (vector<ReadInGraph<SingleNodeLoc> >::const_iterator i =
 			py_reads->begin(); i != py_reads->end(); ++i, ++read_id) {
-		uint graph_index = 0;
+		ulong graph_index = 0;
 
 		for (vector<ReadGraphLoc<SingleNodeLoc> >::const_iterator j =
 				i->graph_locs.begin(); j != i->graph_locs.end();
 				++j, ++graph_index) {
-			uint align_index = 0;
+			ulong align_index = 0;
 
 			for (vector<_graph_seq_0::ReadNodeLoc>::const_iterator k =
 					j->locs.begin(); k != j->locs.end(); ++k, ++align_index) {

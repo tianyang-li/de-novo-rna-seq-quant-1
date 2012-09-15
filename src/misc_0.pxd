@@ -14,7 +14,7 @@
 #  You should have received a copy of the GNU General Public License
 
 cdef extern from "_misc_0.h":
-    ctypedef unsigned int uint
+    ctypedef unsigned long ulong
     ctypedef long double ldbl
 
 

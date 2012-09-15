@@ -46,7 +46,7 @@ typedef _graph_seq_0::ReadNodeLoc SingleNodeLoc;
  */
 void _get_isoforms(std::vector<_graph_seq_0::PyGraph> *py_graphs,
 		std::vector<ReadInGraph<SingleNodeLoc> > *py_reads,
-		std::vector<_graph_seq_0::Fasta> *isoforms, uint max_run);
+		std::vector<_graph_seq_0::Fasta> *isoforms, ulong max_run);
 
 }
 
@@ -67,7 +67,7 @@ inline double get_graph_weight<SingleNodeLoc>(SpliceGraph const &graph,
 }
 
 template<>
-inline uint _add_isof_weight<SingleNodeLoc>(IsoformMap const &opt_graph_ratio,
+inline ulong _add_isof_weight<SingleNodeLoc>(IsoformMap const &opt_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph) {
@@ -78,7 +78,7 @@ inline uint _add_isof_weight<SingleNodeLoc>(IsoformMap const &opt_graph_ratio,
 }
 
 template<>
-inline uint _del_isof_weight<SingleNodeLoc>(IsoformMap const &opt_graph_ratio,
+inline ulong _del_isof_weight<SingleNodeLoc>(IsoformMap const &opt_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph) {

@@ -88,7 +88,7 @@ public:
 			rn(rn_) {
 	}
 
-	uint operator()(uint n) {
+	ulong operator()(ulong n) {
 		return gsl_rng_uniform_int(rn, n);
 	}
 
@@ -99,7 +99,7 @@ private:
 // given read constraint
 // and graph, get a random isoform
 // that satisfies the constraint
-inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
+inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, ulong un_rc,
 		gsl_rng *rn) {
 	// size of @isof is already set
 	// read constraint asumes all 0's doesn't occur
@@ -116,17 +116,17 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 	{
 		// go "up" to find transcript start head
 
-		uint cur_node = *ts_iter;
+		ulong cur_node = *ts_iter;
 		isof.set(cur_node);
 
 		DGInEdgeIter in_i, in_end;
 		tie(in_i, in_end) = in_edges(cur_node, graph.graph);
 
 		while (in_i != in_end) {
-			uint go2node = gsl_rng_uniform_int(rn,
+			ulong go2node = gsl_rng_uniform_int(rn,
 					in_degree(cur_node, graph.graph));
 
-			for (uint i = 0; i != go2node; ++i) {
+			for (ulong i = 0; i != go2node; ++i) {
 				++in_i;
 			}
 
@@ -137,20 +137,20 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 	}
 
 	// last node that has a constraint
-	uint last_rc_node = *ts_iter;
+	ulong last_rc_node = *ts_iter;
 	++ts_iter;
 
 	// extend "back up" to
 	// connect to the previous contraint
 	while (ts_iter != graph.topo_sort.end()) {
 		if (rc[*ts_iter] == true) {
-			uint cur_node = *ts_iter;
+			ulong cur_node = *ts_iter;
 
 			isof.set(cur_node);
 
 			while (cur_node != last_rc_node) {
 
-				vector<uint> edges_in;
+				vector<ulong> edges_in;
 
 				DGInEdgeIter in_i, in_end;
 				tie(in_i, in_end) = in_edges(cur_node, graph.graph);
@@ -164,7 +164,7 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 				std::random_shuffle(edges_in.begin(), edges_in.end(),
 						rn_wrapper);
 
-				for (vector<uint>::const_iterator i = edges_in.begin();
+				for (vector<ulong>::const_iterator i = edges_in.begin();
 						i != edges_in.end(); ++i) {
 					if (edge(last_rc_node, *i, graph.tc).second
 							|| *i == last_rc_node) {
@@ -185,7 +185,7 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 		// extend last node to end,
 		// go "down" to end
 
-		uint cur_node = last_rc_node;
+		ulong cur_node = last_rc_node;
 
 		isof.set(cur_node);
 
@@ -193,10 +193,10 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 		tie(out_i, out_end) = out_edges(cur_node, graph.graph);
 
 		while (out_i != out_end) {
-			uint go2node = gsl_rng_uniform_int(rn,
+			ulong go2node = gsl_rng_uniform_int(rn,
 					out_degree(cur_node, graph.graph));
 
-			for (uint i = 0; i != go2node; ++i) {
+			for (ulong i = 0; i != go2node; ++i) {
 				++out_i;
 			}
 
@@ -207,7 +207,7 @@ inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, uint un_rc,
 	}
 }
 
-inline bool _isof_start_ok(DirectedGraph const &graph, uint cur_vert,
+inline bool _isof_start_ok(DirectedGraph const &graph, ulong cur_vert,
 		IsoformMap const &isofs, Isoform &isof) {
 	isof.set(cur_vert);
 
@@ -228,7 +228,7 @@ inline bool _isof_start_ok(DirectedGraph const &graph, uint cur_vert,
 
 }
 
-inline bool isof_start_ok(DirectedGraph const &graph, uint vert,
+inline bool isof_start_ok(DirectedGraph const &graph, ulong vert,
 		IsoformMap const &isofs) {
 	Isoform isof(num_vertices(graph));
 	return _isof_start_ok(graph, vert, isofs, isof);
@@ -260,7 +260,7 @@ inline void isoform_MCMC_init(
 	for (vector<SpliceGraph>::const_iterator i = graphs.begin();
 			i != graphs.end(); ++i, ++isof_set_iter) {
 
-		uint rc_size = i->read_constraints.size();
+		ulong rc_size = i->read_constraints.size();
 
 		// 1 - unsatisfied
 		// 0 - satisfied
@@ -268,7 +268,7 @@ inline void isoform_MCMC_init(
 		satisfied_rc.set();
 
 		while (satisfied_rc.any()) {
-			uint un_rc = 0; // un-satisfied read constraint index
+			ulong un_rc = 0; // un-satisfied read constraint index
 			while (satisfied_rc[un_rc] == false) {
 				++un_rc;
 			}
@@ -278,7 +278,7 @@ inline void isoform_MCMC_init(
 			rand_rc_isof(*i, isof, un_rc, rn);
 			isof_set_iter->insert(make_pair(isof, 0.0L));
 
-			for (uint j = 0; j != rc_size; ++j) {
+			for (ulong j = 0; j != rc_size; ++j) {
 				if (satisfied_rc[j] == true) {
 					if (isof == (isof | i->read_constraints[j])) {
 						satisfied_rc[j] = false;
@@ -295,7 +295,7 @@ inline void isoform_MCMC_init(
 	vector<IsoformMap>::const_iterator graph_isof_iter = graph_isoforms.begin();
 	for (vector<SpliceGraph>::iterator i = graphs.begin(); i != graphs.end();
 			++i, ++graph_isof_iter) {
-		for (vector<uint>::const_iterator j = i->start_nodes.begin();
+		for (vector<ulong>::const_iterator j = i->start_nodes.begin();
 				j != i->start_nodes.end(); ++j) {
 			i->vert_start_ok[*j] = isof_start_ok(i->graph, *j,
 					*graph_isof_iter);
@@ -320,7 +320,7 @@ inline void isoform_MCMC_init(
 	// assign random expression levels according
 	// to a dirichlet distribution
 
-	uint isofs_size = 0;
+	ulong isofs_size = 0;
 	for (isof_set_iter = graph_isoforms.begin();
 			isof_set_iter != graph_isoforms.end(); ++isof_set_iter) {
 		isofs_size += isof_set_iter->size();
@@ -338,8 +338,8 @@ inline void isoform_MCMC_init(
 
 		delete[] dir_alpha;
 
-		uint isof_exp_ind = 0;
-		uint graph_ind = 0;
+		ulong isof_exp_ind = 0;
+		ulong graph_ind = 0;
 
 		for (isof_set_iter = graph_isoforms.begin();
 				isof_set_iter != graph_isoforms.end();
@@ -371,7 +371,7 @@ inline void isoform_MCMC_init(
 		// use in proposal distributions
 
 		isof_set_iter = graph_isoforms.begin();
-		uint graph_ind = 0;
+		ulong graph_ind = 0;
 		for (vector<IsoformMap>::iterator i = opt_graph_ratios.begin();
 				i != opt_graph_ratios.end(); ++i) {
 
@@ -417,7 +417,7 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 	// and Barbara Wold. Mapping and quantifying mammalian
 	// transcriptomes by RNA-seq. Nature Methods, 5(7):621–628, May 2008.
 
-	uint graph_num = graphs.size();
+	ulong graph_num = graphs.size();
 
 	// initial weight a graph gets
 	double const kGraphWeightInit = 1.0;
@@ -426,13 +426,13 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 	vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
 	vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
 	vector<GraphReads>::const_iterator graph_read_iter = graph_reads.begin();
-	uint cur_graph = 0;
+	ulong cur_graph = 0;
 
 	double tot_unique_weight = double(graph_num) * kGraphWeightInit;
 
 	while (cur_graph != graph_num) {
 
-		uint graph_len = 0;
+		ulong graph_len = 0;
 		for (vector<Node>::const_iterator i = graph_info_iter->nodes.begin();
 				i != graph_info_iter->nodes.end(); ++i) {
 			graph_len += i->est_len;
@@ -457,7 +457,7 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 				graph_read_iter->reads.begin();
 				i != graph_read_iter->reads.end(); ++i) {
 
-			uint align_num = i->get_align_num(read_in_graph);
+			ulong align_num = i->get_align_num(read_in_graph);
 
 			if (align_num != 1) {
 				// weight of a unique read
@@ -476,12 +476,12 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		++graph_read_iter;
 	}
 
-	for (uint i = 0; i != graph_num; ++i) {
+	for (ulong i = 0; i != graph_num; ++i) {
 		dir_graph_weights[i] /= 8.0;
 	}
 
 #ifdef DEBUG
-	for (uint i = 0; i != graph_num; ++i) {
+	for (ulong i = 0; i != graph_num; ++i) {
 		cerr << dir_graph_weights[i] << " ";
 	}
 	cerr << endl;
@@ -491,18 +491,18 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 }
 
 template<class RNodeLoc>
-inline uint choose_graph_to_mod(gsl_rng *rn, vector<SpliceGraph> const &graphs,
+inline ulong choose_graph_to_mod(gsl_rng *rn, vector<SpliceGraph> const &graphs,
 		vector<IsoformMap> const &graph_isoforms,
 		vector<GraphReads> const &graph_reads,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		double * const graph_weights) {
 
-	uint graph_weight_ind = 0;
+	ulong graph_weight_ind = 0;
 	vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
 	vector<IsoformMap>::const_iterator graph_isof_iter = graph_isoforms.begin();
 	vector<GraphReads>::const_iterator graph_read_iter = graph_reads.begin();
 
-	uint graph_num = graphs.size();
+	ulong graph_num = graphs.size();
 
 	while (graph_weight_ind != graph_num) {
 
@@ -518,7 +518,7 @@ inline uint choose_graph_to_mod(gsl_rng *rn, vector<SpliceGraph> const &graphs,
 	gsl_ran_discrete_t *choose_graph = gsl_ran_discrete_preproc(graph_num,
 			graph_weights);
 
-	uint chosen_graph_ind = gsl_ran_discrete(rn, choose_graph);
+	ulong chosen_graph_ind = gsl_ran_discrete(rn, choose_graph);
 
 	gsl_ran_discrete_free(choose_graph);
 
@@ -526,13 +526,13 @@ inline uint choose_graph_to_mod(gsl_rng *rn, vector<SpliceGraph> const &graphs,
 }
 
 template<class RNodeLoc>
-inline uint _add_isof_weight(IsoformMap const &opt_graph_ratio,
+inline ulong _add_isof_weight(IsoformMap const &opt_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
 
 template<class RNodeLoc>
-inline uint _del_isof_weight(IsoformMap const &opt_graph_ratio,
+inline ulong _del_isof_weight(IsoformMap const &opt_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
@@ -629,9 +629,9 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		graph_expr_val += i->second;
 	}
 
-	uint add_isof_weight = _add_isof_weight(opt_graph_ratio, graph_info, graph,
+	ulong add_isof_weight = _add_isof_weight(opt_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph);
-	uint del_isof_weight = _del_isof_weight(opt_graph_ratio, graph_info, graph,
+	ulong del_isof_weight = _del_isof_weight(opt_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph);
 
 	if (add_isof_weight == 0 && del_isof_weight == 0) {
@@ -699,10 +699,10 @@ template<class RNodeLoc>
 inline void isoform_main(vector<GraphInfo> const &graph_infos,
 		vector<SpliceGraph> &graphs,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		vector<GraphReads> const &graph_reads, uint max_run) {
+		vector<GraphReads> const &graph_reads, ulong max_run) {
 
 	// number of graphs
-	uint graph_num = graphs.size();
+	ulong graph_num = graphs.size();
 
 	// used to update expression value
 	// of each graph
@@ -713,7 +713,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 			dir_graph_weights);
 
 	double tot_dir_graph_weight = 0;
-	for (uint i = 0; i != graph_num; ++i) {
+	for (ulong i = 0; i != graph_num; ++i) {
 		tot_dir_graph_weight += dir_graph_weights[i];
 	}
 
@@ -739,9 +739,9 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 		// modify the graph's isoform set
 		double *graph_weights = new double[graph_num];
 
-		for (uint runs = 0; runs != max_run; ++runs) {
+		for (ulong runs = 0; runs != max_run; ++runs) {
 
-			uint chosen_graph_ind = choose_graph_to_mod(rn, graphs,
+			ulong chosen_graph_ind = choose_graph_to_mod(rn, graphs,
 					graph_isoforms, graph_reads, read_in_graph, graph_weights);
 
 			// if accepted @graph_isoform ->

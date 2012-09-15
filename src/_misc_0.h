@@ -23,7 +23,7 @@
 #ifndef _MISC_0_H_
 #define _MISC_0_H_
 
-typedef unsigned int uint;
+typedef unsigned long ulong;
 typedef long double ldbl;
 
 #endif // _MISC_0_H_

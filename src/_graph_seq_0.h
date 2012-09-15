@@ -69,19 +69,19 @@ using std::endl;
  */
 class Node {
 public:
-	Node(uint node_id_, string seq_) :
+	Node(ulong node_id_, string seq_) :
 			node_id(node_id_), seq(seq_), est_len(seq_.size()) {
 	}
 
-	uint node_id;
+	ulong node_id;
 
 	// all the alignment positions are according to
 	// @seq, but the length used in estimation is
 	// @est_len
 	string seq;
-	uint est_len;
+	ulong est_len;
 
-	vector<uint> edges;
+	vector<ulong> edges;
 };
 
 class PyGraph {
@@ -89,7 +89,7 @@ public:
 	PyGraph() {
 	}
 
-	uint graph_id;
+	ulong graph_id;
 	vector<Node> nodes;
 };
 
@@ -100,13 +100,13 @@ typedef PyGraph GraphInfo;
  */
 class SeqLoc {
 public:
-	SeqLoc(uint node_id_, uint start_, uint end_) :
+	SeqLoc(ulong node_id_, ulong start_, ulong end_) :
 			node_id(node_id_), start(start_), end(end_) {
 	}
 
-	uint node_id;
-	uint start;
-	uint end;
+	ulong node_id;
+	ulong start;
+	ulong end;
 };
 
 /*
@@ -154,7 +154,7 @@ typedef boost::unordered_map<Isoform, double, IsoformHash> IsoformMap;
 
 class SpliceGraph {
 public:
-	uint graph_id;
+	ulong graph_id;
 
 	vector<SeqConstraint> read_constraints;
 
@@ -165,7 +165,7 @@ public:
 	// TODO: get stuff out of MCMC results
 	vector<IsoformMap> mcmc_results;
 
-	vector<uint> start_nodes;
+	vector<ulong> start_nodes;
 
 	// whether it's OK or not to start
 	// an isoform at this node
@@ -200,11 +200,11 @@ public:
 template<class RNodeLoc> // Read Node Loc
 class ReadGraphLoc {
 public:
-	ReadGraphLoc(uint graph_id_) :
+	ReadGraphLoc(ulong graph_id_) :
 			graph_id(graph_id_) {
 	}
 
-	uint graph_id;
+	ulong graph_id;
 
 	// distinct location(s) of the read in the graph
 	vector<RNodeLoc> locs;
@@ -216,7 +216,7 @@ public:
 	ReadInGraph() {
 	}
 
-	uint read_id;
+	ulong read_id;
 
 	// graphs that contain the read
 	vector<ReadGraphLoc<RNodeLoc> > graph_locs;
@@ -229,19 +229,19 @@ public:
  */
 class ReadIndex {
 public:
-	ReadIndex(uint read_id_, uint graph_index_, uint align_index_) :
+	ReadIndex(ulong read_id_, ulong graph_index_, ulong align_index_) :
 			read_id(read_id_), graph_index(graph_index_), align_index(
 					align_index_) {
 	}
 
-	uint read_id;
-	uint graph_index;
-	uint align_index;
+	ulong read_id;
+	ulong graph_index;
+	ulong align_index;
 
 	template<class RNodeLoc>
-	inline uint get_align_num(
+	inline ulong get_align_num(
 			vector<ReadInGraph<RNodeLoc> > const &read_in_graph) const {
-		uint align_num = 0;
+		ulong align_num = 0;
 
 		ReadInGraph<RNodeLoc> const &cur_read_in_graph = read_in_graph[read_id];
 
@@ -265,7 +265,7 @@ public:
  */
 class GraphReads {
 public:
-	uint graph_id;
+	ulong graph_id;
 	vector<ReadIndex> reads;
 };
 

@@ -16,29 +16,29 @@
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 
-from misc_0 cimport uint
+from misc_0 cimport ulong
 
 cdef extern from "_graph_seq_0.h" namespace "_graph_seq_0":
     cdef cppclass SeqLoc:
-        SeqLoc(uint, uint, uint) except +
+        SeqLoc(ulong, ulong, ulong) except +
         
-        uint node_id
-        uint start
-        uint end
+        ulong node_id
+        ulong start
+        ulong end
     
     ctypedef vector[SeqLoc] ReadNodeLoc
     
     cdef cppclass Node:
-        Node(uint, string) except +
+        Node(ulong, string) except +
         
-        uint node_id
+        ulong node_id
         string seq_len
-        vector[uint] edges
+        vector[ulong] edges
     
     cdef cppclass PyGraph:
         PyGraph() except +
         
-        uint graph_id
+        ulong graph_id
         vector[Node] nodes
     
     cdef cppclass Fasta:
@@ -48,15 +48,15 @@ cdef extern from "_graph_seq_0.h" namespace "_graph_seq_0":
         string seq 
     
     cdef cppclass ReadGraphLoc[T]:
-        ReadGraphLoc(uint) except +
+        ReadGraphLoc(ulong) except +
             
-        uint graph_id
+        ulong graph_id
         vector[T] locs
     
     cdef cppclass ReadInGraph[T]:
         ReadInGraph() except +
         
-        uint read_id
+        ulong read_id
         vector[ReadGraphLoc[T]] graph_locs
 
 
