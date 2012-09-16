@@ -566,7 +566,10 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	get_vert_start_info(graph_isoform, opt_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph, vert_start_probs);
 
-	// TODO: get @new_graph_isof, @new_opt_ratio
+	// TODO: get @new_graph_isof
+
+	get_opt_graph_ratio(new_graph_isof, new_opt_ratio, graph_info, graph,
+			graph_read, read_in_graph);
 
 	double *new_isof_del_probs = new double[graph_isoform.size()];
 
@@ -597,7 +600,10 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 	get_isof_del_info(graph_isoform, opt_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph, isof_del_probs);
 
-	// TODO: get @new_graph_isof, @new_opt_ratio
+	// TODO: get @new_graph_isof
+
+	get_opt_graph_ratio(new_graph_isof, new_opt_ratio, graph_info, graph,
+			graph_read, read_in_graph);
 
 	double *new_vert_start_probs = new double[num_vertices(graph.graph)];
 
