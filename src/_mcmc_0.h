@@ -32,6 +32,8 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_multimin.h>
+#include <NLF.h>
+#include <OptNewton.h>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -75,6 +77,10 @@ using _graph_seq_0::Node;
 using std::fill;
 using _graph_seq_0::ReadIndex;
 using std::min;
+using NEWMAT::ColumnVector;
+using NEWMAT::SymmetricMatrix;
+using OPTPP::NLP;
+using OPTPP::NLF2;
 
 #ifdef DEBUG
 using std::cerr;
@@ -233,12 +239,32 @@ inline bool isof_start_ok(DirectedGraph const &graph, ulong vert,
 	return _isof_start_ok(graph, vert, isofs, isof);
 }
 
+namespace _graph_ratio_calc {
+
+}
+
+template<class RNodeLoc>
+void init_opt_graph_ratio_calc(int ndim, ColumnVector &x) {
+}
+
+template<class RNodeLoc>
+void graph_ratio_calc(int mode, int ndim, const ColumnVector &x, double &fx,
+		ColumnVector &gx, SymmetricMatrix &Hx, int &result) {
+}
+
 template<class RNodeLoc>
 inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &opt_graph_ratio /* this map is empty */,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
+
+	int ndim = graph_isoform.size();
+
+	NLF2 calc(ndim, graph_ratio_calc<RNodeLoc>,
+			init_opt_graph_ratio_calc<RNodeLoc>);
+
+	calc.initFcn();
 
 }
 
