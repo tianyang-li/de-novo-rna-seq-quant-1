@@ -251,6 +251,8 @@ inline bool isof_start_ok(DirectedGraph const &graph, ulong vert,
 
 namespace _graph_ratio_calc {
 
+Real *init_x;
+
 }
 
 template<class RNodeLoc>
@@ -290,9 +292,16 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 	}
 	delete[] all_0;
 
-	Constraint geq0 = new BoundConstraint(ndim, lower);
-	Constraint sum_eq1 = new LinearEquation(sum_eq1_mat, sum_eq1_vec);
+	Constraint geq0(new BoundConstraint(ndim, lower));
+	Constraint sum_eq1(new LinearEquation(sum_eq1_mat, sum_eq1_vec));
 	CompoundConstraint *constraints = new CompoundConstraint(geq0, sum_eq1);
+
+	_graph_ratio_calc::init_x = new Real[ndim];
+	IsoformMap::const_iterator isof_iter = graph_isoform.begin();
+	for (int i = 0; i != ndim; ++i, ++isof_iter) {
+		_graph_ratio_calc::init_x[i] = isof_iter->second;
+	}
+	delete [] _graph_ratio_calc::init_x;
 
 	NLF2 calc(ndim, graph_ratio_calc<RNodeLoc>,
 			init_opt_graph_ratio_calc<RNodeLoc>, constraints);

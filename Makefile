@@ -74,6 +74,9 @@ clean:
 	rm -rfv src/*.cpp
 	#rm -rfv gsl-1.15/ #TODO make this into a command 
 
-.PHONY: all clean
+learn:
+	cd learn && $(MAKE)
+
+.PHONY: all clean learn
 
 
