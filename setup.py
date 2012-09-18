@@ -29,7 +29,6 @@ cflags = ['-Wall', '-Wextra', '-Wconversion',
           '-fshort-enums',
           '-fno-common',
           #'-Wshadow',
-          '-DHAVE_STD' , '-DHAVE_NAMESPACES',
           ]
 
 

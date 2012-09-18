@@ -1,7 +1,6 @@
 CC = g++
 
 CFLAGS = -Wall -fPIC -Wconversion -Wextra -ggdb -DDEBUG \
--DHAVE_STD -DHAVE_NAMESPACES \
 -Wall -W -Wmissing-prototypes \
 -Wstrict-prototypes \
 -Wwrite-strings -Wnested-externs \
@@ -12,8 +11,7 @@ CFLAGS = -Wall -fPIC -Wconversion -Wextra -ggdb -DDEBUG \
  
 AR = ar
 
-INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0 -Ioptpp-2.4/include \
--Ioptpp-2.4/newmat11
+INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0
 
 all: util/single_1.so
 
@@ -22,22 +20,6 @@ util/single_1.so: lib/libnewmat.a lib/libopt.a lib/libgsl.a setup.py \
 
 	python setup.py build_ext -i 
 	mv single_1.so util/
-
-lib/libopt.a:
-	tar xzvf optpp-2.4.tar.gz
-	
-	cd optpp-2.4 && ./configure CFLAGS="-fPIC" CPPFLAGS="-fPIC" \
-		FFLAGS="-fPIC" && $(MAKE)
-	
-	cp optpp-2.4/lib/.libs/*.a lib
-
-lib/libnewmat.a:
-	tar xzvf optpp-2.4.tar.gz
-	
-	cd optpp-2.4 && ./configure CFLAGS="-fPIC" CPPFLAGS="-fPIC" \
-		FFLAGS="-fPIC" && $(MAKE)
-	
-	cp optpp-2.4/lib/.libs/*.a lib
 
 src/single_1.pyx: src/graph_seq_0.pxd
 

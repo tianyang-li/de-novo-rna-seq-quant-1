@@ -32,12 +32,6 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_multimin.h>
-#include <NLF.h>
-#include <OptNewton.h>
-#include <LinearEquation.h>
-#include <CompoundConstraint.h>
-#include <BoundConstraint.h>
-#include <Constraint.h>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -81,16 +75,6 @@ using _graph_seq_0::Node;
 using std::fill;
 using _graph_seq_0::ReadIndex;
 using std::min;
-using NEWMAT::ColumnVector;
-using NEWMAT::SymmetricMatrix;
-using NEWMAT::Matrix;
-using OPTPP::NLP;
-using OPTPP::NLF2;
-using OPTPP::LinearEquation;
-using OPTPP::CompoundConstraint;
-using OPTPP::BoundConstraint;
-using OPTPP::Constraint;
-using NEWMAT::Real;
 
 #ifdef DEBUG
 using std::cerr;
@@ -249,26 +233,6 @@ inline bool isof_start_ok(DirectedGraph const &graph, ulong vert,
 	return _isof_start_ok(graph, vert, isofs, isof);
 }
 
-namespace _graph_ratio_calc {
-
-class OptGraphRatioAux {
-public:
-	Real *init_x;
-};
-
-extern OptGraphRatioAux *opt_graph_ratio_aux;
-
-}
-
-template<class RNodeLoc>
-void init_opt_graph_ratio_calc(int ndim, ColumnVector &x) {
-}
-
-template<class RNodeLoc>
-void graph_ratio_calc(int mode, int ndim, const ColumnVector &x, double &fx,
-		ColumnVector &gx, SymmetricMatrix &Hx, int &result) {
-}
-
 template<class RNodeLoc>
 inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &opt_graph_ratio /* this map is empty */,
@@ -276,37 +240,7 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, ulong thread_id) {
 
-	int ndim = graph_isoform.size();
 
-	Matrix sum_eq1_mat(1, ndim);
-	Real *all_1 = new Real[ndim];
-	fill(all_1, all_1 + ndim, 1);
-	for (int i = 0; i != ndim; ++i) {
-		sum_eq1_mat << all_1;
-	}
-	delete[] all_1;
-
-	ColumnVector sum_eq1_vec(1);
-	sum_eq1_vec << 1;
-
-	ColumnVector lower(ndim);
-	Real *all_0 = new Real[ndim];
-	fill(all_0, all_0 + ndim, 0);
-	for (int i = 0; i != ndim; ++i) {
-		lower << all_0;
-	}
-	delete[] all_0;
-
-	Constraint geq0(new BoundConstraint(ndim, lower));
-	Constraint sum_eq1(new LinearEquation(sum_eq1_mat, sum_eq1_vec));
-	CompoundConstraint *constraints = new CompoundConstraint(geq0, sum_eq1);
-
-	NLF2 calc(ndim, graph_ratio_calc<RNodeLoc>,
-			init_opt_graph_ratio_calc<RNodeLoc>, constraints);
-
-	calc.initFcn();
-
-	delete constraints;
 
 }
 
@@ -794,9 +728,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 		tot_dir_graph_weight += dir_graph_weights[i];
 	}
 
-	_graph_ratio_calc::opt_graph_ratio_aux =
-			new _graph_ratio_calc::OptGraphRatioAux[num_thread];
-
 	// TODO: multiple chains pthread parallelization
 	ulong thread_id = 0;
 
@@ -869,8 +800,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 	}
 
 	delete[] dir_graph_weights;
-
-	delete[] _graph_ratio_calc::opt_graph_ratio_aux;
 
 	// TODO: put @mcmc_results into @graphs
 
