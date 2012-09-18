@@ -31,7 +31,7 @@
 #include <boost/unordered_map.hpp>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <gsl/gsl_multimin.h>
+#include <nlopt.hpp>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
