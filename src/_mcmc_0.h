@@ -31,7 +31,6 @@
 #include <boost/unordered_map.hpp>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <nlopt.hpp>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -238,8 +237,15 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &opt_graph_ratio /* this map is empty */,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, ulong thread_id) {
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
 
+	ulong ndim = graph_isoform.size();
+
+	if (ndim != 1) {
+
+	} else {
+
+	}
 }
 
 template<class RNodeLoc>
@@ -248,7 +254,7 @@ inline void isoform_MCMC_init(
 		vector<GraphReads> const &graph_reads,
 		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> &graphs,
 		gsl_rng *rn, vector<IsoformMap> &graph_isoforms,
-		vector<IsoformMap> &opt_graph_ratios, ulong thread_id) {
+		vector<IsoformMap> &opt_graph_ratios) {
 
 #ifdef DEBUG
 	cerr << "enter isoform_MCMC_init\n";
@@ -376,7 +382,7 @@ inline void isoform_MCMC_init(
 
 			get_opt_graph_ratio(graph_isoforms[graph_ind], *i,
 					graph_infos[graph_ind], graphs[graph_ind],
-					graph_reads[graph_ind], read_in_graph, thread_id);
+					graph_reads[graph_ind], read_in_graph);
 
 		}
 
@@ -557,8 +563,7 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
 		double action_prob,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
-		IsoformMap &new_opt_ratio /* empty, if accepted @opt_graph_ratio <- */,
-		ulong thread_id) {
+		IsoformMap &new_opt_ratio /* empty, if accepted @opt_graph_ratio <- */) {
 	double model_graph_ratio = 1;
 
 	double *vert_start_probs = new double[num_vertices(graph.graph)];
@@ -569,7 +574,7 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	// TODO: get @new_graph_isof
 
 	get_opt_graph_ratio(new_graph_isof, new_opt_ratio, graph_info, graph,
-			graph_read, read_in_graph, thread_id);
+			graph_read, read_in_graph);
 
 	double *new_isof_del_probs = new double[graph_isoform.size()];
 
@@ -592,8 +597,7 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
 		double action_prob,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
-		IsoformMap &new_opt_ratio /* empty, if accepted @opt_graph_ratio <- */,
-		ulong thread_id) {
+		IsoformMap &new_opt_ratio /* empty, if accepted @opt_graph_ratio <- */) {
 	double model_graph_ratio = 1;
 
 	double *isof_del_probs = new double[graph_isoform.size()];
@@ -604,7 +608,7 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 	// TODO: get @new_graph_isof
 
 	get_opt_graph_ratio(new_graph_isof, new_opt_ratio, graph_info, graph,
-			graph_read, read_in_graph, thread_id);
+			graph_read, read_in_graph);
 
 	double *new_vert_start_probs = new double[num_vertices(graph.graph)];
 
@@ -626,8 +630,7 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
-		IsoformMap &new_opt_ratio /* empty, if accepted @opt_graph_ratio <- */,
-		ulong thread_id) {
+		IsoformMap &new_opt_ratio /* empty, if accepted @opt_graph_ratio <- */) {
 
 	// return the ratio of adding or removing the isoform, or 1
 
@@ -691,13 +694,13 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 	case ADD:
 		return add_isof_ratio(graph_isoform, opt_graph_ratio, graph_info, graph,
 				graph_read, read_in_graph, rn, action_prob, new_graph_isof,
-				new_opt_ratio, thread_id);
+				new_opt_ratio);
 		break;
 
 	case DEL:
 		return del_isof_ratio(graph_isoform, opt_graph_ratio, graph_info, graph,
 				graph_read, read_in_graph, rn, action_prob, new_graph_isof,
-				new_opt_ratio, thread_id);
+				new_opt_ratio);
 		break;
 
 	}
@@ -727,9 +730,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 		tot_dir_graph_weight += dir_graph_weights[i];
 	}
 
-	// TODO: multiple chains pthread parallelization
-	ulong thread_id = 0;
-
 	{
 
 		gsl_rng *rn = gsl_rng_alloc(gsl_rng_mt19937);
@@ -741,7 +741,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 		vector<IsoformMap> opt_graph_ratios(graph_num);
 
 		isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs, rn,
-				graph_isoforms, opt_graph_ratios, thread_id);
+				graph_isoforms, opt_graph_ratios);
 
 		// main part of MCMC
 
@@ -768,7 +768,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 					opt_graph_ratios[chosen_graph_ind],
 					graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
 					graph_reads[chosen_graph_ind], read_in_graph, rn,
-					new_graph_isof, new_opt_ratio, thread_id);
+					new_graph_isof, new_opt_ratio);
 
 			double new_chosen_graph_portion = 1.0;
 			if (graph_num != 1) {
