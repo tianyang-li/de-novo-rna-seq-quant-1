@@ -703,6 +703,7 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		break;
 
 	}
+
 }
 
 template<class RNodeLoc>
