@@ -253,6 +253,7 @@ namespace _graph_ratio_calc {
 
 class OptGraphRatioAux {
 public:
+	Real *init_x;
 };
 
 extern OptGraphRatioAux *opt_graph_ratio_aux;
