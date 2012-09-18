@@ -11,13 +11,12 @@ CFLAGS = -Wall -fPIC -Wconversion -Wextra -ggdb -DDEBUG \
  
 AR = ar
 
-INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0
+INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0 
 
 all: util/single_1.so
 
-util/single_1.so: lib/libnewmat.a lib/libopt.a lib/libgsl.a setup.py \
-	lib/quant.a src/single_1.pyx  
-
+util/single_1.so: lib/libgsl.a \
+		setup.py lib/quant.a src/single_1.pyx  
 	python setup.py build_ext -i 
 	mv single_1.so util/
 
@@ -54,6 +53,7 @@ clean:
 	rm -rfv util/single_1.so
 	rm -rfv lib/*
 	rm -rfv src/*.cpp
+	rm -rfv Ipopt-install
 	#rm -rfv gsl-1.15/ #TODO make this into a command 
 
 learn:

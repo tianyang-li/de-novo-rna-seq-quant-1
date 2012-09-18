@@ -240,8 +240,6 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, ulong thread_id) {
 
-
-
 }
 
 template<class RNodeLoc>
