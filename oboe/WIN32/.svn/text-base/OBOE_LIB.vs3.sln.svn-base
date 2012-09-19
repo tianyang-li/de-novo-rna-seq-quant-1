@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 7.00
+# Visual Studio 2003
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OBOE_LIB.vs5", "OBOE_LIB.vs5.vcproj", "{66982C39-6BE2-41D7-961A-746DBC310D60}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MCFTest", "Test\MCFTest\MCFTest.vcproj", "{56762A46-2D32-431D-9B51-4D93612F8789}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OBOEPLUS", "OBOEPLUS\OBOEPLUS.vcproj", "{4B5A6073-47CD-4E39-AF08-342712A8A402}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{66982C39-6BE2-41D7-961A-746DBC310D60}.Debug|Win32.ActiveCfg = Debug|Win32
+		{66982C39-6BE2-41D7-961A-746DBC310D60}.Debug|Win32.Build.0 = Debug|Win32
+		{66982C39-6BE2-41D7-961A-746DBC310D60}.Release|Win32.ActiveCfg = Release|Win32
+		{66982C39-6BE2-41D7-961A-746DBC310D60}.Release|Win32.Build.0 = Release|Win32
+		{56762A46-2D32-431D-9B51-4D93612F8789}.Debug|Win32.ActiveCfg = Debug|Win32
+		{56762A46-2D32-431D-9B51-4D93612F8789}.Debug|Win32.Build.0 = Debug|Win32
+		{56762A46-2D32-431D-9B51-4D93612F8789}.Release|Win32.ActiveCfg = Release|Win32
+		{56762A46-2D32-431D-9B51-4D93612F8789}.Release|Win32.Build.0 = Release|Win32
+		{4B5A6073-47CD-4E39-AF08-342712A8A402}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4B5A6073-47CD-4E39-AF08-342712A8A402}.Debug|Win32.Build.0 = Debug|Win32
+		{4B5A6073-47CD-4E39-AF08-342712A8A402}.Release|Win32.ActiveCfg = Release|Win32
+		{4B5A6073-47CD-4E39-AF08-342712A8A402}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

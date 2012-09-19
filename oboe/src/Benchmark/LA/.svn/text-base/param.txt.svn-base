@@ -1,0 +1,13 @@
+NumSubProblems Int 1 
+NumVariables Int 5 
+ProblemName S "LATest" 
+MaxOuterIterations Int 50 
+MaxInnerIterations Int 10 
+#ObjectiveLB D -0.416666666666666
+Verbosity I 3
+Proximal I 1
+Ball I 1
+RadiusBall D 5 
+Tolerance D 0.00001
+WeightEpigraphCutInit D 1.0
+WeightEpigraphCutInc D 0.0

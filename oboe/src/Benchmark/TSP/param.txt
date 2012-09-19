@@ -1,0 +1,12 @@
+NumSubProblems Int 1 
+NumVariables Int 29 
+ProblemName S "TSP" 
+MaxOuterIterations Int 1000 
+MaxInnerIterations Int 50
+WeightEpigraphCutInc D 0
+Verbosity I 1
+Proximal I 1
+Tolerance D 0.000001
+#Rho D 1
+#DynamicRho I 1
+#RhoMax D 1

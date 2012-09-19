@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/APS
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/APS/Makefile.in
+END
+APSTest.C
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/APS/APSTest.C
+END
+APC_rot.reservoir
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/APS/APC_rot.reservoir
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/APS/Makefile.am
+END
+param.txt
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/APS/param.txt
+END

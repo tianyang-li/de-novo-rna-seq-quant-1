@@ -1,0 +1,14 @@
+NumSubProblems Int 1 
+NumVariables Int 20 
+ProblemName S "CSTest" 
+MaxOuterIterations Int 50 
+MaxInnerIterations Int 50 
+Verbosity I 3
+Proximal I 1
+Tolerance D 0.00001
+Rho D 1
+DynamicRho I 0
+WeightEpigraphCutInit D 1.0
+WeightEpigraphCutInc D 0
+ObjectiveUB D 0
+ObjectiveLB D -100000

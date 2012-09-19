@@ -1,0 +1,14 @@
+NumSubProblems Int 5 
+NumVariables Int 5 
+ProblemName S "QPTest" 
+#MaxOuterIterations Int 100 
+#MaxInnerIterations Int 50 
+#ObjectiveLB D -0.416666666666666
+Verbosity I 0
+Proximal I 1
+#Ball I 1
+#RadiusBall D 5 
+Tolerance D 0.000001
+WeightEpigraphCutInit D 1.0
+WeightEpigraphCutInc D 1.0
+Filter I 1

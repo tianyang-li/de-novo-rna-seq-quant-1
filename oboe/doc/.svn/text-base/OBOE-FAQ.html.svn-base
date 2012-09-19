@@ -1,0 +1,227 @@
+<html><head><p class="fixed">
+<title> OBOE FAQ </title>
+<LINK REV="made" HREF="mailto:nsawhney@gmail.com">
+
+</head>
+<body>
+<b>OBOE (Oracle Based Optimization Engine) Frequently Asked Questions</b><br>
+<br>
+<ul>
+<li>What is OBOE?<br>
+OBOE is an optimization engine for solving non-differentiable convex
+problems. It solves problems where the objective function is composed
+of 2 parts, one smooth and the other non-smooth. It uses the
+sub-differential information for the non-smooth and the gradients and
+hessian for the smooth part to find the optimal solution using interior
+point methods.<br>
+<br>
+<li>What is ACCPM?<br>
+ACCPM stands for Analytic Center Cutting Plane Methods, which is a
+class of methods using analytic centers of a localization set defining
+the problem domain. It uses interior point method framework to move
+from one solution to the next and eventually converging to optimality.<br>
+<br>
+<li>What is the difference between OBOE and ACCPM?<br>
+ACCPM is the methodology behind OBOE. OBOE is the product based on ACCPM theory.<br>
+<br>
+<li>What does "proximal" refer to in proximal ACCPM?<br>
+ACCPM uses polyhedral relaxation scheme to minimize the non-differentiable
+convex functions. This involves replacing the original function with variables
+bounding these functions and using these variables in the objective function.
+So instead of minimizing f1(y),  where f1(.) is a convex non-diffentiable function
+we minimize z, such that <pre>	f1(y) &lt;= z.</pre><br>
+In general ACCPM minimizes a linear objective function which is a surrogate for
+the original f1(y) + f2(y). It also adds a lograthmic barrier fucntion to the 
+objective function which ensures the required constraints are satisfied.
+The use of this barrier term is standard in interior point 
+methods.<br>
+The proximal ACCPM adds one more component to the objective to be
+minimized. The proximal term given by:	
+<pre>	(&rho/2) * (y - yc) * Q * (y - yc),</pre>
+is also added to the objective function.<br>
+This term can be seen as a spring which can be used to control the movement
+of the query point from the current analytic center, yc.<br>
+The parameter &rho can be controlled by the ACCPM::Parameter Rho and DynamicRho.
+<br><br>
+<li>How do I use OBOE?<br>
+OBOE is a distributed as a bunch of C++ libraries. The user needs to
+implement the "Oracle" by deriving from the ACCPM::Oracle class.<br>
+Then the user creates a query point generator object ACCPM::QpGenerator
+which takes in the oracle and parameters. The parameter setting are
+input by creating an ACCPM::Parameter object which reads in set of
+parameters from a text file.<br>
+<br>
+<li>How do I set the parameters for OBOE?<br>
+OBOE provides a parameter class, ACCPM::Parameter. The user needs to instantiate an object of this class
+and provide the parameter values in one of 2 ways:
+<br>i.Write the parameters and their values in a text file and instantiate the parameter object with this file.
+This can be used only for specifying integer, real and string valued parameters. To specify a vector of values for example to
+set the starting point or set lower bounds on variables the user needs to use the API of ACCPM::Parameter class.
+The text file based parameter setting is useful incase the user wants to try different settings, in  this case they only need
+to change the values in the text file and run the executable again, there is no need to compiling their code again.
+<br>ii. The other way is to use the API provided by ACCPM::Parameter class.
+
+<br><br>
+<li>How do I set the starting point?<br>
+The user can use the following function provided with ACCPM::Parameter
+<pre>	bool setStartingPoint(const StdRealVector&amp; v);</pre>
+<br>
+<li>How do I set the weights on the objective function?<br>
+OBOE supports the following formulation:
+<pre>	min &pi * f1(y) + f2(y)</pre>
+The &pi vector can be set using the following function of ACCPM::Parameter
+<pre>	bool setPi(const StdRealVector&amp; v);</pre>
+The vector v should be of same size as the "NumSubproblems" number of
+subproblems parameter. This parameter is default to 1, but can be more
+if the user chooses to decompose the non-smooth component f1(.) and
+represent it as a weighted sum of non-smooth functions.<br>
+<br>
+<li>How do I set the linear component?<br>
+The linear component i.e the case when the smooth function f2(.) is a linear 
+function can specified easily with either of the following functions of 
+ACCPM::Parameter <br>
+<pre>	bool setB(const StdRealVector&amp; v);
+	bool setB(const AccpmVector&amp; v);</pre>
+The vector v should have the same size as the number of variables 
+"NumVariables" parameter. <br>
+This is easier than having to specify the linear function as a smooth
+function and implementing the oracle for it, since in this case the
+gradient value is always the same.<br>
+Note, however if the f2(.) is a smooth function which has a linear
+component and a non-linear component, the user needs to specify this
+via the smooth oracle using the ACCPM::Oracle object and implementing
+the ACCPM::Oracle::eval function. OBOE supports either the linear
+component being specified via setB() function or specifying the
+smooth oracle but not both.<br>
+<br>
+<li>How do I specify the smooth component f2(.)?<br>
+To specify the smooth component the user needs to implement another oracle which gives the gradient and 
+hessian of the function at a given query point.
+<br><br>
+<li>What does the NumSubProblems parameter do?<br>
+The "NumSubProblems" parameter is used to specify the number of components of the non-smooth f1(.) function.
+By default this value is 1. For some problems it is more natural to specify the f1(.) function as a sum of convex functions.
+This is referred to as the disaggregated mode. The user can then give the sungradients of each of the component functions instead of
+giving one subgradient. This approach helps in cases the oracle gives more information at each iteration and hence the number of
+iterations needed for convergence is expected to reduce. On the other hand this increases the size of the matrices as the oracle
+returns NumSubProlems number of cuts at each iteration.
+
+<br><br>
+<li>What is the difference between Outer and Inner Iterations?<br>
+Outer Iterations are the iterations which OBOE needs to reach convergence or some other termination criterion.
+At each iteration OBOE comes back with a query point and asks the user defined oracle to give the subgradient information
+via the ACCPM::Oracle::eval function call. The user can specify the maximum number of such iterations to be performed by 
+using the parameter MaxOuterIterations.<br>
+Inner Iterations on the other hand are the iterations performed within each outer iteration to solve the Newton System to
+a certain precision.The user can specify the maximum number of such iterations to be performed by 
+using the parameter MaxInnerIterations. The default value for this parameter is 50.<br>
+In the end OBOE reports the total number of outer as well as inner iterations.
+<br><br>
+<li>Can I specify general non-linear constraints?<br>
+No, currently OBOE does not support general non-linear constraints. The only
+non-linear constraint supported is of the form of a "ball constraint" i.e.
+the variables are  restricted to be within a ball centered around a given point
+and with a given radius,
+<pre>	(y - c)'(y - c) &lt;= r.</pre>
+<br>
+<li>How do I set bounds on the variables?<br>
+The ACCPM::Parameter object provides API for this functionality.<br>
+The user needs to create an std vector of size equal to number of variables<br>
+in the problem. The vector should have the bounds for the variables.<br>
+The following functions allow the user to set the lower and upper bounds 
+respectively:
+<pre>	bool setVariableLB(const StdRealVector&amp; v);
+	bool setVariableUB(const StdRealVector&amp; v);</pre>
+<br>
+<li>How do I specify ball constraints for the variables?<br>
+The user needs to give the center and the radius of the ball in which the <br>
+variables lie. The center can be specified by the following function of<br>
+ACCPM::Parameter
+<pre>	bool setCenterBall(const StdRealVector&amp; v);</pre>
+and the radius is set using the double parameter "RadiusBall", for example,
+<pre>	param.setRealParameter("RadiusBall", 5); </pre>
+<br>
+<li>How does the Filter parameter work?<br>
+The Filter parameter which is set by the following example code:
+<pre>	param.setIntParameter("Filter", true)</pre>
+or putting it in the input parameter file as follows
+<pre>	Filter Int 1</pre>
+This enables OBOE to filter away duplicate cuts incase the oracle
+generates them. The default value of this parameter is set to 1, unless
+the user has strong reason to disable it we recommend that the user
+keeps the filter enabled as it does away with redundant cut information.<br>
+<br>
+<li>How do I disable Filter?<br>
+The user can disable Filter by adding the following to the parameter file:
+<pre>	Filter Int 0</pre>
+<br>
+<li>Can I verify if my problem satifies convexity with OBOE?<br>
+The user can use the "ConvexityCheck" parameter for enabling the checking of<br>
+convexity. This reports if the user has given cuts which violate convexity.<br>
+The user can instruct OBOE to "fix" these violations if it is possible, by enabling the ConvexityFix parameter.<br>
+By default both these parameters are off.
+<br><br>
+<li>What is the termination criterion for OBOE?<br>
+OBOE uses one of the following criterion for termination: <br>
+1. MaxOuterIterations : If the number of outer iterations reaches this number OBOE terminates.<br>
+2. Tolerance : If the relative gap becomes less than the specified Tolerance value. <br>
+3. User Stop : If the user signals to stop the iterations by sending a 1 in the ACCPM::Oracle::eval function.
+<br><br>
+<li>What is Relative Gap?<br>
+Relative Gap is used as a measure for the quality of a solution. For 
+minimization problem it is defined as follows:
+<pre>(ObjectiveUB - ObjectiveLB) / ObjectiveUB,</pre>
+where ObjectiveUB and ObjectiveLB are the current upper and lower bounds
+on the objective function.
+<br><br>
+<li>What is the Tolerance parameter?<br>
+The Tolerance parameter is used to specify the quality of the solution. If
+the MaxOuterIterations is not exceeded, OBOE continues execution until the
+computed Relative Gap becomes less than the specified Tolerance. By default
+Tolerance is set to 1e-6.
+<br><br>
+<li>What is the Rho parameter?<br>
+The Rho parameter specifies the weight, &rho of the proximal term: 
+<pre>	&rho/2 *(y - yc)*Q*(y - yc),</pre> 
+where yc is the current analytic center.
+<br>This is used to control the movement of the query point. If the DynamicRho 
+parameter is off the weight remains the same throughout the run.
+If the DynamicRho is turned on then this weight changes based on an internal strategy.
+The changes to Rho can be limited by the RhoMax and RhoMin paramerters. OBOE will not lower the Rho beyond RhoMin or
+raise it above RhoMax.
+
+<br><br>
+<li>What is the ComputeLowerBound parameter?<br>
+OBOE has an internal strategy for computing the lower bound (or upper bound in case of maximization).
+For most problems it is a good idea to use this inbuilt lower bound computation and hence the default
+of this parameter is set to 1 i.e it is enabled.<br>
+However, there are some problems where the user has a better idea of how to compute the bound instead of using the
+generic computation. In this case the user can turn off the OBOE bound computation and provide a lower bound at each
+outer iteration by implementing the following functions of ACCPM::Oracle :
+<pre>	virtual bool computesLowerBound() const { return false; }
+	virtual double getLowerBound() const { return ACCPM_MINUS_INF; }</pre>
+The above are the default implementations and it is upto the user to correctly 
+define them and update the bounds. If the oracle returns true for 
+computesLowerBound() function, OBOE calls the getLowerBound() function at
+every outer interation and updates the lower bound.
+<br>Note: The parameter is called ComputeLowerBound because internally all problems are considered as minimizations problems
+and hence OBOE always computes lower bounds.
+<br><br>
+<li>Can I specify the bounds on the objective function?<br>
+Yes, the user can use the ObjectiveLB and ObjectiveUB parameters to specify the lower and upper bound for the objective function.
+<br><br>
+<li>How can I specify the weight on the epigraph cut?<br>
+The weight on the epigraph cut is specified by the following parameters:
+<pre>	WeightEpigraphCutInit and
+	WeightEpigraphCutInc</pre>
+The default for both these parameters is 1, but the user can specify different initial epigraph cut weight via the
+parameter WeightEpigraphCutInit and the amount to increase it in every outer iteration via the WeightEpigraphCutInc parameter.
+<br><br>
+<li>Can I give non-diagonal Hessian for the smooth oracle?<br>
+No, currently OBOE only supports diagonal Hessian for the smooth oracle. The Hessian information
+is hence a vector of size equal to  the number of variables, and this is interpreted as the diagonal of the Hessian 
+matrix for the smooth oracle.
+<br><br>
+</ul>
+</p></body>
+</html>

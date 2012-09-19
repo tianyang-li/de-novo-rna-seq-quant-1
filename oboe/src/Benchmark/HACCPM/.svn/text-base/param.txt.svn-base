@@ -1,0 +1,13 @@
+NumSubProblems Int 1 
+NumVariables Int 32 
+ProblemName S "hAccpm" 
+MaxOuterIterations Int 1000 
+MaxInnerIterations Int 50 
+Verbosity I 0
+Proximal I 1
+Tolerance D 0.0000001
+#WeightEpigraphCutInit D 1.0
+#WeightEpigraphCutInc D 1.0
+Rho D 1
+DynamicRho I 0
+FixedProximalCenter I 1

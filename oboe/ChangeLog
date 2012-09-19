@@ -1,0 +1,33 @@
+*******************************************************************************
+Date : 06 Arpil 2008
+Author : Nidhi Sawhney (nsawhney@gmail.com)
+*******************************************************************************
+The following files were modified:
+
+To address the issue raised in Ticket 1 the following files were modified:
+(The change made the include flags contain LAPACKCPP_DIR/include/lapackpp)
+1.configure.ac
+2.configure
+
+To address the issue raised in Ticket 2 the following files were modified:
+(There was a problem when serializing some of the fields).
+1.src/AccpmCore/Manager.h
+2.src/AccpmLA/AccpmVector.h
+3.src/AccpmLA/AccpmGenMatrix.h
+
+*******************************************************************************
+*******************************************************************************
+Date : 21 July 2008
+Author : Nidhi Sawhney (nsawhney@gmail.com)
+*******************************************************************************
+
+The following files were modified:
+1. src/AccpmCore/Manager.h (Correction for previousPhase2 flag)
+2. src/AccpmCore/Manager.C (Correction for previousPhase2 flag)
+3. src/AccpmCore/Method.C (Correction in computeStepSize)
+4. src/UI/QpGenerator.C (Calls manager.updatePreviousPhase2)
+
+The above issues were found when trying to ember OBOE in a Branch and Bound 
+framework. Bugs reported by Claude Philippe Medard(claude.philippe.medard@gmail.com).
+
+*******************************************************************************

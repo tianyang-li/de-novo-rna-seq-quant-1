@@ -1,0 +1,12 @@
+NumSubProblems Int 1 
+NumVariables Int 9 
+ProblemName S "UAXTest" 
+MaxOuterIterations Int 100 
+MaxInnerIterations Int 50 
+Verbosity I 2
+Proximal I 1
+Tolerance D 0.001
+Rho D 1
+DynamicRho I 0
+#WeightEpigraphCutInit D 1.0
+WeightEpigraphCutInc D 1.0

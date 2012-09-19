@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/HACCPM
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/HACCPM/Makefile.in
+END
+haccpm.pdf
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/HACCPM/haccpm.pdf
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/HACCPM/Makefile.am
+END
+dtm.dat
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/HACCPM/dtm.dat
+END
+HACCPMTest.C
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/HACCPM/HACCPMTest.C
+END
+param.txt
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/HACCPM/param.txt
+END

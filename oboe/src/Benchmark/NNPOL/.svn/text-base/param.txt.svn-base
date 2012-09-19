@@ -1,0 +1,12 @@
+NumSubProblems Int 1 
+NumVariables Int 10 
+ProblemName S "NNPOLdata-25-10" 
+MaxOuterIterations Int 100 
+MaxInnerIterations Int 50 
+Verbosity I 1
+Proximal I 1
+#Ball I 1
+#RadiusBall D 5 
+Tolerance D 0.000001
+WeightEpigraphCutInit D 1.0
+WeightEpigraphCutInc D 0

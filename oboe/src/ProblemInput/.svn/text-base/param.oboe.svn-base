@@ -1,0 +1,93 @@
+#
+#OBOE uses the parameters described in this file.
+#Here we give the default values of the parameters, the user can
+#use the same format to modify any of these values.
+#
+#The format of this file is:
+# Lines starting with # are treated as comment and ignored by OBOE
+# The paramters are listed in 3 single tab separated colums;
+# [Name of Parameter]	[Type<Integer(I)/Double(D)/String(S)>]	[Value]
+ProblemName		S	"OBOE General Problem"
+ProblemAcronym		S	"OBOE_Problem"
+OptimizationType	S	Min
+NumVariables		I	0
+NumSubProblems		I	1
+MethodName		S	ProximalACDual
+#
+#Number of iterations for the Query Point Generator(UI/QpGen)
+#QpGen will generate as many query points unless
+# (i) the Relative Gap reaches the desired level of accuracy
+# (ii) the user oracle (Oracle) requests termination
+MaxOuterIterations	I	1000
+#Maximum number of Newton Steps
+MaxInnerIterations	I	50
+#Lower Bound on the Objective Value
+ObjectiveLB		D 	ACCPM_MINUS_INF
+#Upper Bound on the Objective Value
+ObjectiveUB		D 	ACCPM_PLUS_INF
+#If ComputeLB is set to 0 then OBOE does not compute the lower bound
+#but relies on the oracle to provide a lower bound estimate at each iteration
+ComputeLowerBound	I	1
+
+#Verify the Localization Set has non-empty interior.
+#If the parameter is true, and localization set turns out to have
+#an empty interior, the program exits
+CheckLocSetInterior	I 	0
+
+#Amount of information displayed by OBOE can be controlled by
+Verbosity		I	1
+
+#Convergence criterion for the Relative Gap
+Tolerance		D	1e-6
+
+#Add proximal term(It is recommended not to change this parameter)
+#Proximal		I 	1
+#Coefficient for the proximal term
+Rho			D	1.0
+#Whether or not to update Rho
+DynamicRho		I	0
+#If DynamicRho the Max/Min values for Rho
+RhoMax			D	100
+RhoMin			D	1e-6
+
+#Initial weight on the epigraph cut
+WeightEpigraphCutInit	D	1.0
+#Increment the weight of the Epigraph Cut at each outer iteration
+#by the following command
+WeightEpigraphCutInc	D	1.0
+
+#Whether ther are Ball constraints
+Ball			I	0
+#If there are Ball constraints, the default value of the radius
+RadiusBall		D	1e5
+#For modifying the center of the Ball refer to
+#setCenterBall
+
+#Whether the Hessian is represented as a diagonal vector
+#instead of a general matrix (currently only Diagonal Hessian is supported so
+#dont change the following
+#DiagHessian		I	1
+
+#Upper bound on the distance of current point from the optimal value
+#Used in the computation of the lower bound
+Delta			D	5
+#Proximity Measure used in the termination of the Newton iterations
+Eta			D	0.99
+#Used in the computation of step size for the Newton step
+Gamma			D	0.99
+EpsilonReal		D	1e-10
+#Precision when comparing double
+EpsilonTol		D	1e-10
+
+#Remove duplicate cuts
+Filter			I	1
+#If set to 1 check if the new cuts maintain convexity
+ConvexityCheck		I	0
+#If set to 1 fix convexity incase the new cuts violates convexity
+ConvexityFix		I	0
+
+#Fix the proximal center. If set to 1 it sets the proximal center to 0
+FixedProximalCenter	I	0
+
+#LP Solver to use to analyse empty Localisation Set`
+LPSolverName		S	"GLPK"

@@ -1,0 +1,18 @@
+NumSubProblems Int 1
+#NumVariables Int 3075 
+NumVariables Int 4 
+ProblemName S "APSTest" 
+MaxOuterIterations Int 1000 
+MaxInnerIterations Int 50 
+Verbosity I 2
+Proximal I 1
+Tolerance D 0.0001
+WeightEpigraphCutInit D 1.0
+WeightEpigraphCutInc D 0.0
+DynamicRho I 1
+RhoMin D 1e-15
+RhoMax D 1e3
+Rho D 1e-10
+#ObjectiveLB 1e-10
+#ObjectiveUB 1e10
+Filter I 0

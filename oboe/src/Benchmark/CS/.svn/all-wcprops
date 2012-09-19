@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/CS
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/CS/Makefile.in
+END
+CSData.dat
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/CS/CSData.dat
+END
+CSTest.C
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/CS/CSTest.C
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/CS/Makefile.am
+END
+param.txt
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/OBOE/!svn/ver/51/releases/1.0.3/src/Benchmark/CS/param.txt
+END

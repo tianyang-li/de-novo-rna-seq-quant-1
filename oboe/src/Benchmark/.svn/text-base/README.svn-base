@@ -1,0 +1,81 @@
+This directory contains the driver code for OBOE using the Analytic 
+Center Cutting Plane Method(ACCPM).
+
+Currently the following tests are supoorted for the C++ version:
+1. Cutting Stock problem (CS) : uses the data file of the format CSData.dat
+   The file provides the number of variables, the total width of the roll, L,
+   followed by the widths needed and the number of each width demanded.
+   The oracle for cutting stock problem uses the knapsack algorithm to obtain
+   the gradient.
+   The oracle returns optimality or feasibility cut depending on the solution
+   from knapsac.
+
+
+2. Linear Algebra (LA) : solves a system symmetric-difference matrix for
+   specified number of variables. 
+   This first-order oracle is used to minimize the quadratic
+   function f(y) = 0.5 * y' * A * y - b' * y.
+   The optimal value satisfies y = A \ b. In this test A is a symmetric i
+   difference matrix and b is identity vector e1.
+   The oracle only returns optimality cuts.
+  
+
+3. p-Median problem (PMED) : solves the p-Median problem for a
+   given distance matrix (Ref: Solving the p-Median problem with a 
+   Semi-Lagrangian Relaxation, Beltran, Tadonki and Vial).
+   The input is given as a distance matrix between the points, and has format
+   for example given in PMED/dist.txt.
+   We use the WEAK Lagrangian relaxation, that is, we also
+   relax the constraint Sum y_i = p.
+   The oracle always returns optimality cuts.
+
+4. Quadratic Programming (QP) : solves quadratically constrained quadratic 
+   programming problem :  
+   Min   f(y) = ||A.*y - B||^2. 
+   Constraints j :  ||C_j.*y - E_j||^2 <= F_j. 
+   The matrices A, B, C, E and F are read in the format provided in 
+   QP/QP_<>.dat.
+   This is an example of a test where the oracle returns more than 1 cut,
+   and these could of type feasibility or optimality.
+   It also uses the disaggregated form of the function f1(.) and
+   has NumSubProblems > 1.
+
+5. Travelling Salesman Problem (TSP) : OBOE is applied to the standard 
+   TSP. It takes as input the coordinates of the n cities. An example is given
+   in file TSP/tsp29.coord. 
+   The oracle always return an optimality cut.
+
+6. UAX : solves the min-max problem in u'Ax. 
+   The oracle solves the problem:
+   Min_x  u * B * x + A_m* * x
+   s.t.   x \in Simplex_n.
+   The input matrices A and B are read in the format given in UAX/UAX_A.dat
+   UAX/UAX_B.dat.
+   It is an example where the oracle can send feasibility or optimality cut.
+
+7. HACCPM: solves the datamining linear separation problem, also known as
+   the support vector machine. This uses the homogeneous version of Accpm 
+   (Ref: HACCPM/haccpm.pdf), which means the Proximal center is set to 0
+   and is not updated. 
+   The input is a set of points with their classification,
+   a binary label 0 or 1, given in the last column. For example file dtm.dat. 
+
+8. NNPOL: solves the Non-negative Polynomial Problem. It reads the
+   matrices A(from <prefix>_rA.dat, <prefix>_iA.dat for the real
+   and imaginary parts), B(<prefix>B.dat), C(<prefix>C.dat) and
+   Q(<prefix<Q.dat>), where <prefix> is commandline argument given
+   by the user.
+
+Note: 
+   There is a problem with dlmach function provided on Fedora
+   it just hangs. This function is used by the Eigen value routines.
+   So for NNPOL to run it is important we link with the correct
+   lapack library, for example one provided with MATLAB distribution
+   <matlab>/bin/glnx86/lapack.so.
+
+9. MCF: solves the Multi-Commodity Flow problem. It has support for the linear
+   (Ref: Solve large scale linear multicommodity flow problems with an active
+   set strategy and Proximal-ACCPM, Babonneau and Vial)
+   and non-linear Kleinrock function
+   (Ref: ACCPM with a nonlinear constraint and an active set strategy to solve
+   nonlinear multicommodity flow problems, Babonneau, du Merle and Vial).

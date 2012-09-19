@@ -1,0 +1,12 @@
+NumSubProblems Int 1 
+NumVariables Int 50 
+ProblemName S "p-Median" 
+MaxOuterIterations Int 1000 
+MaxInnerIterations Int 50 
+Verbosity I 2
+Tolerance D 0.00001
+WeightEpigraphCutInit D 1.0
+WeightEpigraphCutInc D 0.0
+ConvexityCheck I 1
+ConvexityFix I 1
+CheckLocSetInterior I 1
