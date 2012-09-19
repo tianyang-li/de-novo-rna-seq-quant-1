@@ -40,12 +40,10 @@ setup(
                            extra_link_args=['-fPIC'] + cflags,
                            extra_compile_args=['-fPIC'] + cflags,
                            extra_objects=["lib/quant.a",
-                                          "lib/libgsl.a",
-                                          "lib/libnlopt_cxx.a", ],
+                                          "lib/libgsl.a", ],
                            language="c++",
                            include_dirs=["src", "gsl-1.15",
-                                         "boost_1_51_0", 
-                                         "nlopt-2.3/myinstall/include", ],
+                                         "boost_1_51_0", ],
                            library_dirs=["lib"]
                            )
                  ]

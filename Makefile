@@ -11,11 +11,11 @@ CFLAGS = -Wall -fPIC -Wconversion -Wextra -ggdb -DDEBUG \
  
 AR = ar
 
-INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0 -Inlopt-2.3/myinstall/include
+INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0 
 
 all: util/single_1.so
 
-util/single_1.so: lib/libgsl.a lib/libnlopt_cxx.a \
+util/single_1.so: lib/libgsl.a \
 		setup.py lib/quant.a src/single_1.pyx  
 	python setup.py build_ext -i 
 	mv single_1.so util/
@@ -25,15 +25,6 @@ src/single_1.pyx: src/graph_seq_0.pxd
 src/graph_seq_0.pxd: src/misc_0.pxd src/_graph_seq_0.h src/_graph_seq_0.cc
 
 src/misc_0.pxd: src/_misc_0.cc src/_misc_0.h
-
-lib/libnlopt_cxx.a:
-	tar xzvf nlopt-2.3.tar.gz
-	mkdir nlopt-2.3/myinstall
-	cd nlopt-2.3 && ./configure --with-cxx CXXFLAGS="-fPIC" \
-		CFLAGS="-fPIC" CPPFLAGS="-fPIC" \
-		--prefix=$(CURDIR)/nlopt-2.3/myinstall && \
-		make && make install
-	cp nlopt-2.3/myinstall/lib/libnlopt_cxx.a lib/libnlopt_cxx.a
 
 lib/libgsl.a:
 	tar xzvf gsl-1.15.tar.gz
@@ -62,7 +53,6 @@ clean:
 	rm -rfv util/single_1.so
 	rm -rfv lib/*
 	rm -rfv src/*.cpp
-	#rm -rfv nlopt-2.3 #TODO make this into a command 
 	#rm -rfv gsl-1.15 #TODO make this into a command 
 
 learn:
