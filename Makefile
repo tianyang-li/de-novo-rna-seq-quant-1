@@ -11,7 +11,8 @@ CFLAGS = -Wall -fPIC -Wconversion -Wextra -ggdb -DDEBUG \
  
 AR = ar
 
-INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0 
+INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0 \
+-Ibuild/oboe/myinstall/include -Ilapackpp-2.5.4/include
 
 LAPACK = /usr/lib/liblapack.a
 BLAS = /usr/lib/libblas.a
@@ -84,8 +85,6 @@ clean:
 	rm -rfv util/single_1.so
 	rm -rfv lib/*
 	rm -rfv src/*.cpp
-	#rm -rfv build/oboe #TODO make this into a command 
-	#rm -rfv build/lapackcpp #TODO make this into a command 
 	#rm -rfv gsl-1.15 #TODO make this into a command 
 	#rm -rfv oboe #TODO make this into a command 
 	#rm -rfv lapackpp-2.5.4 #TODO make this into a command 

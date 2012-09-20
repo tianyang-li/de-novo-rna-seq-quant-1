@@ -40,10 +40,13 @@ setup(
                            extra_link_args=['-fPIC'] + cflags,
                            extra_compile_args=['-fPIC'] + cflags,
                            extra_objects=["lib/quant.a",
-                                          "lib/libgsl.a", ],
+                                          "lib/libgsl.a",
+                                          "lib/oboe.a", ],
                            language="c++",
                            include_dirs=["src", "gsl-1.15",
-                                         "boost_1_51_0", ],
+                                         "boost_1_51_0",
+                                         "build/oboe/myinstall/include",
+                                         "lapackpp-2.5.4/include", ],
                            library_dirs=["lib"]
                            )
                  ]
