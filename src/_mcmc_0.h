@@ -32,6 +32,9 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <Oracle.h>
+#include <Parameters.h>
+#include <QpGenerator.h>
+#include <AccpmBlasInterface.h>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -75,11 +78,18 @@ using _graph_seq_0::Node;
 using std::fill;
 using _graph_seq_0::ReadIndex;
 using std::min;
+using Accpm::OracleFunction;
+using Accpm::AccpmVector;
+using Accpm::AccpmGenMatrix;
 
 #ifdef DEBUG
 using std::cerr;
 using std::endl;
 #endif
+
+}
+
+namespace _mcmc_0 {
 
 class GSLRngUnifInt {
 public:
@@ -232,6 +242,28 @@ inline bool isof_start_ok(DirectedGraph const &graph, ulong vert,
 	Isoform isof(num_vertices(graph));
 	return _isof_start_ok(graph, vert, isofs, isof);
 }
+
+// Opt Graph Ratio Oracle Function
+template<class RNodeLoc>
+class OGROF: public OracleFunction {
+public:
+	OGROF() :
+			OracleFunction() {
+	}
+
+	OGROF(IsoformMap const &graph_isoform, GraphInfo const &graph_info,
+			SpliceGraph const &graph, GraphReads const &graph_read,
+			vector<ReadInGraph<RNodeLoc> > const &read_in_graph) :
+			OracleFunction() {
+	}
+
+	virtual int eval(const AccpmVector &y, AccpmVector &functionValue,
+			AccpmGenMatrix &subGradients, AccpmGenMatrix *info) {
+
+		return 0;
+
+	}
+};
 
 template<class RNodeLoc>
 inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,

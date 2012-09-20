@@ -39,6 +39,10 @@ using std::cerr;
 using std::endl;
 #endif
 
+}
+
+namespace _single_1 {
+
 typedef _graph_seq_0::ReadNodeLoc SingleNodeLoc;
 
 /*
