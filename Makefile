@@ -13,6 +13,10 @@ AR = ar
 
 INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0 
 
+LAPACK = /usr/lib/liblapack.a
+BLAS = /usr/lib/libblas.a
+
+
 all: util/single_1.so
 
 util/single_1.so: lib/libgsl.a \
