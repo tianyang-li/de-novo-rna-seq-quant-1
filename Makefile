@@ -15,6 +15,8 @@ INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0
 
 LAPACK = /usr/lib/liblapack.a
 BLAS = /usr/lib/libblas.a
+LAPACKCPP_DIR = $(CURDIR)/build/lapackcpp/myinstall
+LAPACKCPP_LIB = $(CURDIR)/build/lapackcpp/myinstall/lib/liblapackpp.a
 
 
 all: util/single_1.so

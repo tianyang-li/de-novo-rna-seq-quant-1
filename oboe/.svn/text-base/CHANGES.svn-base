@@ -1,0 +1,13 @@
+
+1. OBOE-ticket #1 https://ptojects.con-or.org/OBOE/ticket/1
+
+2. OBOE-ticket #2 https://ptojects.con-or.org/OBOE/ticket/2
+
+3. OBOE-ticket #3 https://ptojects.con-or.org/OBOE/ticket/3
+
+4. OBOE-ticket #4 https://ptojects.con-or.org/OBOE/ticket/4
+
+5. OBOE-ticket #11 https://ptojects.con-or.org/OBOE/ticket/11
+NumSubProblems needs to default to 1 even if the user does not set it explicitly.
+This has been fixed on 30 May 2010. The changes copied to stable and new point
+release 1.0.3.

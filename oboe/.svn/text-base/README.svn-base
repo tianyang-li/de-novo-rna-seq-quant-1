@@ -1,0 +1,244 @@
+Welcome to OBOE.
+
+NAME
+    OBOE - Oracle Based Optimization Engine.
+    A package for solving general convex non-differentiable optimization 
+    problems.
+
+SYNOPSIS
+    This directory contains the code and documentation for OBOE package.
+    The package is designed to solve convex optimization problems of the 
+    following form:
+         min           f1(y) + f2(y)
+         subject to    y in Y1 and Y2
+     where f1 and f2 are convex functions on R^n and Y1, Y2 are subsets of R^n.
+     The function f1 and the set Y1 is revealed by a first order oracle. f2
+     is a convex twice continuous differentiable function, Y2 is a 0-level
+     set of a convex twice continuous differentiable function g(y).
+     In the current implementation we restrict Y2 to be R^n or specified by a
+     set of linear constraints given by g(y) <= 0.
+     Additionally, the variables y can be constrained to lie in an affine
+     set {y | D^Ty = d}.
+     
+     Such optimization problems typically occur as a result of solving the
+     dual of some other optimization problem. In particular the Lagrangian
+     relaxation schemes provide the problems described in the format above.
+
+LICENSE
+   OBOE is developed at University of Geneva. Please see the file COPYING for 
+   details.
+
+OBTAINING OBOE
+     In this package we provide the C++ implementation of OBOE. There exists
+     a MATLAB version, which is a precursor to this distribution.
+     For obtaining OBOE for C++ or MATLAB please contact 
+     Jean-Philippe Vial <jpvial@ordecsys.com>
+
+DOCUMENTATION
+     For documentation, please see the files in the doc subdirectory.
+     OBOE-UserGuide.pdf in doc/userguide provides a comprehensive 
+     documentation on the theory and usage of OBOE.
+     The code is documented using the doxygen tool which can be retrieved by
+     opening doc/html/index.html in a browser.
+
+GETTING STARTED
+     For building and installation instructions please see the INSTALL file.
+
+     In addition OBOE uses the following external libraries:
+     1. BLAS     Basic Linear Algebra Subprograms
+                 http://www.netlib.org/blas
+
+     2. LAPACK   Package for solving system of linear equations.
+                 http://www.netlib.org/lapack
+     
+     3. LAPACK++ or lapackpp: A C++ library for BLAS/LAPACK based linear 
+        algebra computaions.   
+        For more information on LAPACK++ we refer
+            http://www.sourceforge.net/projects/lapackpp
+        Download page: 
+            http://sourceforge.net/project/showfiles.php?group_id=99696
+ 
+     4. OBOE can optionally be configured to use LP solver library glpk. The 
+        use of this library enables the user to verify whether the 
+        localization set has non-empty interior. 
+        If the user chooses to use glpk, they need to run configure with the 
+        following option:
+             configure --with-glpk=yes
+	In addition, they also need to specify the glpk directory by setting 
+        the environment variable GLPK_DIR. OBOE assumes this directory has the
+	glpk library and include files in the lib and include directories 
+	respectively.
+
+	5. Boost libraries for serialization. To serialize the OBOE data 
+	structures OBOE can optionally be configured to enable serialization. 
+	In order to do this the user needs to run configure with the following
+	option:
+		configure --enable-serialization=yes
+	This assumes that the boost libraries for serialization are present.
+
+BLAS and LAPACK:
+    OBOE by default tries to link to the standard blas/lapack libs typically
+    found in /usr/lib. One can override this behaviour by setting the
+    environment variable BLAS, before doing configure and compiling the code.
+
+    Similarly the lapack library can be specified by setting the environment
+    variable LAPACK.
+
+    We recommend using the fine tuned blas and lapack libraries provided by 
+    ATLAS (http://math-atlas.sourceforge.net/).
+    
+    In the following notes <OBOE_DIR> should be replaced with the absolute 
+    path to the directory where OBOE is installed.
+
+    For Linux Pentium machines one can use the libraries provided in extras.
+    You can set BLAS to <OBOE_DIR>/extras/LinuxP4SSE2/libatlas.so and
+    LAPACK to <OBOE_DIR>/extras/LinuxP4SSE2/lapack.so.
+    (Depending on your environment you might also have to include path to 
+    these libraries in the environment variable LD_LIBRARY_PATH if you get 
+    error loading libraries at runtime. In this case you just need to append 
+    the LD_LIBRARY_PATH with a command ike:
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/<OBOE_DIR>/extras/LinuxP4SSE2.
+     For other platforms it is best to get the blas and lapack libraries from
+     ATLAS.
+
+LAPACK++:
+     The environment variable for LAPACK++ are LAPACKCPP_DIR and 
+     LAPACKCPP_LIB.
+     OBOE assumes that the headers for LAPACK++ are in LAPACKCPP_DIR/include
+     and library is given by LAPACKCPP_LIB. 
+
+SERIALIZATION:
+     To enable support for serialization of OBOE structures, we use the 
+     serialization libraries provided by boost
+	http://www.rrsd.com/boost/libs/serialization/doc/index.html
+     By default the support for these libraries is turned off, but can be 
+     enabled by 
+	configure --enable-serialization=yes
+     These libraries enable the save and load facilty for OBOE, incase the 
+     user wants to save the state and restart OBOE.
+
+COMPILING and INSTALLATION: 
+     The installation of OBOE uses the standard autoconf/automake utilities.
+     Once the above environment variables have been setup, the user can just 
+     type configure followed by make to compile the code which resides in src.
+     The installation assumes that LAPACK++ libraries have already been built.
+
+QUICK START:
+     We give the few steps for a quick installation of OBOE:
+     1. Set the following environment variables
+     BLAS 
+     LAPACK
+     LAPACKCPP_DIR
+     LAPACKCPP_LIB
+
+     (If the libraries are shared objects(.so) then ensure that they can be 
+     located at runtime by providing the directories in the LD_LIBRARY_PATH
+      environment variable.
+
+     2. configure --prefix=<path to directory where OBOE libraries should be installed>
+
+     (For users not familiar with configure, configure --help will let you 
+     know what options are available)
+     For the following examples we are assuming that the user chooses to install  
+     OBOE in their current directory, <OBOE_DIR> which is the default install directory for OBOE.
+
+     3. make install
+     This will create a bunch of libraries for OBOE. 
+     The makefiles used by OBOE for creating the application code in
+     src/Benchmark/QP, for example, can eaily be modified by the user
+     to plug-in their own application code. They need to modify the Makefile.am
+     and run make check. 
+     If the user wants to use their own build environmemt, they need to ensure 
+     that the application code links with the OBOE libraries by providing the
+     following option at compile time
+     	<compile_cmd> -I<OBOE_DIR>/include -L<OBOE_DIR>/lib <OBOE_DIR>/lib/libaccpm.a <OBOE_DIR>/lib/libaccpmcore.a <OBOE_DIR>/lib/libaccpmparam.a <OBOE_DIR>/lib/libaccpmoracle.a <OBOE_DIR>/lib/libaccpmla.a 
+
+     To create a single OBOE library instead of the 5 above the users can use 
+     the script create_oboe_lib.sh.
+     (This script assumes bash shell, but the users can do something similar
+     on other shells.)
+     This will create a liboboe.a which can be linked in as follows:
+     	<compile_cmd> -I<OBOE_DIR>/include -L<OBOE_DIR>/lib <OBOE_DIR>/lib/liboboe.a
+     
+     Note: In addtion the user will have to link in libg2c, BLAS, LAPACK, 
+     LAPACK++ libraries. If configured to use the glpk librairies in a similar 
+     manner, by appending the -I include FLAG and -L link flag.
+     (These are provided as the OBOE_INCLUDES and OBOE_LDFLAGS and OBOE_LDADD
+     variables via the configure command to the final Makefiles.)
+
+     To see more details look at one of the application code in 
+     	<OBOE_DIR>/src/Benchmark.
+
+EXAMPLES
+     Since OBOE is provided as a C++ callable library, the users need to write
+     their driver programs, specifying the Oracle for their application.
+     As a guide we provide a few example applications in src/Benchmark.
+     Refer to src/Benchmark/README for the example applications solved 
+     using OBOE.
+
+     To create application executable for the tests provided in the release:
+     cd src/Benchmark/<application>
+     make check
+
+     The application code, which resides in directory src/Benchmark, creates
+     binaries for each application. 
+     The binaries have the form oboe<application name> and can be created by 
+     the command make check.
+
+     PARAMETERS
+	The parameters for configuring OBOE are described in
+     src/ProblemInput/param.oboe
+     
+	The Parameters object used for OBOE applications read in file in the 
+     above format. The user can create their own parameter file and specify
+     their options.
+
+WINDOWS
+    For extra instructions regarding installation on windows, read README.W32
+    for using mingw environment for compiling.
+
+     For Visual Studio .NET projects refer to directory WIN32. 
+     The include files are same as for the non-windows version i.e. in 
+     <OBOE-DIR>/include directory. 
+     There library, lib/OBOE.vs5.lib is built wth Visual Studio .NET 2005,
+     and can be used directly for users with compatible build environment
+     otherwise they need to build their own.
+
+CONTENTS
+     The OBOE distribution has the following top-level directory structure.
+
+     config/
+         Helper files for configuring OBOE. This is part of the GNU Autoconf
+     system and is of no interest to most users.
+ 
+     doc/
+         Documentation for the distribution. Point a browser at
+     doc/html/index.html to see the available documentation.
+
+     extras/
+         Some pre-built libraries for building on Linux and windows
+     platforms. These are provided without guarantee and it is probably
+     best to get the appropraite BLAS and LAPACK libraries on your own.
+
+     include/
+         The header files are copied from src/ into this directory as part of 
+     the installation process.
+
+     src/
+         Source files for OBOE distribution.
+
+CREDITS
+     OBOE has been developed at Logilab, HEC, Universite de Geneve.
+     The work has benefitted from the research and experience and many 
+     researchers who worked at Logilab in the past years.
+   
+     The current version is maintained by:
+     
+     Nidhi Sawhney
+     nsawhney@gmail.com
+
+     Jean-Philippe Vial
+     HEC, Universite de Geneve
+     jean-philippe.vial@hec.unige.ch
+     Jean-Philippe Vial <jpvial@ordecsys.com>
+    
