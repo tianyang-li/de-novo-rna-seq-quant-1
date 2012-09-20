@@ -32,7 +32,8 @@ build/
 
 lib/
 
-nlopt-2.3/
+oboe/
 
+lapackpp-2.5.4/
 
 

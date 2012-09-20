@@ -15,16 +15,41 @@ INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0
 
 LAPACK = /usr/lib/liblapack.a
 BLAS = /usr/lib/libblas.a
-LAPACKCPP_DIR = $(CURDIR)/build/lapackcpp/myinstall
+LAPACKCPP_DIR = $(CURDIR)/lapackpp-2.5.4
 LAPACKCPP_LIB = $(CURDIR)/build/lapackcpp/myinstall/lib/liblapackpp.a
 
 
 all: util/single_1.so
 
-util/single_1.so: lib/libgsl.a \
+util/single_1.so: lib/libgsl.a lib/oboe.a \
 		setup.py lib/quant.a src/single_1.pyx  
 	python setup.py build_ext -i 
 	mv single_1.so util/
+	
+lib/oboe.a:
+	tar xzvf oboe.tar.gz
+	tar xzvf lapackpp-2.5.4.tar.gz
+	mkdir -p build/lapackcpp/myinstall
+	mkdir -p build/oboe/myinstall
+	cd build/lapackcpp && \
+		$(CURDIR)/lapackpp-2.5.4/configure \
+		CFLAGS="-fPIC" CPPFLAGS="-fPIC" CXXFLAGS="-fPIC" \
+		--prefix=$(CURDIR)/build/lapackcpp/myinstall && \
+		make && make install 
+	cd build/oboe && \
+		$(CURDIR)/oboe/configure \
+		CFLAGS="-fPIC" CXXFLAGS="-fPIC" CPPFLAGS="-fPIC" \
+		FFLAGS="-fPIC" BLAS=$(BLAS) LAPACK=$(LAPACK) \
+		LAPACKCPP_DIR=$(LAPACKCPP_DIR) LAPACKCPP_LIB=$(LAPACKCPP_LIB) \
+		--prefix=$(CURDIR)/build/oboe/myinstall && \
+		make && make install 
+	mkdir -p build/oboe/objs && cd build/oboe/objs && \
+		ar x ../myinstall/lib/libaccpm.a && \
+		ar x ../myinstall/lib/libaccpmcore.a && \
+		ar x ../myinstall/lib/libaccpmla.a && \
+		ar x ../myinstall/lib/libaccpmoracle.a && \
+		ar x ../myinstall/lib/libaccpmparam.a && \
+		ar rcs $(CURDIR)/lib/oboe.a *.o
 
 src/single_1.pyx: src/graph_seq_0.pxd
 
@@ -59,11 +84,12 @@ clean:
 	rm -rfv util/single_1.so
 	rm -rfv lib/*
 	rm -rfv src/*.cpp
+	#rm -rfv build/oboe #TODO make this into a command 
+	#rm -rfv build/lapackcpp #TODO make this into a command 
 	#rm -rfv gsl-1.15 #TODO make this into a command 
+	#rm -rfv oboe #TODO make this into a command 
+	#rm -rfv lapackpp-2.5.4 #TODO make this into a command 
 
-learn:
-	cd learn && $(MAKE)
-
-.PHONY: all clean learn
+.PHONY: all clean 
 
 
