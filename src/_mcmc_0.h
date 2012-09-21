@@ -280,6 +280,8 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		OGROF<RNodeLoc> ogrof(graph_isoform, graph_info, graph, graph_read,
 				read_in_graph);
 		Oracle oracle(&ogrof);
+		Parameters param;
+		param.setIntParameter("NumVariables", graph_isoform.size());
 
 	} else {
 
