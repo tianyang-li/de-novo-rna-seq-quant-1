@@ -24,6 +24,7 @@
 #include <utility>
 #include <algorithm>
 #include <memory>
+#include <iostream>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
@@ -38,10 +39,6 @@
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
-
-#ifdef DEBUG
-#include <iostream>
-#endif
 
 namespace _mcmc_0 {
 
@@ -84,11 +81,8 @@ using Accpm::AccpmGenMatrix;
 using Accpm::Oracle;
 using Accpm::QpGenerator;
 using Accpm::Parameters;
-
-#ifdef DEBUG
 using std::cerr;
 using std::endl;
-#endif
 
 }
 
@@ -277,11 +271,35 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 
 	if (graph_isoform.size() != 1) {
 
+		Parameters param;
+
+		if (!param.setIntParameter("NumVariables", graph_isoform.size())) {
+			cerr
+					<< "param.setIntParameter(\"NumVariables\", graph_isoform.size()) failed"
+					<< endl;
+			return;
+		}
+
+		{
+
+			StdRealVector init_val(graph_isoform.size());
+
+			StdRealVector::iterator init_val_iter = init_val.begin();
+			for (IsoformMap::const_iterator i = graph_isoform.begin();
+					i != graph_isoform.end(); ++i, ++init_val_iter) {
+				*init_val_iter = i->second;
+			}
+
+			if (!param.setStartingPoint(init_val)) {
+				cerr << "param.setStartingPoint(init_val) failed" << endl;
+				return;
+			}
+
+		}
+
 		OGROF<RNodeLoc> ogrof(graph_isoform, graph_info, graph, graph_read,
 				read_in_graph);
 		Oracle oracle(&ogrof);
-		Parameters param;
-		param.setIntParameter("NumVariables", graph_isoform.size());
 
 	} else {
 
