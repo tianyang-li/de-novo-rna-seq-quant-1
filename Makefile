@@ -19,7 +19,6 @@ BLAS = $(CURDIR)/BLAS/blas.a
 LAPACKCPP_DIR = $(CURDIR)/lapackpp-2.5.4
 LAPACKCPP_LIB = $(CURDIR)/build/lapackcpp/myinstall/lib/liblapackpp.a
 
-
 all: util/single_1.so
 
 util/single_1.so: lib/libgsl.a lib/oboe.a \
@@ -43,7 +42,7 @@ lib/oboe.a: BLAS/blas.a lapack-3.4.1/liblapack.a
 	cd build/lapackcpp && \
 		$(CURDIR)/lapackpp-2.5.4/configure \
 		CFLAGS="-fPIC" CPPFLAGS="-fPIC" CXXFLAGS="-fPIC" \
-		--disable-atlas \
+		--disable-atlas --enable-static=yes --enable-shared=no \
 		--with-blas=$(BLAS) --with-lapack=$(LAPACK) \
 		--prefix=$(CURDIR)/build/lapackcpp/myinstall && \
 		make && make install 
@@ -52,6 +51,7 @@ lib/oboe.a: BLAS/blas.a lapack-3.4.1/liblapack.a
 		CFLAGS="-fPIC" CXXFLAGS="-fPIC" CPPFLAGS="-fPIC" \
 		FFLAGS="-fPIC" BLAS=$(BLAS) LAPACK=$(LAPACK) \
 		LAPACKCPP_DIR=$(LAPACKCPP_DIR) LAPACKCPP_LIB=$(LAPACKCPP_LIB) \
+		--enable-static=yes --enable-shared=no \
 		--prefix=$(CURDIR)/build/oboe/myinstall && \
 		make && make install 
 	mkdir -p build/oboe/objs && cd build/oboe/objs && \
@@ -79,16 +79,20 @@ lib/quant.a: build/_single_1.o build/_graph_seq_0.o build/_misc_0.o \
 		build/_misc_0.o build/_mcmc_0.o
 
 build/_misc_0.o: src/_misc_0.cc src/_misc_0.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/_misc_0.cc -o build/_misc_0.o
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/_misc_0.cc $(LIBS) \
+		-o build/_misc_0.o
 
 build/_single_1.o: src/_single_1.cc src/_single_1.h src/_graph_seq_0.h src/_mcmc_0.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/_single_1.cc -o build/_single_1.o
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/_single_1.cc $(LIBS) \
+		-o build/_single_1.o
 
 build/_graph_seq_0.o: src/_graph_seq_0.cc src/_graph_seq_0.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/_graph_seq_0.cc -o build/_graph_seq_0.o
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/_graph_seq_0.cc $(LIBS) \
+		-o build/_graph_seq_0.o
 
 build/_mcmc_0.o: src/_mcmc_0.h src/_mcmc_0.cc src/_graph_seq_0.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/_mcmc_0.cc -o build/_mcmc_0.o
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/_mcmc_0.cc $(LIBS) \
+		-o build/_mcmc_0.o
 	
 clean:
 	rm -rfv build/*
