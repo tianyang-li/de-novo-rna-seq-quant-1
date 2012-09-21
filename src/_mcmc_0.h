@@ -81,6 +81,9 @@ using std::min;
 using Accpm::OracleFunction;
 using Accpm::AccpmVector;
 using Accpm::AccpmGenMatrix;
+using Accpm::Oracle;
+using Accpm::QpGenerator;
+using Accpm::Parameters;
 
 #ifdef DEBUG
 using std::cerr;
@@ -272,9 +275,11 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
 
-	ulong ndim = graph_isoform.size();
+	if (graph_isoform.size() != 1) {
 
-	if (ndim != 1) {
+		OGROF<RNodeLoc> ogrof(graph_isoform, graph_info, graph, graph_read,
+				read_in_graph);
+		Oracle oracle(&ogrof);
 
 	} else {
 
