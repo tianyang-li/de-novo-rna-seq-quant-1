@@ -269,31 +269,52 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
 
-	if (graph_isoform.size() != 1) {
+	ulong num_isoform = graph_isoform.size();
+
+	if (num_isoform != 1) {
 
 		Parameters param;
 
-		if (!param.setIntParameter("NumVariables", graph_isoform.size())) {
+		if (!param.setIntParameter("NumVariables", num_isoform)) {
 			cerr
-					<< "param.setIntParameter(\"NumVariables\", graph_isoform.size()) failed"
+					<< "param.setIntParameter(\"NumVariables\", num_isoform) failed"
 					<< endl;
 			return;
 		}
 
 		{
 
-			StdRealVector init_val(graph_isoform.size());
+			StdRealVector set_val(num_isoform);
 
-			StdRealVector::iterator init_val_iter = init_val.begin();
+			StdRealVector::iterator set_val_iter = set_val.begin();
 			for (IsoformMap::const_iterator i = graph_isoform.begin();
-					i != graph_isoform.end(); ++i, ++init_val_iter) {
-				*init_val_iter = i->second;
+					i != graph_isoform.end(); ++i, ++set_val_iter) {
+				*set_val_iter = i->second;
 			}
 
-			if (!param.setStartingPoint(init_val)) {
-				cerr << "param.setStartingPoint(init_val) failed" << endl;
+			if (!param.setStartingPoint(set_val)) {
+				cerr << "param.setStartingPoint(set_val) failed" << endl;
 				return;
 			}
+
+			fill(set_val.begin(), set_val.end(), 0);
+
+			if (!param.setVariableLB(set_val)) {
+				cerr << "param.setVariableLB(set_val) failed" << endl;
+			}
+		}
+
+		{
+
+			AccpmVector rhs(1);
+			rhs(0) = 1;
+
+			AccpmGenMatrix lhs(num_isoform, 1);
+			for (ulong i = 0; i != num_isoform; ++i) {
+				lhs(i, 0) = 1;
+			}
+
+			param.addEqualityConstraints(lhs, rhs);
 
 		}
 
