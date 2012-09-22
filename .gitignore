@@ -32,14 +32,9 @@ build/
 
 lib/
 
-oboe/
-
-lapackpp-2.5.4/
-
 backup/
 
-BLAS/
 
-lapack-3.4.1/
+
 
 

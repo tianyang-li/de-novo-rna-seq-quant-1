@@ -32,6 +32,7 @@
 #include <boost/unordered_map.hpp>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+#include <boost/unordered_set.hpp>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -73,6 +74,7 @@ using _graph_seq_0::ReadIndex;
 using std::min;
 using std::cerr;
 using std::endl;
+using boost::unordered_set;
 
 }
 
@@ -231,6 +233,44 @@ inline bool isof_start_ok(DirectedGraph const &graph, ulong vert,
 }
 
 template<class RNodeLoc>
+class GraphRatioLikelihood {
+public:
+	GraphRatioLikelihood(IsoformMap const &graph_isoform,
+			GraphInfo const &graph_info, SpliceGraph const &graph,
+			GraphReads const &graph_read,
+			vector<ReadInGraph<RNodeLoc> > const &read_in_graph) :
+			ndim(graph_isoform.size()) {
+
+		val = new double[ndim];
+
+		r = new double[ndim];
+
+		IsoformMap::const_iterator graph_isof_iter = graph_isoform.begin();
+		for (ulong i = 0; i != ndim; ++i, ++graph_isof_iter) {
+
+			val[i] = graph_isof_iter->second;
+
+		}
+
+	}
+
+	~GraphRatioLikelihood() {
+
+		delete[] val;
+
+		delete[] r;
+
+	}
+
+	ulong ndim;
+
+	double *val;
+
+	double *r;
+
+};
+
+template<class RNodeLoc>
 inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &opt_graph_ratio /* this map is empty */,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
@@ -240,6 +280,13 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 	ulong num_isoform = graph_isoform.size();
 
 	if (num_isoform != 1) {
+
+		GraphRatioLikelihood<RNodeLoc> opt_info(graph_isoform, graph_info,
+				graph, graph_read, read_in_graph);
+
+		unordered_set<ulong> B;
+
+		double const kTol = 1e-6 / double(num_isoform);
 
 	} else {
 
