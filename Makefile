@@ -15,7 +15,7 @@ INCLUDES = -Igsl-1.15 -Isrc -Iboost_1_51_0
 
 all: util/single_1.so
 
-util/single_1.so: lib/libgsl.a lib/oboe.a \
+util/single_1.so: lib/libgsl.a \
 		setup.py lib/quant.a src/single_1.pyx  
 	python setup.py build_ext -i 
 	mv single_1.so util/
