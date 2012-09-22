@@ -39,17 +39,11 @@ setup(
                            extra_link_args=['-fPIC'] + cflags,
                            extra_compile_args=['-fPIC'] + cflags,
                            extra_objects=["lib/quant.a",
-                                          "lib/oboe.a",
-                                          "build/lapackcpp/myinstall/lib/liblapackpp.a",
-                                          "BLAS/blas.a",
-                                          "lapack-3.4.1/liblapack.a",
                                           "lib/libgsl.a", ],
                            language="c++",
                            libraries=["gfortran", ],
                            include_dirs=["src", "gsl-1.15",
-                                         "boost_1_51_0",
-                                         "build/oboe/myinstall/include",
-                                         "lapackpp-2.5.4/include", ],
+                                         "boost_1_51_0", ],
                            library_dirs=[],
                            )
                  ]

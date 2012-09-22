@@ -32,10 +32,6 @@
 #include <boost/unordered_map.hpp>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <Oracle.h>
-#include <Parameters.h>
-#include <QpGenerator.h>
-#include <AccpmBlasInterface.h>
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
@@ -75,12 +71,6 @@ using _graph_seq_0::Node;
 using std::fill;
 using _graph_seq_0::ReadIndex;
 using std::min;
-using Accpm::OracleFunction;
-using Accpm::AccpmVector;
-using Accpm::AccpmGenMatrix;
-using Accpm::Oracle;
-using Accpm::QpGenerator;
-using Accpm::Parameters;
 using std::cerr;
 using std::endl;
 
@@ -240,28 +230,6 @@ inline bool isof_start_ok(DirectedGraph const &graph, ulong vert,
 	return _isof_start_ok(graph, vert, isofs, isof);
 }
 
-// Opt Graph Ratio Oracle Function
-template<class RNodeLoc>
-class OGROF: public OracleFunction {
-public:
-	OGROF() :
-			OracleFunction() {
-	}
-
-	OGROF(IsoformMap const &graph_isoform, GraphInfo const &graph_info,
-			SpliceGraph const &graph, GraphReads const &graph_read,
-			vector<ReadInGraph<RNodeLoc> > const &read_in_graph) :
-			OracleFunction() {
-	}
-
-	virtual int eval(const AccpmVector &y, AccpmVector &functionValue,
-			AccpmGenMatrix &subGradients, AccpmGenMatrix *info) {
-
-		return 0;
-
-	}
-};
-
 template<class RNodeLoc>
 inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &opt_graph_ratio /* this map is empty */,
@@ -272,55 +240,6 @@ inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
 	ulong num_isoform = graph_isoform.size();
 
 	if (num_isoform != 1) {
-
-		Parameters param;
-
-		if (!param.setIntParameter("NumVariables", num_isoform)) {
-			cerr
-					<< "param.setIntParameter(\"NumVariables\", num_isoform) failed"
-					<< endl;
-			return;
-		}
-
-		{
-
-			StdRealVector set_val(num_isoform);
-
-			StdRealVector::iterator set_val_iter = set_val.begin();
-			for (IsoformMap::const_iterator i = graph_isoform.begin();
-					i != graph_isoform.end(); ++i, ++set_val_iter) {
-				*set_val_iter = i->second;
-			}
-
-			if (!param.setStartingPoint(set_val)) {
-				cerr << "param.setStartingPoint(set_val) failed" << endl;
-				return;
-			}
-
-			fill(set_val.begin(), set_val.end(), 0);
-
-			if (!param.setVariableLB(set_val)) {
-				cerr << "param.setVariableLB(set_val) failed" << endl;
-			}
-		}
-
-		{
-
-			AccpmVector rhs(1);
-			rhs(0) = 1;
-
-			AccpmGenMatrix lhs(num_isoform, 1);
-			for (ulong i = 0; i != num_isoform; ++i) {
-				lhs(i, 0) = 1;
-			}
-
-			param.addEqualityConstraints(lhs, rhs);
-
-		}
-
-		OGROF<RNodeLoc> ogrof(graph_isoform, graph_info, graph, graph_read,
-				read_in_graph);
-		Oracle oracle(&ogrof);
 
 	} else {
 
@@ -521,6 +440,8 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 				i != graph_info_iter->nodes.end(); ++i) {
 			graph_len += i->est_len;
 		}
+
+		// TODO: normalize by length
 
 		// get initial weight for unique reads
 		for (vector<ReadIndex>::const_iterator i =
