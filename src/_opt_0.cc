@@ -20,4 +20,7 @@
 
 namespace _opt_0 {
 
+inline void opt_on_std_simplex() {
+}
+
 } // namespace _opt_0
