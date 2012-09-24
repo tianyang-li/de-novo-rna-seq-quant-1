@@ -74,7 +74,6 @@ using _graph_seq_0::ReadIndex;
 using std::min;
 using std::cerr;
 using std::endl;
-using _graph_seq_0::get_opt_graph_ratio;
 
 }
 
@@ -364,10 +363,6 @@ inline void isoform_MCMC_init(
 		for (vector<IsoformMap>::iterator i = opt_graph_ratios.begin();
 				i != opt_graph_ratios.end(); ++i) {
 
-			get_opt_graph_ratio(graph_isoforms[graph_ind], *i,
-					graph_infos[graph_ind], graphs[graph_ind],
-					graph_reads[graph_ind], read_in_graph);
-
 		}
 
 	}
@@ -559,9 +554,6 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 
 	// TODO: get @new_graph_isof
 
-	get_opt_graph_ratio(new_graph_isof, new_opt_ratio, graph_info, graph,
-			graph_read, read_in_graph);
-
 	double *new_isof_del_probs = new double[graph_isoform.size()];
 
 	get_isof_del_info(new_graph_isof, new_opt_ratio, graph_info, graph,
@@ -592,9 +584,6 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 			graph_read, read_in_graph, isof_del_probs);
 
 	// TODO: get @new_graph_isof
-
-	get_opt_graph_ratio(new_graph_isof, new_opt_ratio, graph_info, graph,
-			graph_read, read_in_graph);
 
 	double *new_vert_start_probs = new double[num_vertices(graph.graph)];
 
