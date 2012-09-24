@@ -36,20 +36,21 @@ lib/quant.a: build/_single_1.o build/_graph_seq_0.o build/_misc_0.o \
 	$(AR) rcs lib/quant.a build/_single_1.o build/_graph_seq_0.o \
 		build/_misc_0.o build/_mcmc_0.o
 
-build/_misc_0.o: src/_misc_0.cc src/_misc_0.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/_misc_0.cc $(LIBS) \
+build/_misc_0.o: src/_misc_0.cc src/_misc_0.h 
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/_misc_0.cc \
 		-o build/_misc_0.o
 
-build/_single_1.o: src/_single_1.cc src/_single_1.h src/_graph_seq_0.h src/_mcmc_0.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/_single_1.cc $(LIBS) \
+build/_single_1.o: src/_single_1.cc src/_single_1.h src/_graph_seq_0.h \
+		src/_mcmc_0.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/_single_1.cc \
 		-o build/_single_1.o
 
 build/_graph_seq_0.o: src/_graph_seq_0.cc src/_graph_seq_0.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/_graph_seq_0.cc $(LIBS) \
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/_graph_seq_0.cc \
 		-o build/_graph_seq_0.o
 
-build/_mcmc_0.o: src/_mcmc_0.h src/_mcmc_0.cc src/_graph_seq_0.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/_mcmc_0.cc $(LIBS) \
+build/_mcmc_0.o: src/_mcmc_0.h src/_mcmc_0.cc src/_graph_seq_0.h 
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/_mcmc_0.cc \
 		-o build/_mcmc_0.o
 	
 clean:

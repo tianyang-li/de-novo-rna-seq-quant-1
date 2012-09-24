@@ -74,7 +74,7 @@ using _graph_seq_0::ReadIndex;
 using std::min;
 using std::cerr;
 using std::endl;
-using boost::unordered_set;
+using _graph_seq_0::get_opt_graph_ratio;
 
 }
 
@@ -230,67 +230,6 @@ inline bool isof_start_ok(DirectedGraph const &graph, ulong vert,
 		IsoformMap const &isofs) {
 	Isoform isof(num_vertices(graph));
 	return _isof_start_ok(graph, vert, isofs, isof);
-}
-
-template<class RNodeLoc>
-class GraphRatioLikelihood {
-public:
-	GraphRatioLikelihood(IsoformMap const &graph_isoform,
-			GraphInfo const &graph_info, SpliceGraph const &graph,
-			GraphReads const &graph_read,
-			vector<ReadInGraph<RNodeLoc> > const &read_in_graph) :
-			ndim(graph_isoform.size()) {
-
-		val = new double[ndim];
-
-		r = new double[ndim];
-
-		IsoformMap::const_iterator graph_isof_iter = graph_isoform.begin();
-		for (ulong i = 0; i != ndim; ++i, ++graph_isof_iter) {
-
-			val[i] = graph_isof_iter->second;
-
-		}
-
-	}
-
-	~GraphRatioLikelihood() {
-
-		delete[] val;
-
-		delete[] r;
-
-	}
-
-	ulong ndim;
-
-	double *val;
-
-	double *r;
-
-};
-
-template<class RNodeLoc>
-inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
-		IsoformMap &opt_graph_ratio /* this map is empty */,
-		GraphInfo const &graph_info, SpliceGraph const &graph,
-		GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
-
-	ulong num_isoform = graph_isoform.size();
-
-	if (num_isoform != 1) {
-
-		GraphRatioLikelihood<RNodeLoc> opt_info(graph_isoform, graph_info,
-				graph, graph_read, read_in_graph);
-
-		unordered_set<ulong> B;
-
-		double const kTol = 1e-6 / double(num_isoform);
-
-	} else {
-
-	}
 }
 
 template<class RNodeLoc>
@@ -851,6 +790,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 }
 
-}
+} // namespace _mcmc_0
 
 #endif // _MCMC_0_H_

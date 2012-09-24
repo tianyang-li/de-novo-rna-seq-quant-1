@@ -21,5 +21,5 @@
 
 namespace _mcmc_0 {
 
-}
+} // namespace _mcmc_0
 

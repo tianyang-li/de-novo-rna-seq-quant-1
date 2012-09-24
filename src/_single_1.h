@@ -110,6 +110,6 @@ inline void get_isof_del_info<SingleNodeLoc>(IsoformMap const &graph_isoform,
 	// TODO
 }
 
-}
+} // namespace _single_1
 
 #endif // _SINGLE_1_H_

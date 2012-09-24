@@ -204,5 +204,5 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 
 }
 
-}
+} // namespace _single_1
 

@@ -16,14 +16,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "_graph_seq_0.h"
+#ifndef _OPT_0_H
+#define _OPT_0_H
 
-namespace _graph_seq_0 {
+namespace _opt_0 {
 
-void get_isoform_FASTA(vector<SpliceGraph> const &graphs,
-		vector<PyGraph> const &py_graphs, vector<Fasta> &isoforms) {
-	// TODO: get output in FASTA
-}
+} // namespace _opt_0
 
-} // namespace _graph_seq_0
-
+#endif // _OPT_0_H

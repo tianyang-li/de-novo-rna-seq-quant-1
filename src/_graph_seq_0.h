@@ -271,7 +271,44 @@ public:
 
 void get_isoform_FASTA(vector<SpliceGraph> const &graphs,
 		vector<PyGraph> const &py_graphs, vector<Fasta> &isoforms);
-//TODO
+
+template<class RNodeLoc>
+class GraphRatioLikelihood {
+public:
+	GraphRatioLikelihood(IsoformMap const &graph_isoform,
+			GraphInfo const &graph_info, SpliceGraph const &graph,
+			GraphReads const &graph_read,
+			vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
+
+	}
+
+	~GraphRatioLikelihood() {
+
+	}
+
+};
+
+template<class RNodeLoc>
+inline void get_opt_graph_ratio(IsoformMap const &graph_isoform,
+		IsoformMap &opt_graph_ratio /* this map is empty */,
+		GraphInfo const &graph_info, SpliceGraph const &graph,
+		GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph) {
+
+	ulong num_isoform = graph_isoform.size();
+
+	if (num_isoform != 1) {
+
+		GraphRatioLikelihood<RNodeLoc> opt_info(graph_isoform, graph_info,
+				graph, graph_read, read_in_graph);
+
+		double const kTol = 1e-6 / double(num_isoform);
+
+	} else {
+
+	}
 }
+
+} // namespace _graph_seq_0
 
 #endif // _GRAPH_SEQ_0_H_
