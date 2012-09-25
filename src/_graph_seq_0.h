@@ -178,20 +178,7 @@ public:
 
 	vector<ulong> start_nodes;
 
-	// whether it's OK or not to start
-	// an isoform at this node
-	vector<bool> vert_start_ok;
-
-	// whether it's OK to pass through this node
-	// when choosing a vertex to start
-	// an isoform
-	//
-	// calculated from vert_start_ok
-	// by using @get_vert_passable
-	vector<bool> vert_passable;
-
 	inline void setup() {
-		vert_start_ok.assign(num_vertices(graph), true);
 
 		boost::transitive_closure(graph, tc);
 

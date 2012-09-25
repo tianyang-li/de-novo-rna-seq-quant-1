@@ -286,8 +286,7 @@ inline void isoform_MCMC_init(
 			++i, ++graph_isof_iter) {
 		for (vector<ulong>::const_iterator j = i->start_nodes.begin();
 				j != i->start_nodes.end(); ++j) {
-			i->vert_start_ok[*j] = isof_start_ok(i->graph, *j,
-					*graph_isof_iter);
+			// TODO: set vert_start_ok
 		}
 
 #ifdef DEBUG
@@ -295,11 +294,6 @@ inline void isoform_MCMC_init(
 		for (IsoformMap::const_iterator j = graph_isof_iter->begin();
 				j != graph_isof_iter->end(); ++j) {
 			std::cout << j->first << " ";
-		}
-		std::cout << std::endl;
-		for (vector<bool>::const_iterator j = i->vert_start_ok.begin();
-				j != i->vert_start_ok.end(); ++j) {
-			std::cout << *j << " ";
 		}
 		std::cout << "################\n";
 #endif
@@ -364,6 +358,8 @@ inline void isoform_MCMC_init(
 		for (vector<IsoformMap>::iterator i = opt_graph_ratios.begin();
 				i != opt_graph_ratios.end(); ++i) {
 
+			// TODO
+
 		}
 
 	}
@@ -374,12 +370,17 @@ inline void isoform_MCMC_init(
 
 }
 
+// get graph weights for choosing
+// which graph to modify
 template<class RNodeLoc>
 inline double get_graph_weight(SpliceGraph const &graph,
 		IsoformMap const &graph_isof,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		GraphReads const &graph_read);
 
+// get graph weights for
+// updating graph expression values
+// when modifying a graph
 template<class RNodeLoc>
 inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		vector<SpliceGraph> const &graphs,
