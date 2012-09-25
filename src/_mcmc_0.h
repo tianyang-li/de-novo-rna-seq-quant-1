@@ -290,12 +290,12 @@ inline void isoform_MCMC_init(
 		}
 
 #ifdef DEBUG
-		std::cout << "######\nisoform expr val\n" << std::endl;
+		cerr << "######\nisoform expr val\n" << std::endl;
 		for (IsoformMap::const_iterator j = graph_isof_iter->begin();
 				j != graph_isof_iter->end(); ++j) {
-			std::cout << j->first << " ";
+			cerr << j->first << " ";
 		}
-		std::cout << "################\n";
+		cerr << "################\n";
 #endif
 
 	}
@@ -387,7 +387,6 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
 		double * const dir_graph_weights) {
-	// TODO: test this
 
 #ifdef DEBUG
 	cerr << "enter get_dir_graph_weights\n";
@@ -405,65 +404,73 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 
 	ulong graph_num = graphs.size();
 
-	// initial weight a graph gets
-	double const kGraphWeightInit = 1.0;
-	fill(dir_graph_weights, dir_graph_weights + graph_num, kGraphWeightInit);
+	if (graph_num != 1) {
 
-	vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
-	vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
-	vector<GraphReads>::const_iterator graph_read_iter = graph_reads.begin();
-	ulong cur_graph = 0;
+		// initial weight a graph gets
+		double const kGraphWeightInit = 1.0;
+		fill(dir_graph_weights, dir_graph_weights + graph_num,
+				kGraphWeightInit);
 
-	double tot_unique_weight = double(graph_num) * kGraphWeightInit;
+		vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
+		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+		vector<GraphReads>::const_iterator graph_read_iter =
+				graph_reads.begin();
+		ulong cur_graph = 0;
 
-	while (cur_graph != graph_num) {
+		double tot_unique_weight = double(graph_num) * kGraphWeightInit;
 
-		ulong graph_len = 0;
-		for (vector<Node>::const_iterator i = graph_info_iter->nodes.begin();
-				i != graph_info_iter->nodes.end(); ++i) {
-			graph_len += i->est_len;
-		}
+		while (cur_graph != graph_num) {
 
-		// get initial weight for unique reads
-		for (vector<ReadIndex>::const_iterator i =
-				graph_read_iter->reads.begin();
-				i != graph_read_iter->reads.end(); ++i) {
-
-			if (i->get_align_num(read_in_graph) == 1) {
-				// weight of a unique read
-				double const kUniqueWeight = 1.0;
-				dir_graph_weights[cur_graph] += kUniqueWeight;
-				tot_unique_weight += kUniqueWeight;
+			ulong graph_len = 0;
+			for (vector<Node>::const_iterator i =
+					graph_info_iter->nodes.begin();
+					i != graph_info_iter->nodes.end(); ++i) {
+				graph_len += i->est_len;
 			}
 
-		}
+			// get initial weight for unique reads
+			for (vector<ReadIndex>::const_iterator i =
+					graph_read_iter->reads.begin();
+					i != graph_read_iter->reads.end(); ++i) {
 
-		// adjust weight for multi-reads
-		for (vector<ReadIndex>::const_iterator i =
-				graph_read_iter->reads.begin();
-				i != graph_read_iter->reads.end(); ++i) {
+				if (i->get_align_num(read_in_graph) == 1) {
+					// weight of a unique read
+					double const kUniqueWeight = 1.0;
+					dir_graph_weights[cur_graph] += kUniqueWeight;
+					tot_unique_weight += kUniqueWeight;
+				}
 
-			ulong align_num = i->get_align_num(read_in_graph);
-
-			if (align_num != 1) {
-				// weight of a unique read
-				double const kMultiWeight = 1.0;
-				double unique_weight = dir_graph_weights[cur_graph];
-				dir_graph_weights[cur_graph] +=
-						(kMultiWeight * double(align_num) * unique_weight
-								/ tot_unique_weight);
 			}
 
+			// adjust weight for multi-reads
+			for (vector<ReadIndex>::const_iterator i =
+					graph_read_iter->reads.begin();
+					i != graph_read_iter->reads.end(); ++i) {
+
+				ulong align_num = i->get_align_num(read_in_graph);
+
+				if (align_num != 1) {
+					// weight of a unique read
+					double const kMultiWeight = 1.0;
+					double unique_weight = dir_graph_weights[cur_graph];
+					dir_graph_weights[cur_graph] += (kMultiWeight
+							* double(align_num) * unique_weight
+							/ tot_unique_weight);
+				}
+
+			}
+
+			dir_graph_weights[cur_graph] /= double(
+					graph_info_iter->get_gene_len());
+
+			dir_graph_weights[cur_graph] /= sqrt(read_in_graph.size());
+
+			++cur_graph;
+			++graph_iter;
+			++graph_info_iter;
+			++graph_read_iter;
 		}
 
-		dir_graph_weights[cur_graph] /= double(graph_info_iter->get_gene_len());
-
-		dir_graph_weights[cur_graph] /= sqrt(read_in_graph.size());
-
-		++cur_graph;
-		++graph_iter;
-		++graph_info_iter;
-		++graph_read_iter;
 	}
 
 #ifdef DEBUG
