@@ -237,12 +237,20 @@ inline bool isof_start_ok(DirectedGraph const &graph, ulong vert,
 typedef vector<bool> VertIsofChoose;
 
 template<class RNodeLoc>
+inline void get_prop_graph_ratio(
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		vector<GraphReads> const &graph_reads, GraphInfo const &graph_info,
+		SpliceGraph const &graph, IsoformMap const &graph_isoform,
+		IsoformMap &prop_graph_ratio) {
+}
+
+template<class RNodeLoc>
 inline void isoform_MCMC_init(
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
 		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> const &graphs,
 		gsl_rng *rn, vector<IsoformMap> &graph_isoforms,
-		vector<IsoformMap> &prop_graph_ratios,
+		vector<IsoformMap> &prop_graph_ratios /* each entry is an empty map */,
 		vector<VertIsofChoose> &vert_start_oks) {
 
 #ifdef DEBUG
@@ -373,13 +381,17 @@ inline void isoform_MCMC_init(
 		// get proposal ratios for graphs to
 		// use in proposal distributions
 
-		vector<IsoformMap>::const_iterator isof_set_iter =
+		vector<IsoformMap>::const_iterator graph_isof_iter =
 				graph_isoforms.begin();
-		ulong graph_ind = 0;
-		for (vector<IsoformMap>::iterator i = prop_graph_ratios.begin();
-				i != prop_graph_ratios.end(); ++i) {
+		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+		vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
 
-			// TODO
+		for (vector<IsoformMap>::iterator i = prop_graph_ratios.begin();
+				i != prop_graph_ratios.end();
+				++i, ++graph_iter, ++graph_isof_iter, ++graph_info_iter) {
+
+			get_prop_graph_ratio(read_in_graph, graph_reads, *graph_info_iter,
+					*graph_iter, *graph_isof_iter, *i);
 
 		}
 
