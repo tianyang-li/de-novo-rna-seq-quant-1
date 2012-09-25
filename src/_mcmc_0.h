@@ -232,13 +232,18 @@ inline bool isof_start_ok(DirectedGraph const &graph, ulong vert,
 	return _isof_start_ok(graph, vert, isofs, isof);
 }
 
+// information on where to choose
+// isoforms to start or end in a graph
+typedef vector<bool> VertIsofChoose;
+
 template<class RNodeLoc>
 inline void isoform_MCMC_init(
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
 		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> &graphs,
 		gsl_rng *rn, vector<IsoformMap> &graph_isoforms,
-		vector<IsoformMap> &opt_graph_ratios) {
+		vector<IsoformMap> &opt_graph_ratios,
+		vector<VertIsofChoose> &vert_start_oks) {
 
 #ifdef DEBUG
 	cerr << "enter isoform_MCMC_init\n";
@@ -279,26 +284,10 @@ inline void isoform_MCMC_init(
 
 	}
 
-	// graph contraints given isoforms
+	// see which vertices can have an isoform starting
+	// from it
 
-	vector<IsoformMap>::const_iterator graph_isof_iter = graph_isoforms.begin();
-	for (vector<SpliceGraph>::iterator i = graphs.begin(); i != graphs.end();
-			++i, ++graph_isof_iter) {
-		for (vector<ulong>::const_iterator j = i->start_nodes.begin();
-				j != i->start_nodes.end(); ++j) {
-			// TODO: set vert_start_ok
-		}
-
-#ifdef DEBUG
-		cerr << "######\nisoform expr val\n" << std::endl;
-		for (IsoformMap::const_iterator j = graph_isof_iter->begin();
-				j != graph_isof_iter->end(); ++j) {
-			cerr << j->first << " ";
-		}
-		cerr << "################\n";
-#endif
-
-	}
+	// TODO
 
 	// assign random expression levels according
 	// to a dirichlet distribution
@@ -722,8 +711,10 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 		vector<IsoformMap> opt_graph_ratios(graph_num);
 
+		vector<VertIsofChoose> vert_start_oks(graph_num);
+
 		isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs, rn,
-				graph_isoforms, opt_graph_ratios);
+				graph_isoforms, opt_graph_ratios, vert_start_oks);
 
 		// main part of MCMC
 
