@@ -294,10 +294,21 @@ inline void isoform_MCMC_init(
 		// from it
 
 		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+		vector<IsoformMap>::const_iterator graph_isof_iter =
+				graph_isoforms.begin();
 		for (vector<VertIsofChoose>::iterator i = vert_start_oks.begin();
-				i != vert_start_oks.end(); ++i, ++graph_iter) {
+				i != vert_start_oks.end();
+				++i, ++graph_iter, ++graph_isof_iter) {
 
 			i->assign(num_vertices(graph_iter->graph), true);
+
+			for (ulong j = 0; j != i->size(); ++j) {
+
+				if (!isof_start_ok(graph_iter->graph, j, *graph_isof_iter)) {
+					(*i)[j] = false;
+				}
+
+			}
 
 		}
 
