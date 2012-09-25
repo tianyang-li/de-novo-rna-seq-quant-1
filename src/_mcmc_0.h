@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <memory>
 #include <iostream>
+#include <cmath>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
@@ -422,8 +423,6 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 			graph_len += i->est_len;
 		}
 
-		// TODO: normalize by length
-
 		// get initial weight for unique reads
 		for (vector<ReadIndex>::const_iterator i =
 				graph_read_iter->reads.begin();
@@ -456,14 +455,14 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 
 		}
 
+		dir_graph_weights[cur_graph] /= double(graph_info_iter->get_gene_len());
+
+		dir_graph_weights[cur_graph] /= sqrt(read_in_graph.size());
+
 		++cur_graph;
 		++graph_iter;
 		++graph_info_iter;
 		++graph_read_iter;
-	}
-
-	for (ulong i = 0; i != graph_num; ++i) {
-		dir_graph_weights[i] /= 8.0;
 	}
 
 #ifdef DEBUG

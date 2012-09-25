@@ -41,7 +41,7 @@ setup(
                            extra_objects=["lib/quant.a",
                                           "lib/libgsl.a", ],
                            language="c++",
-                           libraries=[],
+                           libraries=["m", ],
                            include_dirs=["src", "gsl-1.15",
                                          "boost_1_51_0", ],
                            library_dirs=[],

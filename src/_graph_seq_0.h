@@ -91,6 +91,17 @@ public:
 
 	ulong graph_id;
 	vector<Node> nodes;
+
+	ulong get_gene_len() const {
+		ulong gene_len = 0;
+
+		for (vector<Node>::const_iterator i = nodes.begin(); i != nodes.end();
+				++i) {
+			gene_len += i->est_len;
+		}
+
+		return gene_len;
+	}
 };
 
 typedef PyGraph GraphInfo;
