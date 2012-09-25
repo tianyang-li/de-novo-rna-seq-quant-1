@@ -71,7 +71,7 @@ inline double get_graph_weight<SingleNodeLoc>(SpliceGraph const &graph,
 }
 
 template<>
-inline ulong _add_isof_weight<SingleNodeLoc>(IsoformMap const &opt_graph_ratio,
+inline ulong _add_isof_weight<SingleNodeLoc>(IsoformMap const &prop_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph) {
@@ -82,7 +82,7 @@ inline ulong _add_isof_weight<SingleNodeLoc>(IsoformMap const &opt_graph_ratio,
 }
 
 template<>
-inline ulong _del_isof_weight<SingleNodeLoc>(IsoformMap const &opt_graph_ratio,
+inline ulong _del_isof_weight<SingleNodeLoc>(IsoformMap const &prop_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph) {
@@ -94,7 +94,7 @@ inline ulong _del_isof_weight<SingleNodeLoc>(IsoformMap const &opt_graph_ratio,
 
 template<>
 inline void get_vert_start_info<SingleNodeLoc>(IsoformMap const &graph_isoform,
-		IsoformMap const &opt_graph_ratio, GraphInfo const &graph_info,
+		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
 		double * const vert_start_probs) {
@@ -103,7 +103,7 @@ inline void get_vert_start_info<SingleNodeLoc>(IsoformMap const &graph_isoform,
 
 template<>
 inline void get_isof_del_info<SingleNodeLoc>(IsoformMap const &graph_isoform,
-		IsoformMap const &opt_graph_ratio, GraphInfo const &graph_info,
+		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
 		double * const isof_del_probs) {
