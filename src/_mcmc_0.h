@@ -240,7 +240,7 @@ template<class RNodeLoc>
 inline void isoform_MCMC_init(
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
-		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> &graphs,
+		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> const &graphs,
 		gsl_rng *rn, vector<IsoformMap> &graph_isoforms,
 		vector<IsoformMap> &prop_graph_ratios,
 		vector<VertIsofChoose> &vert_start_oks) {
@@ -249,92 +249,112 @@ inline void isoform_MCMC_init(
 	cerr << "enter isoform_MCMC_init\n";
 #endif
 
-	vector<IsoformMap>::iterator isof_set_iter = graph_isoforms.begin();
+	{
 
-	for (vector<SpliceGraph>::const_iterator i = graphs.begin();
-			i != graphs.end(); ++i, ++isof_set_iter) {
+		vector<IsoformMap>::iterator isof_set_iter = graph_isoforms.begin();
 
-		ulong rc_size = i->read_constraints.size();
+		for (vector<SpliceGraph>::const_iterator i = graphs.begin();
+				i != graphs.end(); ++i, ++isof_set_iter) {
 
-		// 1 - unsatisfied
-		// 0 - satisfied
-		dynamic_bitset<> satisfied_rc(rc_size);
-		satisfied_rc.set();
+			ulong rc_size = i->read_constraints.size();
 
-		while (satisfied_rc.any()) {
-			ulong un_rc = 0; // un-satisfied read constraint index
-			while (satisfied_rc[un_rc] == false) {
-				++un_rc;
-			}
-			satisfied_rc[un_rc] = false;
+			// 1 - unsatisfied
+			// 0 - satisfied
+			dynamic_bitset<> satisfied_rc(rc_size);
+			satisfied_rc.set();
 
-			Isoform isof(boost::num_vertices(i->graph));
-			rand_rc_isof(*i, isof, un_rc, rn);
-			isof_set_iter->insert(make_pair(isof, 0.0L));
+			while (satisfied_rc.any()) {
+				ulong un_rc = 0; // un-satisfied read constraint index
+				while (satisfied_rc[un_rc] == false) {
+					++un_rc;
+				}
+				satisfied_rc[un_rc] = false;
 
-			for (ulong j = 0; j != rc_size; ++j) {
-				if (satisfied_rc[j] == true) {
-					if (isof == (isof | i->read_constraints[j])) {
-						satisfied_rc[j] = false;
+				Isoform isof(boost::num_vertices(i->graph));
+				rand_rc_isof(*i, isof, un_rc, rn);
+				isof_set_iter->insert(make_pair(isof, 0.0L));
+
+				for (ulong j = 0; j != rc_size; ++j) {
+					if (satisfied_rc[j] == true) {
+						if (isof == (isof | i->read_constraints[j])) {
+							satisfied_rc[j] = false;
+						}
 					}
 				}
+
 			}
 
 		}
 
 	}
 
-	// see which vertices can have an isoform starting
-	// from it
+	{
 
-	// TODO
+		// see which vertices can have an isoform starting
+		// from it
 
-	// assign random expression levels according
-	// to a dirichlet distribution
+		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+		for (vector<VertIsofChoose>::iterator i = vert_start_oks.begin();
+				i != vert_start_oks.end(); ++i, ++graph_iter) {
 
-	ulong isofs_size = 0;
-	for (isof_set_iter = graph_isoforms.begin();
-			isof_set_iter != graph_isoforms.end(); ++isof_set_iter) {
-		isofs_size += isof_set_iter->size();
-	}
-
-	if (isofs_size != 1) {
-
-		double *dir_alpha = new double[isofs_size];
-
-		fill(dir_alpha, dir_alpha + isofs_size, 1);
-
-		double *dir_theta = new double[isofs_size];
-
-		gsl_ran_dirichlet(rn, isofs_size, dir_alpha, dir_theta);
-
-		delete[] dir_alpha;
-
-		ulong isof_exp_ind = 0;
-		ulong graph_ind = 0;
-
-		for (isof_set_iter = graph_isoforms.begin();
-				isof_set_iter != graph_isoforms.end();
-				++isof_set_iter, ++graph_ind) {
-
-			for (IsoformMap::iterator cur_isof = isof_set_iter->begin();
-					cur_isof != isof_set_iter->end(); ++cur_isof) {
-
-				cur_isof->second = dir_theta[isof_exp_ind];
-
-				++isof_exp_ind;
-
-			}
+			i->assign(num_vertices(graph_iter->graph), true);
 
 		}
 
-		delete[] dir_theta;
+	}
 
-	} else {
+	{
 
-		// special case when there's only 1 isoform
+		// assign random expression levels according
+		// to a dirichlet distribution
 
-		graph_isoforms[0].begin()->second = 1.0;
+		ulong isofs_size = 0;
+		for (vector<IsoformMap>::const_iterator isof_set_iter =
+				graph_isoforms.begin(); isof_set_iter != graph_isoforms.end();
+				++isof_set_iter) {
+			isofs_size += isof_set_iter->size();
+		}
+
+		if (isofs_size != 1) {
+
+			double *dir_alpha = new double[isofs_size];
+
+			fill(dir_alpha, dir_alpha + isofs_size, 1);
+
+			double *dir_theta = new double[isofs_size];
+
+			gsl_ran_dirichlet(rn, isofs_size, dir_alpha, dir_theta);
+
+			delete[] dir_alpha;
+
+			ulong isof_exp_ind = 0;
+			ulong graph_ind = 0;
+
+			for (vector<IsoformMap>::iterator isof_set_iter =
+					graph_isoforms.begin();
+					isof_set_iter != graph_isoforms.end();
+					++isof_set_iter, ++graph_ind) {
+
+				for (IsoformMap::iterator cur_isof = isof_set_iter->begin();
+						cur_isof != isof_set_iter->end(); ++cur_isof) {
+
+					cur_isof->second = dir_theta[isof_exp_ind];
+
+					++isof_exp_ind;
+
+				}
+
+			}
+
+			delete[] dir_theta;
+
+		} else {
+
+			// special case when there's only 1 isoform
+
+			graph_isoforms[0].begin()->second = 1.0;
+
+		}
 
 	}
 
@@ -342,7 +362,8 @@ inline void isoform_MCMC_init(
 		// get proposal ratios for graphs to
 		// use in proposal distributions
 
-		isof_set_iter = graph_isoforms.begin();
+		vector<IsoformMap>::const_iterator isof_set_iter =
+				graph_isoforms.begin();
 		ulong graph_ind = 0;
 		for (vector<IsoformMap>::iterator i = prop_graph_ratios.begin();
 				i != prop_graph_ratios.end(); ++i) {
@@ -615,10 +636,10 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		graph_expr_val += i->second;
 	}
 
-	ulong add_isof_weight = _add_isof_weight(prop_graph_ratio, graph_info, graph,
-			graph_read, read_in_graph);
-	ulong del_isof_weight = _del_isof_weight(prop_graph_ratio, graph_info, graph,
-			graph_read, read_in_graph);
+	ulong add_isof_weight = _add_isof_weight(prop_graph_ratio, graph_info,
+			graph, graph_read, read_in_graph);
+	ulong del_isof_weight = _del_isof_weight(prop_graph_ratio, graph_info,
+			graph, graph_read, read_in_graph);
 
 	if (add_isof_weight == 0 && del_isof_weight == 0) {
 		return 1.0;
@@ -667,15 +688,15 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 	switch (action) {
 
 	case ADD:
-		return add_isof_ratio(graph_isoform, prop_graph_ratio, graph_info, graph,
-				graph_read, read_in_graph, rn, action_prob, new_graph_isof,
-				new_prop_ratio);
+		return add_isof_ratio(graph_isoform, prop_graph_ratio, graph_info,
+				graph, graph_read, read_in_graph, rn, action_prob,
+				new_graph_isof, new_prop_ratio);
 		break;
 
 	case DEL:
-		return del_isof_ratio(graph_isoform, prop_graph_ratio, graph_info, graph,
-				graph_read, read_in_graph, rn, action_prob, new_graph_isof,
-				new_prop_ratio);
+		return del_isof_ratio(graph_isoform, prop_graph_ratio, graph_info,
+				graph, graph_read, read_in_graph, rn, action_prob,
+				new_graph_isof, new_prop_ratio);
 		break;
 
 	}
