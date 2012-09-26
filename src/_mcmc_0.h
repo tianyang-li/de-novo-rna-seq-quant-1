@@ -258,6 +258,11 @@ inline void get_prop_graph_ratio(
 
 	}
 
+	for (IsoformMap::iterator i = prop_graph_ratio.begin();
+			i != prop_graph_ratio.end(); ++i) {
+
+	}
+
 	// TODO:
 
 }
