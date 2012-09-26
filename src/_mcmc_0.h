@@ -241,7 +241,25 @@ inline void get_prop_graph_ratio(
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads, GraphInfo const &graph_info,
 		SpliceGraph const &graph, IsoformMap const &graph_isoform,
-		IsoformMap &prop_graph_ratio) {
+		IsoformMap &prop_graph_ratio /* empty map */) {
+
+	// rescue method
+	//
+	// Ali Mortazavi, Brian A. Williams, Kenneth McCue, Lorian Schaeffer,
+	// and Barbara Wold. Mapping and quantifying mammalian
+	// transcriptomes by RNA-seq. Nature Methods, 5(7):621–628, May 2008.
+
+	for (IsoformMap::const_iterator i = graph_isoform.begin();
+			i != graph_isoform.end(); ++i) {
+
+		double kIsofInitWeight = 1.0;
+
+		prop_graph_ratio.insert(make_pair(i->first, kIsofInitWeight));
+
+	}
+
+	// TODO:
+
 }
 
 template<class RNodeLoc>
@@ -496,6 +514,7 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 			dir_graph_weights[cur_graph] /= double(
 					graph_info_iter->get_gene_len());
 
+			// XXX: change how this is chosen???
 			dir_graph_weights[cur_graph] /= sqrt(read_in_graph.size());
 
 			++cur_graph;
