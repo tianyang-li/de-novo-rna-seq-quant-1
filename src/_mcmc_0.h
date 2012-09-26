@@ -252,30 +252,29 @@ inline void get_prop_graph_ratio(
 	// and Barbara Wold. Mapping and quantifying mammalian
 	// transcriptomes by RNA-seq. Nature Methods, 5(7):621–628, May 2008.
 
-	double tot_uniq_weight = 0;
+	// XXX: change how weights are chosen?
+
+	double const kIsofInitWeight = 1.0;
 
 	for (IsoformMap::const_iterator i = graph_isoform.begin();
 			i != graph_isoform.end(); ++i) {
 
-		double const kIsofInitWeight = 1.0;
-
-		double isof_weight = kIsofInitWeight;
-
-		double const kUniqReadWeight = 1.0;
-
-		for (vector<ReadIndex>::const_iterator j = graph_read.reads.begin();
-				j != graph_read.reads.end(); ++j) {
-		}
-
-		tot_uniq_weight += isof_weight;
-
-		prop_graph_ratio.insert(make_pair(i->first, isof_weight));
+		prop_graph_ratio.insert(make_pair(i->first, kIsofInitWeight));
 
 	}
 
+	double tot_uniq_weight = kIsofInitWeight * double(graph_isoform.size());
+
+	// set unique weight
+	for (vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
+			i != graph_read.reads.end(); ++i) {
+
+	}
+
+	double isof_weight_scale_factor = sqrt(graph_read.reads.size());
 	for (IsoformMap::iterator i = prop_graph_ratio.begin();
 			i != prop_graph_ratio.end(); ++i) {
-
+		i->second /= isof_weight_scale_factor;
 	}
 
 	// TODO:
@@ -476,6 +475,8 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 	// and Barbara Wold. Mapping and quantifying mammalian
 	// transcriptomes by RNA-seq. Nature Methods, 5(7):621–628, May 2008.
 
+	// XXX: change how weights are chosen???
+
 	ulong graph_num = graphs.size();
 
 	if (graph_num != 1) {
@@ -524,6 +525,7 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		graph_read_iter = graph_reads.begin();
 		cur_graph = 0;
 
+		double graph_weight_scale_factor = sqrt(read_in_graph.size());
 		while (cur_graph != graph_num) {
 
 			// adjust weight for multi-reads
@@ -547,8 +549,7 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 
 			}
 
-			// XXX: change how this is chosen???
-			dir_graph_weights[cur_graph] /= sqrt(read_in_graph.size());
+			dir_graph_weights[cur_graph] /= graph_weight_scale_factor;
 
 			++cur_graph;
 			++graph_iter;
