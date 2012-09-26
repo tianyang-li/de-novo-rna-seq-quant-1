@@ -16,6 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// XXX:
+//
+// * boost zip_iterator
+
 #ifndef _MCMC_0_H_
 #define _MCMC_0_H_
 
@@ -258,6 +262,8 @@ inline void get_prop_graph_ratio(
 
 		double const kUniqReadWeight = 1.0;
 
+
+
 		prop_graph_ratio.insert(make_pair(i->first, isof_weight));
 
 	}
@@ -447,6 +453,7 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
 		double * const dir_graph_weights) {
+	// TODO: test this
 
 #ifdef DEBUG
 	cerr << "enter get_dir_graph_weights\n";
