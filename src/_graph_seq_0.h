@@ -193,6 +193,9 @@ public:
 };
 
 /*
+ * location of the read
+ * in the graph
+ *
  * assumes that the read is already known
  */
 template<class RNodeLoc> // Read Node Loc
@@ -208,6 +211,8 @@ public:
 	vector<RNodeLoc> locs;
 };
 
+// for a given read, has all the graphs that
+// this read is in
 template<class RNodeLoc>
 class ReadInGraph {
 public:

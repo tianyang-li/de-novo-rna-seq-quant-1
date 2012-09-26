@@ -78,6 +78,7 @@ using _graph_seq_0::ReadIndex;
 using std::min;
 using std::cerr;
 using std::endl;
+using _graph_seq_0::ReadGraphLoc;
 
 }
 
@@ -239,6 +240,10 @@ inline bool isof_start_ok(DirectedGraph const &graph, ulong vert,
 // isoforms to start or end in a graph
 typedef vector<bool> VertIsofChoose;
 
+// determine if a read is compatible with an isoform
+template<class RNodeLoc>
+inline bool read_on_isoform(Isoform const &isof, RNodeLoc const &read_loc);
+
 template<class RNodeLoc>
 inline void get_prop_graph_ratio(
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
@@ -269,15 +274,39 @@ inline void get_prop_graph_ratio(
 	for (vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
 			i != graph_read.reads.end(); ++i) {
 
+		ulong num_read_isofs = 0;
+
+		IsoformMap::iterator isof_iter = prop_graph_ratio.begin();
+
+		while (isof_iter != prop_graph_ratio.end()) {
+
+			if (read_on_isoform(isof_iter->first,
+					read_in_graph[i->read_id].graph_locs[i->graph_index].locs[i->align_index])) {
+
+				++num_read_isofs;
+
+				if (num_read_isofs == 2) {
+					break;
+				}
+
+			}
+
+			++isof_iter;
+
+		}
+
+		if (num_read_isofs == 1) {
+
+		}
+
 	}
 
+	// TODO:
 	double isof_weight_scale_factor = sqrt(graph_read.reads.size());
 	for (IsoformMap::iterator i = prop_graph_ratio.begin();
 			i != prop_graph_ratio.end(); ++i) {
 		i->second /= isof_weight_scale_factor;
 	}
-
-	// TODO:
 
 }
 
