@@ -252,9 +252,13 @@ inline void get_prop_graph_ratio(
 	for (IsoformMap::const_iterator i = graph_isoform.begin();
 			i != graph_isoform.end(); ++i) {
 
-		double kIsofInitWeight = 1.0;
+		double const kIsofInitWeight = 1.0;
 
-		prop_graph_ratio.insert(make_pair(i->first, kIsofInitWeight));
+		double isof_weight = kIsofInitWeight;
+
+		double const kUniqReadWeight = 1.0;
+
+		prop_graph_ratio.insert(make_pair(i->first, isof_weight));
 
 	}
 
@@ -477,13 +481,6 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 
 		while (cur_graph != graph_num) {
 
-			ulong graph_len = 0;
-			for (vector<Node>::const_iterator i =
-					graph_info_iter->nodes.begin();
-					i != graph_info_iter->nodes.end(); ++i) {
-				graph_len += i->est_len;
-			}
-
 			// get initial weight for unique reads
 			for (vector<ReadIndex>::const_iterator i =
 					graph_read_iter->reads.begin();
@@ -492,11 +489,28 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 				if (i->get_align_num(read_in_graph) == 1) {
 					// weight of a unique read
 					double const kUniqueWeight = 1.0;
-					dir_graph_weights[cur_graph] += kUniqueWeight;
-					tot_unique_weight += kUniqueWeight;
+
+					dir_graph_weights[cur_graph] += kUniqueWeight
+							/ double(graph_info_iter->get_gene_len());
+
 				}
 
 			}
+
+			tot_unique_weight += dir_graph_weights[cur_graph];
+
+			++cur_graph;
+			++graph_iter;
+			++graph_info_iter;
+			++graph_read_iter;
+		}
+
+		graph_info_iter = graph_infos.begin();
+		graph_iter = graphs.begin();
+		graph_read_iter = graph_reads.begin();
+		cur_graph = 0;
+
+		while (cur_graph != graph_num) {
 
 			// adjust weight for multi-reads
 			for (vector<ReadIndex>::const_iterator i =
@@ -508,16 +522,16 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 				if (align_num != 1) {
 					// weight of a unique read
 					double const kMultiWeight = 1.0;
+
 					double unique_weight = dir_graph_weights[cur_graph];
-					dir_graph_weights[cur_graph] += (kMultiWeight
-							* double(align_num) * unique_weight
-							/ tot_unique_weight);
+
+					dir_graph_weights[cur_graph] += kMultiWeight
+							* double(align_num)
+							* (unique_weight / tot_unique_weight)
+							/ double(graph_info_iter->get_gene_len());
 				}
 
 			}
-
-			dir_graph_weights[cur_graph] /= double(
-					graph_info_iter->get_gene_len());
 
 			// XXX: change how this is chosen???
 			dir_graph_weights[cur_graph] /= sqrt(read_in_graph.size());
