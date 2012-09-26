@@ -19,7 +19,6 @@
 // XXX:
 //
 // * boost zip_iterator
-
 #ifndef _MCMC_0_H_
 #define _MCMC_0_H_
 
@@ -243,7 +242,7 @@ typedef vector<bool> VertIsofChoose;
 template<class RNodeLoc>
 inline void get_prop_graph_ratio(
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		vector<GraphReads> const &graph_reads, GraphInfo const &graph_info,
+		GraphReads const &graph_read, GraphInfo const &graph_info,
 		SpliceGraph const &graph, IsoformMap const &graph_isoform,
 		IsoformMap &prop_graph_ratio /* empty map */) {
 
@@ -252,6 +251,8 @@ inline void get_prop_graph_ratio(
 	// Ali Mortazavi, Brian A. Williams, Kenneth McCue, Lorian Schaeffer,
 	// and Barbara Wold. Mapping and quantifying mammalian
 	// transcriptomes by RNA-seq. Nature Methods, 5(7):621–628, May 2008.
+
+	double tot_uniq_weight = 0;
 
 	for (IsoformMap::const_iterator i = graph_isoform.begin();
 			i != graph_isoform.end(); ++i) {
@@ -262,7 +263,11 @@ inline void get_prop_graph_ratio(
 
 		double const kUniqReadWeight = 1.0;
 
+		for (vector<ReadIndex>::const_iterator j = graph_read.reads.begin();
+				j != graph_read.reads.end(); ++j) {
+		}
 
+		tot_uniq_weight += isof_weight;
 
 		prop_graph_ratio.insert(make_pair(i->first, isof_weight));
 
@@ -418,13 +423,15 @@ inline void isoform_MCMC_init(
 				graph_isoforms.begin();
 		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
 		vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
+		vector<GraphReads>::const_iterator graph_read_iter =
+				graph_reads.begin();
 
 		for (vector<IsoformMap>::iterator i = prop_graph_ratios.begin();
 				i != prop_graph_ratios.end();
-				++i, ++graph_iter, ++graph_isof_iter, ++graph_info_iter) {
+				++i, ++graph_iter, ++graph_isof_iter, ++graph_info_iter, ++graph_read_iter) {
 
-			get_prop_graph_ratio(read_in_graph, graph_reads, *graph_info_iter,
-					*graph_iter, *graph_isof_iter, *i);
+			get_prop_graph_ratio(read_in_graph, *graph_read_iter,
+					*graph_info_iter, *graph_iter, *graph_isof_iter, *i);
 
 		}
 
