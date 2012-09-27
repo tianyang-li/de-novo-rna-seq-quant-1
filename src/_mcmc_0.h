@@ -325,6 +325,16 @@ inline void get_prop_graph_ratio(
 		// isoforms that this read is in
 		vector<IsoformMap::iterator> read_isofs;
 
+		for (IsoformMap::iterator j = prop_graph_ratio.begin();
+				j != prop_graph_ratio.end(); ++j) {
+
+			if (read_on_isoform(j->first,
+					read_in_graph[i->read_id].graph_locs[i->graph_index].locs[i->align_index])) {
+
+			}
+
+		}
+
 		if (read_isofs.size() >= 2) {
 
 		}

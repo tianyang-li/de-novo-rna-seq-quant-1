@@ -27,6 +27,10 @@
 #include "_graph_seq_0.h"
 #include "_mcmc_0.h"
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 namespace _single_1 {
 
 using _graph_seq_0::ReadInGraph;
