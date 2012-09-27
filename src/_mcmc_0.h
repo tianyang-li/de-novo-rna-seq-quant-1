@@ -287,11 +287,15 @@ inline void get_prop_graph_ratio(
 
 		IsoformMap::iterator isof_iter = prop_graph_ratio.begin();
 
+		// an isoform that this read is on
+		IsoformMap::iterator read_isof;
+
 		while (isof_iter != prop_graph_ratio.end()) {
 
 			if (read_on_isoform(isof_iter->first,
 					read_in_graph[i->read_id].graph_locs[i->graph_index].locs[i->align_index])) {
 
+				read_isof = isof_iter;
 				++num_read_isofs;
 
 				if (num_read_isofs == 2) {
@@ -308,10 +312,10 @@ inline void get_prop_graph_ratio(
 
 			double kUniqueWeight = 1.0;
 
-			isof_iter->second += kUniqueWeight
-					/ double(isof_lens.find(isof_iter->first)->second);
+			read_isof->second += kUniqueWeight
+					/ double(isof_lens.find(read_isof->first)->second);
 
-			tot_uniq_weight += isof_iter->second;
+			tot_uniq_weight += read_isof->second;
 
 		}
 
@@ -330,13 +334,16 @@ inline void get_prop_graph_ratio(
 
 			if (read_on_isoform(j->first,
 					read_in_graph[i->read_id].graph_locs[i->graph_index].locs[i->align_index])) {
-
+				read_isofs.push_back(j);
 			}
 
 		}
 
 		if (read_isofs.size() >= 2) {
+			for (vector<IsoformMap::iterator>::iterator j = read_isofs.begin();
+					j != read_isofs.end(); ++j) {
 
+			}
 		}
 
 	}
