@@ -310,7 +310,7 @@ inline void get_prop_graph_ratio(
 
 		if (num_read_isofs == 1) {
 
-			double kUniqueWeight = 1.0;
+			double const kUniqueWeight = 1.0;
 
 			read_isof->second += kUniqueWeight
 					/ double(isof_lens.find(read_isof->first)->second);
@@ -342,6 +342,13 @@ inline void get_prop_graph_ratio(
 		if (read_isofs.size() >= 2) {
 			for (vector<IsoformMap::iterator>::iterator j = read_isofs.begin();
 					j != read_isofs.end(); ++j) {
+
+				double const kMultiReadWeight = 1.0;
+
+				double uniq_weight = (*j)->second;
+
+				(*j)->second += uniq_weight / tot_uniq_weight * kMultiReadWeight
+						/ double(isof_lens.find((*j)->first)->second);
 
 			}
 		}
