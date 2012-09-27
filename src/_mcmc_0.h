@@ -16,7 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// XXX:
+// TODO:
 //
 // * boost zip_iterator
 #ifndef _MCMC_0_H_
@@ -260,7 +260,7 @@ inline void get_prop_graph_ratio(
 	// and Barbara Wold. Mapping and quantifying mammalian
 	// transcriptomes by RNA-seq. Nature Methods, 5(7):621–628, May 2008.
 
-	// XXX: change how weights are chosen?
+	// TODO: change how weights are chosen?
 
 	double const kIsofInitWeight = 1.0;
 
@@ -282,6 +282,7 @@ inline void get_prop_graph_ratio(
 	for (vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
 			i != graph_read.reads.end(); ++i) {
 
+		// # of isoforms this read is in
 		ulong num_read_isofs = 0;
 
 		IsoformMap::iterator isof_iter = prop_graph_ratio.begin();
@@ -307,7 +308,8 @@ inline void get_prop_graph_ratio(
 
 			double kUniqueWeight = 1.0;
 
-			isof_iter->second += kUniqueWeight; //TODO: normalize by length
+			isof_iter->second += kUniqueWeight
+					/ double(isof_lens.find(isof_iter->first)->second);
 
 			tot_uniq_weight += isof_iter->second;
 
@@ -316,6 +318,19 @@ inline void get_prop_graph_ratio(
 	}
 
 	// TODO:
+	// set multi-read weights
+	for (vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
+			i != graph_read.reads.end(); ++i) {
+
+		// isoforms that this read is in
+		vector<IsoformMap::iterator> read_isofs;
+
+		if (read_isofs.size() >= 2) {
+
+		}
+
+	}
+
 	double isof_weight_scale_factor = sqrt(graph_read.reads.size());
 	for (IsoformMap::iterator i = prop_graph_ratio.begin();
 			i != prop_graph_ratio.end(); ++i) {
@@ -522,7 +537,7 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 	// and Barbara Wold. Mapping and quantifying mammalian
 	// transcriptomes by RNA-seq. Nature Methods, 5(7):621–628, May 2008.
 
-	// XXX: change how weights are chosen???
+	// TODO: change how weights are chosen???
 
 	ulong graph_num = graphs.size();
 

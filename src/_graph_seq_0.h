@@ -122,6 +122,9 @@ public:
 
 /*
  * assumes the graph is already known
+ *
+ * this contains all the nodes that this read is aligned to
+ * in the graph
  */
 typedef vector<SeqLoc> ReadNodeLoc;
 

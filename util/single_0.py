@@ -16,6 +16,11 @@
 #  You should have received a copy of the GNU General Public License
 
 
+# TODO:
+#
+# * performance!!! 
+
+
 import getopt
 import sys
 from collections import defaultdict
