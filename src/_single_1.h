@@ -113,7 +113,9 @@ inline void get_isof_del_info<SingleNodeLoc>(IsoformMap const &graph_isoform,
 template<>
 inline bool read_on_isoform<SingleNodeLoc>(Isoform const &isof,
 		SingleNodeLoc const &read_loc) {
+	// TODO
 	return true;
+
 }
 
 } // namespace _single_1
