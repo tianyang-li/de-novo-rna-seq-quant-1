@@ -79,6 +79,8 @@ using std::min;
 using std::cerr;
 using std::endl;
 using _graph_seq_0::ReadGraphLoc;
+using _graph_seq_0::get_isof_len;
+using _graph_seq_0::IsoformHash;
 
 }
 
@@ -250,7 +252,7 @@ inline void get_prop_graph_ratio(
 		GraphReads const &graph_read, GraphInfo const &graph_info,
 		SpliceGraph const &graph, IsoformMap const &graph_isoform,
 		IsoformMap &prop_graph_ratio /* empty map */,
-		unordered_map<Isoform, ulong> &isof_lens) {
+		unordered_map<Isoform, ulong, IsoformHash> &isof_lens) {
 
 	// rescue method
 	//
@@ -266,6 +268,11 @@ inline void get_prop_graph_ratio(
 			i != graph_isoform.end(); ++i) {
 
 		prop_graph_ratio.insert(make_pair(i->first, kIsofInitWeight));
+
+		if (isof_lens.find(i->first) == isof_lens.end()) {
+			isof_lens.insert(
+					make_pair(i->first, get_isof_len(i->first, graph_info)));
+		}
 
 	}
 
@@ -325,7 +332,7 @@ inline void isoform_MCMC_init(
 		gsl_rng *rn, vector<IsoformMap> &graph_isoforms,
 		vector<IsoformMap> &prop_graph_ratios /* each entry is an empty map */,
 		vector<VertIsofChoose> &vert_start_oks,
-		vector<unordered_map<Isoform, ulong> > &graph_isof_lens) {
+		vector<unordered_map<Isoform, ulong, IsoformHash> > &graph_isof_lens) {
 
 #ifdef DEBUG
 	cerr << "enter isoform_MCMC_init\n";
@@ -461,7 +468,7 @@ inline void isoform_MCMC_init(
 		vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
 		vector<GraphReads>::const_iterator graph_read_iter =
 				graph_reads.begin();
-		vector<unordered_map<Isoform, ulong> >::iterator isof_lens_iter =
+		vector<unordered_map<Isoform, ulong, IsoformHash> >::iterator isof_lens_iter =
 				graph_isof_lens.begin();
 
 		for (vector<IsoformMap>::iterator i = prop_graph_ratios.begin();
@@ -854,7 +861,8 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 		vector<VertIsofChoose> vert_start_oks(graph_num);
 
-		vector<unordered_map<Isoform, ulong> > graph_isof_lens(graph_num);
+		vector<unordered_map<Isoform, ulong, IsoformHash> > graph_isof_lens(
+				graph_num);
 
 		isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs, rn,
 				graph_isoforms, prop_graph_ratios, vert_start_oks,

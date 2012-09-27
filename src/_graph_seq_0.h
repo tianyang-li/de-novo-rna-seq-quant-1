@@ -186,10 +186,6 @@ public:
 		std::reverse(topo_sort.begin(), topo_sort.end());
 	}
 
-	inline void get_passable_edges() {
-		// TODO:
-	}
-
 };
 
 /*
@@ -274,6 +270,22 @@ public:
 
 void get_isoform_FASTA(vector<SpliceGraph> const &graphs,
 		vector<PyGraph> const &py_graphs, vector<Fasta> &isoforms);
+
+inline ulong get_isof_len(Isoform const &isof, GraphInfo const &graph_info) {
+
+	ulong isof_len = 0;
+
+	for (ulong i = 0; i != graph_info.nodes.size(); ++i) {
+
+		if (isof[i] == true) {
+			isof_len += graph_info.nodes[i].est_len;
+		}
+
+	}
+
+	return isof_len;
+
+}
 
 } // namespace _graph_seq_0
 
