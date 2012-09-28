@@ -354,10 +354,9 @@ inline void get_prop_graph_ratio(
 
 	}
 
-	double isof_weight_scale_factor = sqrt(graph_read.reads.size());
 	for (IsoformMap::iterator i = prop_graph_ratio.begin();
 			i != prop_graph_ratio.end(); ++i) {
-		i->second /= isof_weight_scale_factor;
+		i->second /= double(graph_read.reads.size());
 	}
 
 }
@@ -610,7 +609,6 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		graph_read_iter = graph_reads.begin();
 		cur_graph = 0;
 
-		double graph_weight_scale_factor = sqrt(read_in_graph.size());
 		while (cur_graph != graph_num) {
 
 			// adjust weight for multi-reads
@@ -634,7 +632,7 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 
 			}
 
-			dir_graph_weights[cur_graph] /= graph_weight_scale_factor;
+			dir_graph_weights[cur_graph] /= double(read_in_graph.size());
 
 			++cur_graph;
 			++graph_iter;
@@ -726,7 +724,9 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
 		double action_prob,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
-		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */) {
+		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
+		unordered_map<Isoform, ulong, IsoformHash> &isof_lens) {
+
 	double model_graph_ratio = 1;
 
 	double *vert_start_probs = new double[num_vertices(graph.graph)];
@@ -735,6 +735,9 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 			graph_read, read_in_graph, vert_start_probs);
 
 	// TODO: get @new_graph_isof
+
+	get_prop_graph_ratio(read_in_graph, graph_read, graph_info, graph,
+			new_graph_isof, new_prop_ratio, isof_lens);
 
 	double *new_isof_del_probs = new double[graph_isoform.size()];
 
@@ -757,7 +760,9 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
 		double action_prob,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
-		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */) {
+		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
+		unordered_map<Isoform, ulong, IsoformHash> &isof_lens) {
+
 	double model_graph_ratio = 1;
 
 	double *isof_del_probs = new double[graph_isoform.size()];
@@ -766,6 +771,9 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 			graph_read, read_in_graph, isof_del_probs);
 
 	// TODO: get @new_graph_isof
+
+	get_prop_graph_ratio(read_in_graph, graph_read, graph_info, graph,
+			new_graph_isof, new_prop_ratio, isof_lens);
 
 	double *new_vert_start_probs = new double[num_vertices(graph.graph)];
 
@@ -787,7 +795,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
-		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */) {
+		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
+		unordered_map<Isoform, ulong, IsoformHash> &isof_lens) {
 
 	// return the ratio of adding or removing the isoform, or 1
 
@@ -851,13 +860,13 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 	case ADD:
 		return add_isof_ratio(graph_isoform, prop_graph_ratio, graph_info,
 				graph, graph_read, read_in_graph, rn, action_prob,
-				new_graph_isof, new_prop_ratio);
+				new_graph_isof, new_prop_ratio, isof_lens);
 		break;
 
 	case DEL:
 		return del_isof_ratio(graph_isoform, prop_graph_ratio, graph_info,
 				graph, graph_read, read_in_graph, rn, action_prob,
-				new_graph_isof, new_prop_ratio);
+				new_graph_isof, new_prop_ratio, isof_lens);
 		break;
 
 	}
@@ -931,7 +940,8 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 					prop_graph_ratios[chosen_graph_ind],
 					graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
 					graph_reads[chosen_graph_ind], read_in_graph, rn,
-					new_graph_isof, new_prop_ratio);
+					new_graph_isof, new_prop_ratio,
+					graph_isof_lens[chosen_graph_ind]);
 
 			double new_chosen_graph_portion = 1.0;
 			if (graph_num != 1) {
