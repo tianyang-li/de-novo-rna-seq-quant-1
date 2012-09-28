@@ -321,7 +321,6 @@ inline void get_prop_graph_ratio(
 
 	}
 
-	// TODO:
 	// set multi-read weights
 	for (vector<ReadIndex>::const_iterator i = graph_read.reads.begin();
 			i != graph_read.reads.end(); ++i) {
