@@ -17,6 +17,8 @@
  */
 
 #include <vector>
+#include <exception>
+#include <iostream>
 #include <boost/unordered_set.hpp>
 
 #include "_single_1.h"
@@ -24,20 +26,18 @@
 #include "_graph_seq_0.h"
 #include "_mcmc_0.h"
 
-#ifdef DEBUG
-#include <iostream>
-#endif
-
 namespace _single_1 {
 
 using std::vector;
 using _graph_seq_0::SeqConstraint;
 using _graph_seq_0::ReadIndex;
-
-#ifdef DEBUG
 using std::cerr;
 using std::endl;
-#endif
+using std::exception;
+
+}
+
+namespace _single_1 {
 
 inline void setup_graph_rc(_graph_seq_0::SpliceGraph &graph,
 		_graph_seq_0::PyGraph const &py_graph, GraphReads const &graph_read,
@@ -137,66 +137,82 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 	cerr << "enter extension" << endl;
 #endif
 
-	// the reads that a graph has
-	vector<GraphReads> graph_reads(py_graphs->size());
+	try {
 
-	ulong graph_id = 0;
+		// the reads that a graph has
+		vector<GraphReads> graph_reads(py_graphs->size());
 
-	for (vector<GraphReads>::iterator i = graph_reads.begin();
-			i != graph_reads.end(); ++i, ++graph_id) {
-		i->graph_id = graph_id;
-	}
+		ulong graph_id = 0;
 
-	ulong read_id = 0;
+		for (vector<GraphReads>::iterator i = graph_reads.begin();
+				i != graph_reads.end(); ++i, ++graph_id) {
+			i->graph_id = graph_id;
+		}
 
-	for (vector<ReadInGraph<SingleNodeLoc> >::const_iterator i =
-			py_reads->begin(); i != py_reads->end(); ++i, ++read_id) {
-		ulong graph_index = 0;
+		ulong read_id = 0;
 
-		for (vector<ReadGraphLoc<SingleNodeLoc> >::const_iterator j =
-				i->graph_locs.begin(); j != i->graph_locs.end();
-				++j, ++graph_index) {
-			ulong align_index = 0;
+		for (vector<ReadInGraph<SingleNodeLoc> >::const_iterator i =
+				py_reads->begin(); i != py_reads->end(); ++i, ++read_id) {
+			ulong graph_index = 0;
 
-			for (vector<_graph_seq_0::ReadNodeLoc>::const_iterator k =
-					j->locs.begin(); k != j->locs.end(); ++k, ++align_index) {
-				graph_reads[j->graph_id].reads.push_back(
-						ReadIndex(read_id, graph_index, align_index));
+			for (vector<ReadGraphLoc<SingleNodeLoc> >::const_iterator j =
+					i->graph_locs.begin(); j != i->graph_locs.end();
+					++j, ++graph_index) {
+				ulong align_index = 0;
+
+				for (vector<_graph_seq_0::ReadNodeLoc>::const_iterator k =
+						j->locs.begin(); k != j->locs.end();
+						++k, ++align_index) {
+					graph_reads[j->graph_id].reads.push_back(
+							ReadIndex(read_id, graph_index, align_index));
+				}
 			}
 		}
+
+		vector<_graph_seq_0::SpliceGraph> graphs(py_graphs->size());
+
+		// setup graphs
+
+		graph_id = 0;
+		vector<GraphReads>::const_iterator graph_read = graph_reads.begin();
+		vector<_graph_seq_0::PyGraph>::const_iterator py_graph =
+				py_graphs->begin();
+
+		for (vector<_graph_seq_0::SpliceGraph>::iterator i = graphs.begin();
+				i != graphs.end(); ++i, ++graph_id, ++graph_read, ++py_graph) {
+			i->graph_id = graph_id;
+
+			setup_graph(*i, *py_graph, *graph_read, *py_reads);
+
+		}
+
+		// for graph information:
+		//     @py_graphs sequences, seq_len, est_len -> @graph_infos
+		// 	   @graphs structure and isoforms
+
+		// for read to graph alignment information:
+		//     @py_reads would have been modified and -> @read_in_graph
+		//     will continue to be used
+
+		// for each graph's alignments information:
+		//     @graph_reads will continue to be used
+
+		try {
+			_mcmc_0::isoform_main<SingleNodeLoc>(*py_graphs, graphs, *py_reads,
+					graph_reads, max_run);
+		} catch (exception &e) {
+			cerr << e.what() << endl;
+		}
+
+		try {
+			_graph_seq_0::get_isoform_FASTA(graphs, *py_graphs, *isoforms);
+		} catch (exception &e) {
+			cerr << e.what() << endl;
+		}
+
+	} catch (exception &e) {
+		cerr << e.what() << endl;
 	}
-
-	vector<_graph_seq_0::SpliceGraph> graphs(py_graphs->size());
-
-	// setup graphs
-
-	graph_id = 0;
-	vector<GraphReads>::const_iterator graph_read = graph_reads.begin();
-	vector<_graph_seq_0::PyGraph>::const_iterator py_graph = py_graphs->begin();
-
-	for (vector<_graph_seq_0::SpliceGraph>::iterator i = graphs.begin();
-			i != graphs.end(); ++i, ++graph_id, ++graph_read, ++py_graph) {
-		i->graph_id = graph_id;
-
-		setup_graph(*i, *py_graph, *graph_read, *py_reads);
-
-	}
-
-	// for graph information:
-	//     @py_graphs sequences, seq_len, est_len -> @graph_infos
-	// 	   @graphs structure and isoforms
-
-	// for read to graph alignment information:
-	//     @py_reads would have been modified and -> @read_in_graph
-	//     will continue to be used
-
-	// for each graph's alignments information:
-	//     @graph_reads will continue to be used
-
-	_mcmc_0::isoform_main<SingleNodeLoc>(*py_graphs, graphs, *py_reads,
-			graph_reads, max_run);
-
-	_graph_seq_0::get_isoform_FASTA(graphs, *py_graphs, *isoforms);
 
 #ifdef DEBUG
 	cerr << "exit extension" << endl;

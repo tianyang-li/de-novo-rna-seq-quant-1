@@ -29,7 +29,7 @@ cdef extern from "_single_1.h" namespace "_single_1":
     cdef void _get_isoforms(vector[PyGraph] * py_graphs,
                             vector[ReadInGraph[SingleNodeLoc]] * py_reads,
                             vector[Fasta] * isoforms,
-                            ulong max_run)
+                            ulong max_run) except +
 
 
 class IdMap(object):
@@ -43,7 +43,7 @@ class IdMap(object):
         return "graph:%s,nodes_map:%s" % (self.graph_id, str(self.nodes_map))
 
 
-cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
+cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs) except +:
     """
     id_maps: 
         a dictionary where
@@ -96,7 +96,7 @@ cdef void get_graph_from_py(graph_dict, id_maps, vector[PyGraph] * py_graphs):
 
 
 cdef void get_read_in_graph_from_py(read_in_graph, id_maps,
-                                    vector[ReadInGraph[SingleNodeLoc]] * py_reads):        
+                                    vector[ReadInGraph[SingleNodeLoc]] * py_reads) except +:        
     cdef ulong read_id = 0
     cdef ulong graph_id, node_id
     
@@ -139,7 +139,7 @@ cdef void get_read_in_graph_from_py(read_in_graph, id_maps,
         inc(read_id)
 
 
-cdef void convert_isoforms(isoforms, vector[Fasta] * _isoforms):
+cdef void convert_isoforms(isoforms, vector[Fasta] * _isoforms) except +:
     """
     isoforms:
         a list of FastaSeq

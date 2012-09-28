@@ -34,6 +34,7 @@
 #include <memory>
 #include <iostream>
 #include <cmath>
+#include <exception>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/dynamic_bitset.hpp>
@@ -689,7 +690,7 @@ void get_vert_start_info(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		double * const vert_start_probs);
+		double * const vert_start_probs, bool * const vert_start_oks);
 
 // get the probability distribution on the
 // isoforms for removing an isoform
@@ -715,10 +716,12 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	double model_graph_ratio = 1;
 
 	double *vert_start_probs = new double[num_vertices(graph.graph)];
+	bool *vert_start_oks = new bool[num_vertices(graph.graph)];
 
 	get_vert_start_info(graph_isoform, prop_graph_ratio, graph_info, graph,
-			graph_read, read_in_graph, vert_start_probs);
+			graph_read, read_in_graph, vert_start_probs, vert_start_oks);
 
+	new_graph_isof = graph_isoform;
 	// TODO: get @new_graph_isof
 
 	get_prop_graph_ratio(read_in_graph, graph_read, graph_info, graph,
@@ -732,6 +735,7 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	// update @model_graph_ratio
 
 	delete[] vert_start_probs;
+	delete[] vert_start_oks;
 
 	delete[] new_isof_del_probs;
 
@@ -763,14 +767,16 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 			new_graph_isof, new_prop_ratio, isof_lens);
 
 	double *new_vert_start_probs = new double[num_vertices(graph.graph)];
+	bool *new_vert_start_oks = new bool[num_vertices(graph.graph)];
 
 	get_vert_start_info(new_graph_isof, new_prop_ratio, graph_info, graph,
-			graph_read, read_in_graph, new_vert_start_probs);
+			graph_read, read_in_graph, new_vert_start_probs,
+			new_vert_start_oks);
 
 	// update @model_graph_ratio
 
 	delete[] new_vert_start_probs;
-
+	delete[] new_vert_start_oks;
 	delete[] isof_del_probs;
 
 	return model_graph_ratio;
@@ -889,8 +895,12 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 		// TODO: seed @rn
 
+		// for each graph, the expression values of
+		// each isoform in that graph
 		vector<IsoformMap> graph_isoforms(graph_num);
 
+		// for each graph, the proposal dirichlet parameters
+		// for the isoforms
 		vector<IsoformMap> prop_graph_ratios(graph_num);
 
 		vector<unordered_map<Isoform, ulong, IsoformHash> > graph_isof_lens(

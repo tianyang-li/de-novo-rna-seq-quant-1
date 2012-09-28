@@ -101,7 +101,7 @@ inline void get_vert_start_info<SingleNodeLoc>(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
-		double * const vert_start_probs) {
+		double * const vert_start_probs, bool * const vert_start_oks) {
 	// TODO
 }
 
