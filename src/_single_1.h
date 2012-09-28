@@ -128,7 +128,6 @@ inline bool read_on_isoform<SingleNodeLoc>(Isoform const &isof,
 	}
 
 	return true;
-
 }
 
 } // namespace _single_1

@@ -183,7 +183,6 @@ public:
 	vector<ulong> start_nodes;
 
 	inline void setup() {
-
 		boost::transitive_closure(graph, tc);
 
 		boost::topological_sort(graph, std::back_inserter(topo_sort));

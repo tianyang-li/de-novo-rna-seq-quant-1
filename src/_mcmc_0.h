@@ -719,6 +719,23 @@ void get_isof_del_info(IsoformMap const &graph_isoform,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		double * const isof_del_probs);
 
+// grow an isoform from a starting node
+// return the probability of growing that isoform like
+// that
+template<class RNodeLoc>
+double grow_added_isof_prob(IsoformMap const &graph_isoform,
+		GraphInfo const &graph_info, SpliceGraph const &graph,
+		GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng * const rn,
+		Isoform &added_isof) {
+
+	double grow_prob = 1;
+
+	// TODO:
+
+	return grow_prob;
+}
+
 // add an isoform and return the corresponding
 // MCMC ratio
 template<class RNodeLoc>
@@ -736,7 +753,9 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	double model_graph_ratio = 1;
 
 	double *vert_start_probs = new double[num_graph_vert];
+
 	bool *vert_start_oks = new bool[num_graph_vert];
+	fill(vert_start_oks, vert_start_oks + num_graph_vert, true);
 
 	get_vert_start_info(graph_isoform, prop_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph, vert_start_probs, vert_start_oks);
@@ -748,18 +767,23 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	{
 		ulong chose0prob_times = 0;
 		while (!vert_start_oks[vert_start]) {
-			vert_start = gsl_ran_discrete(rn, vert_start_probs_gsl);
-			++chose0prob_times;
 			if (chose0prob_times == ZeroProbTooManyTimes::kMaxZeroProbTimes) {
 				throw ZeroProbTooManyTimes();
 			}
+			vert_start = gsl_ran_discrete(rn, vert_start_probs_gsl);
+			++chose0prob_times;
 		}
 	}
 
 	gsl_ran_discrete_free(vert_start_probs_gsl);
 
+	Isoform added_isof;
+
+	double added_isof_prob = grow_added_isof_prob(graph_isoform, graph_info,
+			graph, graph_read, read_in_graph, rn, added_isof);
+
 	new_graph_isof = graph_isoform;
-	// TODO: get @new_graph_isof
+	new_graph_isof.insert(make_pair(added_isof, 0));
 
 	get_prop_graph_ratio(read_in_graph, graph_read, graph_info, graph,
 			new_graph_isof, new_prop_ratio, isof_lens);
@@ -898,14 +922,19 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 						graph_info, graph, graph_read, read_in_graph, rn,
 						action_prob, new_graph_isof, new_prop_ratio, isof_lens);
 			} catch (exception &e) {
-
+				cerr << e.what() << endl;
+				throw;
 			}
 			break;
 
 		case DEL:
-			return del_isof_ratio(graph_isoform, prop_graph_ratio, graph_info,
-					graph, graph_read, read_in_graph, rn, action_prob,
-					new_graph_isof, new_prop_ratio, isof_lens);
+			try {
+				return del_isof_ratio(graph_isoform, prop_graph_ratio,
+						graph_info, graph, graph_read, read_in_graph, rn,
+						action_prob, new_graph_isof, new_prop_ratio, isof_lens);
+			} catch (exception &e) {
+				cerr << e.what() << endl;
+			}
 			break;
 
 		}
