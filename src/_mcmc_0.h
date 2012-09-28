@@ -973,7 +973,14 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 			// TODO: calculate @model_graph_ratio
 
 			if (gsl_rng_uniform(rn) <= min(1.0, model_graph_ratio)) {
-				// TODO update to accepted state
+				// update to accepted state
+
+				if (flip_vert_start_ok.first) {
+					vert_start_oks[chosen_graph_ind][flip_vert_start_ok.second] =
+							!vert_start_oks[chosen_graph_ind][flip_vert_start_ok.second];
+				}
+
+				// TODO
 				if (graph_num != 1) {
 
 				}
