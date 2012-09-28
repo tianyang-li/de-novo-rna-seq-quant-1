@@ -88,7 +88,7 @@ namespace _mcmc_0 {
 
 class GSLRngUnifInt {
 public:
-	GSLRngUnifInt(gsl_rng *rn_) :
+	GSLRngUnifInt(gsl_rng * const rn_) :
 			rn(rn_) {
 	}
 
@@ -97,14 +97,14 @@ public:
 	}
 
 private:
-	gsl_rng *rn;
+	gsl_rng * const rn;
 };
 
 // given read constraint
 // and graph, get a random isoform
 // that satisfies the constraint
 inline void rand_rc_isof(SpliceGraph const &graph, Isoform &isof, ulong un_rc,
-		gsl_rng *rn) {
+		gsl_rng * const rn) {
 	// size of @isof is already set
 	// read constraint asumes all 0's doesn't occur
 
@@ -366,7 +366,7 @@ inline void isoform_MCMC_init(
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
 		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> const &graphs,
-		gsl_rng *rn, vector<IsoformMap> &graph_isoforms,
+		gsl_rng * const rn, vector<IsoformMap> &graph_isoforms,
 		vector<IsoformMap> &prop_graph_ratios /* each entry is an empty map */,
 		vector<VertIsofChoose> &vert_start_oks,
 		vector<unordered_map<Isoform, ulong, IsoformHash> > &graph_isof_lens) {
@@ -657,7 +657,8 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 }
 
 template<class RNodeLoc>
-inline ulong choose_graph_to_mod(gsl_rng *rn, vector<SpliceGraph> const &graphs,
+inline ulong choose_graph_to_mod(gsl_rng * const rn,
+		vector<SpliceGraph> const &graphs,
 		vector<IsoformMap> const &graph_isoforms,
 		vector<GraphReads> const &graph_reads,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
@@ -691,18 +692,24 @@ inline ulong choose_graph_to_mod(gsl_rng *rn, vector<SpliceGraph> const &graphs,
 	return chosen_graph_ind;
 }
 
+// @_add_isof_weight / (@_add_isof_weight + @_del_isof_weight)
+// is the probability of adding an isoform to the current set
 template<class RNodeLoc>
 inline ulong _add_isof_weight(IsoformMap const &prop_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
 
+// @_del_isof_weight / (@_add_isof_weight + @_del_isof_weight)
+// is the probability of deleting an isoform from the current set
 template<class RNodeLoc>
 inline ulong _del_isof_weight(IsoformMap const &prop_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
 
+// get the probability distribution on the nodes
+// for the starting position of an isoform
 template<class RNodeLoc>
 void get_vert_start_info(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
@@ -710,6 +717,8 @@ void get_vert_start_info(IsoformMap const &graph_isoform,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		double * const vert_start_probs);
 
+// get the probability distribution on the
+// isoforms for removing an isoform
 template<class RNodeLoc>
 void get_isof_del_info(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
@@ -723,7 +732,7 @@ template<class RNodeLoc>
 inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng * const rn,
 		double action_prob,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
@@ -763,7 +772,7 @@ template<class RNodeLoc>
 inline double del_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng * const rn,
 		double action_prob,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
@@ -801,7 +810,7 @@ template<class RNodeLoc>
 inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng *rn,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng * const rn,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
@@ -926,8 +935,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 		isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs, rn,
 				graph_isoforms, prop_graph_ratios, vert_start_oks,
 				graph_isof_lens);
-
-		// main part of MCMC
 
 		vector<vector<IsoformMap> > mcmc_results;
 
