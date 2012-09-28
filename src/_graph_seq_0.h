@@ -139,6 +139,7 @@ public:
 // the corresponding node
 typedef boost::dynamic_bitset<> SeqConstraint;
 
+// TODO: ways to optimize?
 class SeqConstraintHash {
 public:
 	inline size_t operator()(SeqConstraint const &x) const {

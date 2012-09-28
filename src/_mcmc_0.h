@@ -16,9 +16,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO:
-//
-// * boost zip_iterator
+/*
+ * TODO:
+ *
+ * * boost zip_iterator
+ *
+ * * optimize code
+ */
+
 #ifndef _MCMC_0_H_
 #define _MCMC_0_H_
 
@@ -238,10 +243,6 @@ inline bool isof_start_ok(DirectedGraph const &graph, ulong vert,
 	return _isof_start_ok(graph, vert, isofs, isof);
 }
 
-// information on where to choose
-// isoforms to start or end in a graph
-typedef vector<bool> VertIsofChoose;
-
 // determine if a read is compatible with an isoform
 template<class RNodeLoc>
 inline bool read_on_isoform(Isoform const &isof, RNodeLoc const &read_loc);
@@ -368,7 +369,6 @@ inline void isoform_MCMC_init(
 		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> const &graphs,
 		gsl_rng * const rn, vector<IsoformMap> &graph_isoforms,
 		vector<IsoformMap> &prop_graph_ratios /* each entry is an empty map */,
-		vector<VertIsofChoose> &vert_start_oks,
 		vector<unordered_map<Isoform, ulong, IsoformHash> > &graph_isof_lens) {
 
 #ifdef DEBUG
@@ -406,32 +406,6 @@ inline void isoform_MCMC_init(
 							satisfied_rc[j] = false;
 						}
 					}
-				}
-
-			}
-
-		}
-
-	}
-
-	{
-
-		// see which vertices can have an isoform starting
-		// from it
-
-		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
-		vector<IsoformMap>::const_iterator graph_isof_iter =
-				graph_isoforms.begin();
-		for (vector<VertIsofChoose>::iterator i = vert_start_oks.begin();
-				i != vert_start_oks.end();
-				++i, ++graph_iter, ++graph_isof_iter) {
-
-			i->assign(num_vertices(graph_iter->graph), true);
-
-			for (ulong j = 0; j != i->size(); ++j) {
-
-				if (!isof_start_ok(graph_iter->graph, j, *graph_isof_iter)) {
-					(*i)[j] = false;
 				}
 
 			}
@@ -736,9 +710,7 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		double action_prob,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
-		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
-		VertIsofChoose &vert_start_ok,
-		pair<bool, ulong> &flip_vert_start_ok /* if @first == true flip @vert_start_ok[@second] */) {
+		unordered_map<Isoform, ulong, IsoformHash> &isof_lens) {
 
 	double model_graph_ratio = 1;
 
@@ -776,9 +748,7 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 		double action_prob,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
-		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
-		VertIsofChoose &vert_start_ok,
-		pair<bool, ulong> &flip_vert_start_ok /* if @first == true flip @vert_start_ok[@second] */) {
+		unordered_map<Isoform, ulong, IsoformHash> &isof_lens) {
 
 	double model_graph_ratio = 1;
 
@@ -813,9 +783,7 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng * const rn,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
-		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
-		VertIsofChoose &vert_start_ok,
-		pair<bool, ulong> &flip_vert_start_ok /* if @first == true flip @vert_start_ok[@second] */) {
+		unordered_map<Isoform, ulong, IsoformHash> &isof_lens) {
 
 	// return the ratio of adding or removing the isoform, or 1
 
@@ -879,15 +847,13 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 	case ADD:
 		return add_isof_ratio(graph_isoform, prop_graph_ratio, graph_info,
 				graph, graph_read, read_in_graph, rn, action_prob,
-				new_graph_isof, new_prop_ratio, isof_lens, vert_start_ok,
-				flip_vert_start_ok);
+				new_graph_isof, new_prop_ratio, isof_lens);
 		break;
 
 	case DEL:
 		return del_isof_ratio(graph_isoform, prop_graph_ratio, graph_info,
 				graph, graph_read, read_in_graph, rn, action_prob,
-				new_graph_isof, new_prop_ratio, isof_lens, vert_start_ok,
-				flip_vert_start_ok);
+				new_graph_isof, new_prop_ratio, isof_lens);
 		break;
 
 	}
@@ -927,14 +893,11 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 		vector<IsoformMap> prop_graph_ratios(graph_num);
 
-		vector<VertIsofChoose> vert_start_oks(graph_num);
-
 		vector<unordered_map<Isoform, ulong, IsoformHash> > graph_isof_lens(
 				graph_num);
 
 		isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs, rn,
-				graph_isoforms, prop_graph_ratios, vert_start_oks,
-				graph_isof_lens);
+				graph_isoforms, prop_graph_ratios, graph_isof_lens);
 
 		vector<vector<IsoformMap> > mcmc_results;
 
@@ -953,10 +916,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 			// if accepted @prop_graph_ratio ->
 			IsoformMap new_prop_ratio;
 
-			// if @first == true
-			// flip @vert_start_ok[@second]
-			pair<bool, ulong> flip_vert_start_ok(false, 0);
-
 			// the ratio of adding or deleting an isoform
 			double model_graph_ratio = update_chosen_graph_isoform(
 					graph_isoforms[chosen_graph_ind],
@@ -964,8 +923,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 					graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
 					graph_reads[chosen_graph_ind], read_in_graph, rn,
 					new_graph_isof, new_prop_ratio,
-					graph_isof_lens[chosen_graph_ind],
-					vert_start_oks[chosen_graph_ind], flip_vert_start_ok);
+					graph_isof_lens[chosen_graph_ind]);
 
 			double new_chosen_graph_portion = 1.0;
 			if (graph_num != 1) {
@@ -981,11 +939,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 			if (gsl_rng_uniform(rn) <= min(1.0, model_graph_ratio)) {
 				// update to accepted state
-
-				if (flip_vert_start_ok.first) {
-					vert_start_oks[chosen_graph_ind][flip_vert_start_ok.second] =
-							!vert_start_oks[chosen_graph_ind][flip_vert_start_ok.second];
-				}
 
 				// TODO
 				if (graph_num != 1) {
