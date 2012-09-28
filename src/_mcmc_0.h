@@ -19,9 +19,11 @@
 /*
  * TODO:
  *
- * * boost zip_iterator
+ *     * boost zip_iterator
  *
- * * optimize code
+ *     * optimize code
+ *
+ *     * exceptions
  */
 
 #ifndef _MCMC_0_H_
@@ -87,10 +89,26 @@ using std::endl;
 using _graph_seq_0::ReadGraphLoc;
 using _graph_seq_0::get_isof_len;
 using _graph_seq_0::IsoformHash;
+using std::exception;
 
 }
 
 namespace _mcmc_0 {
+
+// when choosing discrete probabilities,
+// if something is 0 and gets chosen too many times,
+// this exception is thrown
+class ZeroProbTooManyIter: public exception {
+public:
+	virtual char const * what() const throw () {
+		return "Something with 0 probability "
+				"in a discrete distribution "
+				"has been chosen "
+				"too many times!\n";
+	}
+
+	static ulong const kMaxZeroProbIter = 5;
+};
 
 class GSLRngUnifInt {
 public:
@@ -721,6 +739,8 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	get_vert_start_info(graph_isoform, prop_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph, vert_start_probs, vert_start_oks);
 
+	ulong start_vert;
+
 	new_graph_isof = graph_isoform;
 	// TODO: get @new_graph_isof
 
@@ -761,6 +781,7 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 	get_isof_del_info(graph_isoform, prop_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph, isof_del_probs);
 
+	new_graph_isof = graph_isoform;
 	// TODO: get @new_graph_isof
 
 	get_prop_graph_ratio(read_in_graph, graph_read, graph_info, graph,
@@ -791,77 +812,88 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens) {
 
-	// return the ratio of adding or removing the isoform, or 1
+	try {
 
-	double graph_expr_val = 0;
-	for (IsoformMap::const_iterator i = graph_isoform.begin();
-			i != graph_isoform.end(); ++i) {
-		graph_expr_val += i->second;
-	}
+		// return the ratio of adding or removing the isoform, or 1
 
-	ulong add_isof_weight = _add_isof_weight(prop_graph_ratio, graph_info,
-			graph, graph_read, read_in_graph);
-	ulong del_isof_weight = _del_isof_weight(prop_graph_ratio, graph_info,
-			graph, graph_read, read_in_graph);
+		double graph_expr_val = 0;
+		for (IsoformMap::const_iterator i = graph_isoform.begin();
+				i != graph_isoform.end(); ++i) {
+			graph_expr_val += i->second;
+		}
 
-	if (add_isof_weight == 0 && del_isof_weight == 0) {
-		return 1.0;
-	}
+		ulong add_isof_weight = _add_isof_weight(prop_graph_ratio, graph_info,
+				graph, graph_read, read_in_graph);
+		ulong del_isof_weight = _del_isof_weight(prop_graph_ratio, graph_info,
+				graph, graph_read, read_in_graph);
 
-	enum Action {
-		ADD, DEL,
-	};
+		if (add_isof_weight == 0 && del_isof_weight == 0) {
+			return 1.0;
+		}
 
-	Action action;
+		enum Action {
+			ADD, DEL,
+		};
 
-	double action_prob = 1.0;
+		Action action;
 
-	if (add_isof_weight == 0) {
+		double action_prob = 1.0;
 
-		action = ADD;
+		if (add_isof_weight == 0) {
 
-	} else {
+			action = ADD;
 
-		if (del_isof_weight == 0) {
-			action = DEL;
 		} else {
 
-			double add_prob = double(add_isof_weight)
-					/ double(add_isof_weight + del_isof_weight);
-
-			if (gsl_rng_uniform(rn) <= add_prob) {
-
-				action = ADD;
-
-				action_prob = add_prob;
-
+			if (del_isof_weight == 0) {
+				action = DEL;
 			} else {
 
-				action = DEL;
-
-				action_prob = double(del_isof_weight)
+				double add_prob = double(add_isof_weight)
 						/ double(add_isof_weight + del_isof_weight);
+
+				if (gsl_rng_uniform(rn) <= add_prob) {
+
+					action = ADD;
+
+					action_prob = add_prob;
+
+				} else {
+
+					action = DEL;
+
+					action_prob = double(del_isof_weight)
+							/ double(add_isof_weight + del_isof_weight);
+
+				}
 
 			}
 
 		}
 
-	}
+		switch (action) {
 
-	switch (action) {
+		case ADD:
+			try {
+				return add_isof_ratio(graph_isoform, prop_graph_ratio,
+						graph_info, graph, graph_read, read_in_graph, rn,
+						action_prob, new_graph_isof, new_prop_ratio, isof_lens);
+			} catch (exception &e) {
 
-	case ADD:
-		return add_isof_ratio(graph_isoform, prop_graph_ratio, graph_info,
-				graph, graph_read, read_in_graph, rn, action_prob,
-				new_graph_isof, new_prop_ratio, isof_lens);
-		break;
+			}
+			break;
 
-	case DEL:
-		return del_isof_ratio(graph_isoform, prop_graph_ratio, graph_info,
-				graph, graph_read, read_in_graph, rn, action_prob,
-				new_graph_isof, new_prop_ratio, isof_lens);
-		break;
+		case DEL:
+			return del_isof_ratio(graph_isoform, prop_graph_ratio, graph_info,
+					graph, graph_read, read_in_graph, rn, action_prob,
+					new_graph_isof, new_prop_ratio, isof_lens);
+			break;
 
+		}
+
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+		throw;
 	}
 
 }
@@ -873,101 +905,112 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 		vector<GraphReads> const &graph_reads, ulong max_run, ulong num_thread =
 				1 /* TODO: add threading */) {
 
-	// number of graphs
-	ulong graph_num = graphs.size();
+	try {
 
-	// used to update expression value
-	// of each graph
-	// using a dirichlet distribution
-	double *dir_graph_weights = new double[graph_num];
+		// number of graphs
+		ulong graph_num = graphs.size();
 
-	get_dir_graph_weights(graph_infos, graphs, read_in_graph, graph_reads,
-			dir_graph_weights);
+		// used to update expression value
+		// of each graph
+		// using a dirichlet distribution
+		double *dir_graph_weights = new double[graph_num];
 
-	double tot_dir_graph_weight = 0;
-	for (ulong i = 0; i != graph_num; ++i) {
-		tot_dir_graph_weight += dir_graph_weights[i];
-	}
+		get_dir_graph_weights(graph_infos, graphs, read_in_graph, graph_reads,
+				dir_graph_weights);
 
-	{
+		double tot_dir_graph_weight = 0;
+		for (ulong i = 0; i != graph_num; ++i) {
+			tot_dir_graph_weight += dir_graph_weights[i];
+		}
 
-		gsl_rng *rn = gsl_rng_alloc(gsl_rng_mt19937);
+		try {
 
-		// TODO: seed @rn
+			gsl_rng *rn = gsl_rng_alloc(gsl_rng_mt19937);
 
-		// for each graph, the expression values of
-		// each isoform in that graph
-		vector<IsoformMap> graph_isoforms(graph_num);
+			// TODO: seed @rn
 
-		// for each graph, the proposal dirichlet parameters
-		// for the isoforms
-		vector<IsoformMap> prop_graph_ratios(graph_num);
+			// for each graph, the expression values of
+			// each isoform in that graph
+			vector<IsoformMap> graph_isoforms(graph_num);
 
-		vector<unordered_map<Isoform, ulong, IsoformHash> > graph_isof_lens(
-				graph_num);
+			// for each graph, the proposal dirichlet parameters
+			// for the isoforms
+			vector<IsoformMap> prop_graph_ratios(graph_num);
 
-		isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs, rn,
-				graph_isoforms, prop_graph_ratios, graph_isof_lens);
+			vector<unordered_map<Isoform, ulong, IsoformHash> > graph_isof_lens(
+					graph_num);
 
-		vector<vector<IsoformMap> > mcmc_results;
+			isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs,
+					rn, graph_isoforms, prop_graph_ratios, graph_isof_lens);
 
-		// used to choose a graph to
-		// modify the graph's isoform set
-		double *graph_weights = new double[graph_num];
+			vector<vector<IsoformMap> > mcmc_results;
 
-		for (ulong runs = 0; runs != max_run; ++runs) {
+			// used to choose a graph to
+			// modify the graph's isoform set
+			double *graph_weights = new double[graph_num];
 
-			ulong chosen_graph_ind = choose_graph_to_mod(rn, graphs,
-					graph_isoforms, graph_reads, read_in_graph, graph_weights);
+			for (ulong runs = 0; runs != max_run; ++runs) {
 
-			// if accepted @graph_isoform ->
-			IsoformMap new_graph_isof;
+				ulong chosen_graph_ind = choose_graph_to_mod(rn, graphs,
+						graph_isoforms, graph_reads, read_in_graph,
+						graph_weights);
 
-			// if accepted @prop_graph_ratio ->
-			IsoformMap new_prop_ratio;
+				// if accepted @graph_isoform ->
+				IsoformMap new_graph_isof;
 
-			// the ratio of adding or deleting an isoform
-			double model_graph_ratio = update_chosen_graph_isoform(
-					graph_isoforms[chosen_graph_ind],
-					prop_graph_ratios[chosen_graph_ind],
-					graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
-					graph_reads[chosen_graph_ind], read_in_graph, rn,
-					new_graph_isof, new_prop_ratio,
-					graph_isof_lens[chosen_graph_ind]);
+				// if accepted @prop_graph_ratio ->
+				IsoformMap new_prop_ratio;
 
-			double new_chosen_graph_portion = 1.0;
-			if (graph_num != 1) {
+				// the ratio of adding or deleting an isoform
+				double model_graph_ratio = update_chosen_graph_isoform(
+						graph_isoforms[chosen_graph_ind],
+						prop_graph_ratios[chosen_graph_ind],
+						graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
+						graph_reads[chosen_graph_ind], read_in_graph, rn,
+						new_graph_isof, new_prop_ratio,
+						graph_isof_lens[chosen_graph_ind]);
 
-				new_chosen_graph_portion = gsl_ran_beta(rn,
-						dir_graph_weights[chosen_graph_ind],
-						tot_dir_graph_weight
-								- dir_graph_weights[chosen_graph_ind]);
-
-			}
-
-			// TODO: calculate @model_graph_ratio
-
-			if (gsl_rng_uniform(rn) <= min(1.0, model_graph_ratio)) {
-				// update to accepted state
-
-				// TODO
+				double new_chosen_graph_portion = 1.0;
 				if (graph_num != 1) {
+
+					new_chosen_graph_portion = gsl_ran_beta(rn,
+							dir_graph_weights[chosen_graph_ind],
+							tot_dir_graph_weight
+									- dir_graph_weights[chosen_graph_ind]);
+
+				}
+
+				// TODO: calculate @model_graph_ratio
+
+				if (gsl_rng_uniform(rn) <= min(1.0, model_graph_ratio)) {
+					// update to accepted state
+
+					// TODO
+					if (graph_num != 1) {
+
+					}
 
 				}
 
 			}
 
+			delete[] graph_weights;
+
+			gsl_rng_free(rn);
+
+		} catch (exception &e) {
+			cerr << e.what() << endl;
+			throw;
 		}
 
-		delete[] graph_weights;
+		delete[] dir_graph_weights;
 
-		gsl_rng_free(rn);
+		// TODO: put @mcmc_results into @graphs
 
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+		throw;
 	}
-
-	delete[] dir_graph_weights;
-
-	// TODO: put @mcmc_results into @graphs
 
 }
 

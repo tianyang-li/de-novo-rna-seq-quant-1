@@ -202,16 +202,19 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 					graph_reads, max_run);
 		} catch (exception &e) {
 			cerr << e.what() << endl;
+			throw;
 		}
 
 		try {
 			_graph_seq_0::get_isoform_FASTA(graphs, *py_graphs, *isoforms);
 		} catch (exception &e) {
 			cerr << e.what() << endl;
+			throw;
 		}
 
 	} catch (exception &e) {
 		cerr << e.what() << endl;
+		throw;
 	}
 
 #ifdef DEBUG
