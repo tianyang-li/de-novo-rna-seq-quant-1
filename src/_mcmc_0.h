@@ -710,7 +710,7 @@ void get_vert_start_info(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		double * const vert_start_probs) {
+		double * const vert_start_probs /* filled with 0's */) {
 
 }
 
@@ -757,6 +757,7 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	double model_graph_ratio = 1;
 
 	double *vert_start_probs = new double[num_graph_vert];
+	fill(vert_start_probs, vert_start_probs + num_graph_vert, 0);
 
 	get_vert_start_info(graph_isoform, prop_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph, vert_start_probs);
@@ -831,6 +832,7 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 			new_graph_isof, new_prop_ratio, isof_lens);
 
 	double *new_vert_start_probs = new double[num_graph_vert];
+	fill(new_vert_start_probs, new_vert_start_probs + num_graph_vert, 0);
 
 	get_vert_start_info(new_graph_isof, new_prop_ratio, graph_info, graph,
 			graph_read, read_in_graph, new_vert_start_probs);
