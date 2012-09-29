@@ -39,11 +39,10 @@ using std::exception;
 
 namespace _single_1 {
 
+// setup graph read constraints
 inline void setup_graph_rc(_graph_seq_0::SpliceGraph &graph,
 		_graph_seq_0::PyGraph const &py_graph, GraphReads const &graph_read,
 		vector<ReadInGraph<SingleNodeLoc> > &py_reads) {
-
-	// read constraints
 
 	boost::unordered_set<SeqConstraint, _graph_seq_0::SeqConstraintHash> rcs_set;
 
@@ -98,7 +97,7 @@ inline void setup_graph_rc(_graph_seq_0::SpliceGraph &graph,
 }
 
 inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
-		_graph_seq_0::PyGraph const &py_graph, GraphReads const &graph_read,
+		_graph_seq_0::PyGraph &py_graph, GraphReads const &graph_read,
 		vector<ReadInGraph<SingleNodeLoc> > &py_reads) {
 	// setup boost graph
 	// setup read constraints
@@ -121,9 +120,9 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 
 	// TODO: fix graph node when segmentation is done
 
-	// TODO: remove low coverage
+	// TODO: set @start, @end of non-branch start/end sites
 
-	graph.setup();
+	graph.setup(py_graph);
 
 	setup_graph_rc(graph, py_graph, graph_read, py_reads);
 
@@ -175,8 +174,7 @@ void _get_isoforms(vector<_graph_seq_0::PyGraph> *py_graphs,
 
 		graph_id = 0;
 		vector<GraphReads>::const_iterator graph_read = graph_reads.begin();
-		vector<_graph_seq_0::PyGraph>::const_iterator py_graph =
-				py_graphs->begin();
+		vector<_graph_seq_0::PyGraph>::iterator py_graph = py_graphs->begin();
 
 		for (vector<_graph_seq_0::SpliceGraph>::iterator i = graphs.begin();
 				i != graphs.end(); ++i, ++graph_id, ++graph_read, ++py_graph) {

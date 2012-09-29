@@ -193,11 +193,33 @@ public:
 
 	vector<ulong> start_nodes;
 
-	inline void setup() {
+	inline void setup(PyGraph &py_graph) {
 		boost::transitive_closure(graph, tc);
 
 		boost::topological_sort(graph, std::back_inserter(topo_sort));
 		std::reverse(topo_sort.begin(), topo_sort.end());
+
+		for (ulong i = 0; i != topo_sort.size(); ++i) {
+			if (boost::in_degree(i, graph) == 0) {
+
+				start_nodes.push_back(i);
+
+				py_graph.nodes[i].start = true;
+
+			} else {
+				break;
+			}
+		}
+
+		for (ulong i = topo_sort.size(); i != 0; --i) {
+			if (boost::out_degree(i, graph) == 0) {
+
+				py_graph.nodes[i].end = true;
+
+			} else {
+				break;
+			}
+		}
 	}
 
 };
