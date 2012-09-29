@@ -70,7 +70,8 @@ using std::endl;
 class Node {
 public:
 	Node(ulong node_id_, string seq_) :
-			node_id(node_id_), seq(seq_), est_len(seq_.size()) {
+			node_id(node_id_), seq(seq_), est_len(seq_.size()), start(false), end(
+					false) {
 	}
 
 	ulong node_id;
@@ -80,6 +81,16 @@ public:
 	// @est_len
 	string seq;
 	ulong est_len;
+
+	// this node is definitely the start of an isoform
+	// @false not sure
+	// @true sure
+	bool start;
+
+	// this node is definitely the end of an isoform
+	// @false not sure
+	// @true sure
+	bool end;
 
 	vector<ulong> edges;
 };

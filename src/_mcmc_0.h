@@ -24,6 +24,8 @@
  *     * optimize code
  *
  *     * exceptions
+ *
+ *     * GSL error handling
  */
 
 #ifndef _MCMC_0_H_
@@ -708,7 +710,9 @@ void get_vert_start_info(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		double * const vert_start_probs, bool * const vert_start_oks);
+		double * const vert_start_probs) {
+
+}
 
 // get the probability distribution on the
 // isoforms for removing an isoform
@@ -754,11 +758,8 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 
 	double *vert_start_probs = new double[num_graph_vert];
 
-	bool *vert_start_oks = new bool[num_graph_vert];
-	fill(vert_start_oks, vert_start_oks + num_graph_vert, true);
-
 	get_vert_start_info(graph_isoform, prop_graph_ratio, graph_info, graph,
-			graph_read, read_in_graph, vert_start_probs, vert_start_oks);
+			graph_read, read_in_graph, vert_start_probs);
 
 	gsl_ran_discrete_t *vert_start_probs_gsl = gsl_ran_discrete_preproc(
 			num_graph_vert, vert_start_probs);
@@ -766,7 +767,7 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	ulong vert_start = gsl_ran_discrete(rn, vert_start_probs_gsl);
 	{
 		ulong chose0prob_times = 0;
-		while (!vert_start_oks[vert_start]) {
+		while (vert_start_probs[vert_start] == 0) {
 			if (chose0prob_times == ZeroProbTooManyTimes::kMaxZeroProbTimes) {
 				throw ZeroProbTooManyTimes();
 			}
@@ -796,7 +797,6 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	// update @model_graph_ratio
 
 	delete[] vert_start_probs;
-	delete[] vert_start_oks;
 
 	delete[] new_isof_del_probs;
 
@@ -831,16 +831,14 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 			new_graph_isof, new_prop_ratio, isof_lens);
 
 	double *new_vert_start_probs = new double[num_graph_vert];
-	bool *new_vert_start_oks = new bool[num_graph_vert];
 
 	get_vert_start_info(new_graph_isof, new_prop_ratio, graph_info, graph,
-			graph_read, read_in_graph, new_vert_start_probs,
-			new_vert_start_oks);
+			graph_read, read_in_graph, new_vert_start_probs);
 
 	// update @model_graph_ratio
 
 	delete[] new_vert_start_probs;
-	delete[] new_vert_start_oks;
+
 	delete[] isof_del_probs;
 
 	return model_graph_ratio;
@@ -1034,6 +1032,9 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 					// update to accepted state
 
 					// TODO
+
+					// TODO: update @graph_weights
+
 					if (graph_num != 1) {
 
 					}
