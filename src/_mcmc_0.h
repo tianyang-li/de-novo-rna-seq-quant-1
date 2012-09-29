@@ -712,6 +712,8 @@ void get_vert_start_info(IsoformMap const &graph_isoform,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		double * const vert_start_probs /* filled with 0's */) {
 
+	// TODO
+
 }
 
 // get the probability distribution on the
@@ -946,6 +948,13 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 
 }
 
+// update weights for choosing which graph to modify
+inline void update_graph_weights(double * const graph_weights) {
+
+	// TODO:
+
+}
+
 template<class RNodeLoc>
 inline void isoform_main(vector<GraphInfo> const &graph_infos,
 		vector<SpliceGraph> &graphs,
@@ -1035,7 +1044,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 					// TODO
 
-					// TODO: update @graph_weights
+					update_graph_weights(graph_weights);
 
 					if (graph_num != 1) {
 
