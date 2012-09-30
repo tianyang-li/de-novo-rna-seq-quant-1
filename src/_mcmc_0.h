@@ -708,6 +708,8 @@ inline ulong choose_graph_to_mod(gsl_rng * const rn,
 
 // get the probability distribution on the nodes
 // for the starting position of an isoform
+//
+// the weights are on the same scale as @get_isof_del_info
 template<class RNodeLoc>
 void get_vert_start_info(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
@@ -721,12 +723,17 @@ void get_vert_start_info(IsoformMap const &graph_isoform,
 
 // get the probability distribution on the
 // isoforms for removing an isoform
+//
+// the weights are on the same scale as @get_vert_start_info
 template<class RNodeLoc>
 void get_isof_del_info(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		double * const isof_del_probs /* filled with 0's */) {
+
+	// TODO
+
 }
 
 // grow an isoform from a starting node
