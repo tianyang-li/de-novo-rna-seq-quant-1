@@ -23,7 +23,7 @@
  *
  *     * optimize code
  *
- *     * exceptions
+ *     * exceptions and better error messages
  *
  *     * GSL error handling
  */
@@ -396,7 +396,8 @@ inline void isoform_MCMC_init(
 	cerr << "enter isoform_MCMC_init\n";
 #endif
 
-	{
+	try {
+		// get isoforms that satisfy the read constraints
 
 		vector<IsoformMap>::iterator isof_set_iter = graph_isoforms.begin();
 
@@ -433,9 +434,21 @@ inline void isoform_MCMC_init(
 
 		}
 
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+		throw;
 	}
 
-	{
+	try {
+
+		// TODO: satisfy all node @start @end constraints
+
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+		throw;
+	}
+
+	try {
 
 		// assign random expression levels according
 		// to a dirichlet distribution
@@ -488,9 +501,12 @@ inline void isoform_MCMC_init(
 
 		}
 
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+		throw;
 	}
 
-	{
+	try {
 		// get proposal ratios for graphs to
 		// use in proposal distributions
 
@@ -513,6 +529,9 @@ inline void isoform_MCMC_init(
 
 		}
 
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+		throw;
 	}
 
 #ifdef DEBUG
@@ -723,7 +742,7 @@ void get_isof_del_info(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		double * const isof_del_probs);
+		double * const isof_del_probs /* filled with 0's */);
 
 // grow an isoform from a starting node
 // return the probability of growing that isoform like
@@ -781,7 +800,7 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 
 	gsl_ran_discrete_free(vert_start_probs_gsl);
 
-	Isoform added_isof;
+	Isoform added_isof(num_graph_vert);
 
 	double added_isof_prob = grow_added_isof_prob(graph_isoform, graph_info,
 			graph, graph_read, read_in_graph, rn, added_isof);
@@ -792,7 +811,9 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	get_prop_graph_ratio(read_in_graph, graph_read, graph_info, graph,
 			new_graph_isof, new_prop_ratio, isof_lens);
 
-	double *new_isof_del_probs = new double[graph_isoform.size()];
+	ulong num_new_graph_isof = new_graph_isof.size();
+	double *new_isof_del_probs = new double[num_new_graph_isof];
+	fill(new_isof_del_probs, new_isof_del_probs + num_new_graph_isof, 0);
 
 	get_isof_del_info(new_graph_isof, new_prop_ratio, graph_info, graph,
 			graph_read, read_in_graph, new_isof_del_probs);
@@ -822,10 +843,29 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 
 	double model_graph_ratio = 1;
 
-	double *isof_del_probs = new double[graph_isoform.size()];
+	ulong num_graph_isoform = graph_isoform.size();
+	double *isof_del_probs = new double[num_graph_isoform];
+	fill(isof_del_probs, isof_del_probs + num_graph_isoform, 0);
 
 	get_isof_del_info(graph_isoform, prop_graph_ratio, graph_info, graph,
 			graph_read, read_in_graph, isof_del_probs);
+
+	gsl_ran_discrete_t *isof_del_probs_gsl = gsl_ran_discrete_preproc(
+			num_graph_isoform, isof_del_probs);
+
+	ulong isof_del = gsl_ran_discrete(rn, isof_del_probs_gsl);
+	{
+		ulong chose0prob_times = 0;
+		while (isof_del_probs[isof_del] == 0) {
+			if (chose0prob_times == ZeroProbTooManyTimes::kMaxZeroProbTimes) {
+				throw ZeroProbTooManyTimes();
+			}
+			isof_del = gsl_ran_discrete(rn, isof_del_probs_gsl);
+			++chose0prob_times;
+		}
+	}
+
+	gsl_ran_discrete_free(isof_del_probs_gsl);
 
 	new_graph_isof = graph_isoform;
 	// TODO: get @new_graph_isof
