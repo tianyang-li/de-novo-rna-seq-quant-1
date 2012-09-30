@@ -75,37 +75,6 @@ inline double get_graph_weight<SingleNodeLoc>(SpliceGraph const &graph,
 }
 
 template<>
-inline ulong _add_isof_weight<SingleNodeLoc>(IsoformMap const &prop_graph_ratio,
-		GraphInfo const &graph_info, SpliceGraph const &graph,
-		GraphReads const &graph_read,
-		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph) {
-
-	//TODO
-	return 0;
-
-}
-
-template<>
-inline ulong _del_isof_weight<SingleNodeLoc>(IsoformMap const &prop_graph_ratio,
-		GraphInfo const &graph_info, SpliceGraph const &graph,
-		GraphReads const &graph_read,
-		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph) {
-
-	//TODO
-	return 0;
-
-}
-
-template<>
-inline void get_isof_del_info<SingleNodeLoc>(IsoformMap const &graph_isoform,
-		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
-		SpliceGraph const &graph, GraphReads const &graph_read,
-		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
-		double * const isof_del_probs) {
-	// TODO
-}
-
-template<>
 inline bool read_on_isoform<SingleNodeLoc>(Isoform const &isof,
 		SingleNodeLoc const &read_loc) {
 
@@ -119,6 +88,17 @@ inline bool read_on_isoform<SingleNodeLoc>(Isoform const &isof,
 	}
 
 	return true;
+}
+
+template<>
+inline void update_graph_weights<SingleNodeLoc>(
+		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> const &graphs,
+		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph,
+		vector<GraphReads> const &graph_reads, double * const graph_weights,
+		vector<IsoformMap> const &graph_isoforms) {
+
+	// TODO
+
 }
 
 } // namespace _single_1

@@ -706,22 +706,6 @@ inline ulong choose_graph_to_mod(gsl_rng * const rn,
 	return chosen_graph_ind;
 }
 
-// @_add_isof_weight / (@_add_isof_weight + @_del_isof_weight)
-// is the probability of adding an isoform to the current set
-template<class RNodeLoc>
-inline ulong _add_isof_weight(IsoformMap const &prop_graph_ratio,
-		GraphInfo const &graph_info, SpliceGraph const &graph,
-		GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
-
-// @_del_isof_weight / (@_add_isof_weight + @_del_isof_weight)
-// is the probability of deleting an isoform from the current set
-template<class RNodeLoc>
-inline ulong _del_isof_weight(IsoformMap const &prop_graph_ratio,
-		GraphInfo const &graph_info, SpliceGraph const &graph,
-		GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
-
 // get the probability distribution on the nodes
 // for the starting position of an isoform
 template<class RNodeLoc>
@@ -742,7 +726,8 @@ void get_isof_del_info(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		double * const isof_del_probs /* filled with 0's */);
+		double * const isof_del_probs /* filled with 0's */) {
+}
 
 // grow an isoform from a starting node
 // return the probability of growing that isoform like
@@ -771,17 +756,12 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		double action_prob,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
-		unordered_map<Isoform, ulong, IsoformHash> &isof_lens) {
+		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
+		double * const vert_start_probs /* already set */) {
 
 	ulong num_graph_vert = num_vertices(graph.graph);
 
 	double model_graph_ratio = 1;
-
-	double *vert_start_probs = new double[num_graph_vert];
-	fill(vert_start_probs, vert_start_probs + num_graph_vert, 0);
-
-	get_vert_start_info(graph_isoform, prop_graph_ratio, graph_info, graph,
-			graph_read, read_in_graph, vert_start_probs);
 
 	gsl_ran_discrete_t *vert_start_probs_gsl = gsl_ran_discrete_preproc(
 			num_graph_vert, vert_start_probs);
@@ -837,18 +817,14 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 		double action_prob,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
-		unordered_map<Isoform, ulong, IsoformHash> &isof_lens) {
+		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
+		double * const isof_del_probs /* this is already set */) {
 
 	ulong num_graph_vert = num_vertices(graph.graph);
 
 	double model_graph_ratio = 1;
 
 	ulong num_graph_isoform = graph_isoform.size();
-	double *isof_del_probs = new double[num_graph_isoform];
-	fill(isof_del_probs, isof_del_probs + num_graph_isoform, 0);
-
-	get_isof_del_info(graph_isoform, prop_graph_ratio, graph_info, graph,
-			graph_read, read_in_graph, isof_del_probs);
 
 	gsl_ran_discrete_t *isof_del_probs_gsl = gsl_ran_discrete_preproc(
 			num_graph_isoform, isof_del_probs);
@@ -907,10 +883,31 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 			graph_expr_val += i->second;
 		}
 
-		ulong add_isof_weight = _add_isof_weight(prop_graph_ratio, graph_info,
-				graph, graph_read, read_in_graph);
-		ulong del_isof_weight = _del_isof_weight(prop_graph_ratio, graph_info,
-				graph, graph_read, read_in_graph);
+		double *vert_start_probs = new double[num_vertices(graph.graph)];
+		fill(vert_start_probs, vert_start_probs + num_vertices(graph.graph), 0);
+
+		get_vert_start_info(graph_isoform, prop_graph_ratio, graph_info, graph,
+				graph_read, read_in_graph, vert_start_probs);
+
+		// @_add_isof_weight / (@_add_isof_weight + @_del_isof_weight)
+		// is the probability of adding an isoform to the current set
+		double add_isof_weight = 0;
+		for (ulong i = 0; i != num_vertices(graph.graph); ++i) {
+			add_isof_weight += vert_start_probs[i];
+		}
+
+		// @_del_isof_weight / (@_add_isof_weight + @_del_isof_weight)
+		// is the probability of deleting an isoform from the current set
+		double *isof_del_probs = new double[graph_isoform.size()];
+		fill(isof_del_probs, isof_del_probs + graph_isoform.size(), 0);
+
+		get_isof_del_info(graph_isoform, prop_graph_ratio, graph_info, graph,
+				graph_read, read_in_graph, isof_del_probs);
+
+		double del_isof_weight = 0;
+		for (ulong i = 0; i != graph_isoform.size(); ++i) {
+			del_isof_weight += isof_del_probs[i];
+		}
 
 		if (add_isof_weight == 0 && del_isof_weight == 0) {
 			return 1.0;
@@ -934,8 +931,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 				action = DEL;
 			} else {
 
-				double add_prob = double(add_isof_weight)
-						/ double(add_isof_weight + del_isof_weight);
+				double add_prob = add_isof_weight
+						/ (add_isof_weight + del_isof_weight);
 
 				if (gsl_rng_uniform(rn) <= add_prob) {
 
@@ -947,8 +944,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 
 					action = DEL;
 
-					action_prob = double(del_isof_weight)
-							/ double(add_isof_weight + del_isof_weight);
+					action_prob = del_isof_weight
+							/ (add_isof_weight + del_isof_weight);
 
 				}
 
@@ -962,7 +959,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 			try {
 				return add_isof_ratio(graph_isoform, prop_graph_ratio,
 						graph_info, graph, graph_read, read_in_graph, rn,
-						action_prob, new_graph_isof, new_prop_ratio, isof_lens);
+						action_prob, new_graph_isof, new_prop_ratio, isof_lens,
+						vert_start_probs);
 			} catch (exception &e) {
 				cerr << e.what() << endl;
 				throw;
@@ -973,7 +971,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 			try {
 				return del_isof_ratio(graph_isoform, prop_graph_ratio,
 						graph_info, graph, graph_read, read_in_graph, rn,
-						action_prob, new_graph_isof, new_prop_ratio, isof_lens);
+						action_prob, new_graph_isof, new_prop_ratio, isof_lens,
+						isof_del_probs);
 			} catch (exception &e) {
 				cerr << e.what() << endl;
 			}
@@ -989,11 +988,13 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 }
 
 // update weights for choosing which graph to modify
-inline void update_graph_weights(double * const graph_weights) {
-
-	// TODO:
-
-}
+// this function should be simple
+template<class RNodeLoc>
+inline void update_graph_weights(vector<GraphInfo> const &graph_infos,
+		vector<SpliceGraph> const &graphs,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		vector<GraphReads> const &graph_reads, double * const graph_weights,
+		vector<IsoformMap> const &graph_isoforms);
 
 template<class RNodeLoc>
 inline void isoform_main(vector<GraphInfo> const &graph_infos,
@@ -1084,7 +1085,8 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 					// TODO
 
-					update_graph_weights(graph_weights);
+					update_graph_weights(graph_infos, graphs, read_in_graph,
+							graph_reads, graph_weights, graph_isoforms);
 
 					if (graph_num != 1) {
 
