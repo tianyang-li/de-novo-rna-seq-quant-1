@@ -21,6 +21,17 @@
  * for working with sequences, graphs, etc.
  */
 
+/*
+ * work TODO
+ *
+ *
+ *     * handle these kinds of data
+ *
+ *         * RNA-PET
+ *
+ *         * RNA-Seq CAGE
+ */
+
 #ifndef _GRAPH_SEQ_0_H_
 #define _GRAPH_SEQ_0_H_
 
@@ -70,8 +81,7 @@ using std::endl;
 class Node {
 public:
 	Node(ulong node_id_, string seq_) :
-			node_id(node_id_), seq(seq_), est_len(seq_.size()), start(false), end(
-					false) {
+			node_id(node_id_), seq(seq_), est_len(seq_.size()) {
 	}
 
 	ulong node_id;
@@ -81,16 +91,6 @@ public:
 	// @est_len
 	string seq;
 	ulong est_len;
-
-	// this node is definitely the start of an isoform
-	// @false not sure
-	// @true sure
-	bool start;
-
-	// this node is definitely the end of an isoform
-	// @false not sure
-	// @true sure
-	bool end;
 
 	vector<ulong> edges;
 };
@@ -199,27 +199,6 @@ public:
 		boost::topological_sort(graph, std::back_inserter(topo_sort));
 		std::reverse(topo_sort.begin(), topo_sort.end());
 
-		for (ulong i = 0; i != topo_sort.size(); ++i) {
-			if (boost::in_degree(i, graph) == 0) {
-
-				start_nodes.push_back(i);
-
-				py_graph.nodes[i].start = true;
-
-			} else {
-				break;
-			}
-		}
-
-		for (ulong i = topo_sort.size(); i != 0; --i) {
-			if (boost::out_degree(i, graph) == 0) {
-
-				py_graph.nodes[i].end = true;
-
-			} else {
-				break;
-			}
-		}
 	}
 
 };

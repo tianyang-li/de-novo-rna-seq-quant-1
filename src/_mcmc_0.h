@@ -17,7 +17,7 @@
  */
 
 /*
- * TODO:
+ * code TODO:
  *
  *     * boost zip_iterator
  *
@@ -433,15 +433,6 @@ inline void isoform_MCMC_init(
 			}
 
 		}
-
-	} catch (exception &e) {
-		cerr << e.what() << endl;
-		throw;
-	}
-
-	try {
-
-		// TODO: satisfy all node @start @end constraints
 
 	} catch (exception &e) {
 		cerr << e.what() << endl;

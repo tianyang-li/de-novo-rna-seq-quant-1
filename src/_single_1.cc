@@ -120,8 +120,6 @@ inline void setup_graph(_graph_seq_0::SpliceGraph &graph,
 
 	// TODO: fix graph node when segmentation is done
 
-	// TODO: set @start, @end of non-branch start/end sites
-
 	graph.setup(py_graph);
 
 	setup_graph_rc(graph, py_graph, graph_read, py_reads);
