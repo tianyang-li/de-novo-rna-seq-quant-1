@@ -194,7 +194,7 @@ public:
 	// "distance" of each node from a
 	// source vertex, can be a mixture of
 	// distances
-	vector<ulong> dist_from_starts;
+	vector<double> dist_from_starts;
 
 	inline void setup() {
 		boost::transitive_closure(graph, tc);
@@ -203,6 +203,9 @@ public:
 		std::reverse(topo_sort.begin(), topo_sort.end());
 
 		dist_from_starts.assign(num_vertices(graph), 0);
+		for (ulong i = 0 /* vertex */; i != num_vertices(graph); ++i) {
+
+		}
 		// TODO: set @dist_from_starts
 
 #ifdef DEBUG
