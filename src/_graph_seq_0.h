@@ -41,6 +41,7 @@
 #include <iterator>
 #include <algorithm>
 #include <utility>
+#include <iostream>
 #include <boost/functional/hash.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -54,21 +55,15 @@
 
 #include "_misc_0.h"
 
-#ifdef DEBUG
-#include <iostream>
-#endif
-
 namespace _graph_seq_0 {
 
 using std::vector;
 using std::string;
 using boost::num_vertices;
 using boost::out_edges;
-
-#ifdef DEBUG
 using std::cerr;
 using std::endl;
-#endif
+using boost::print_graph;
 
 /*
  * makes it easy to get graph information from
@@ -198,6 +193,11 @@ public:
 
 		boost::topological_sort(graph, std::back_inserter(topo_sort));
 		std::reverse(topo_sort.begin(), topo_sort.end());
+
+#ifdef DEBUG
+		cerr << graph_id << endl;
+		print_graph(graph);
+#endif
 
 	}
 
