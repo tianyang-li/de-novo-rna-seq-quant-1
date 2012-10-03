@@ -749,6 +749,11 @@ void get_vert_start_info(IsoformMap const &graph_isoform,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		double * const vert_start_probs /* filled with 0's */) {
 
+	for (vector<DGVertex>::const_iterator i = graph.topo_sort.begin();
+			i != graph.topo_sort.end(); ++i) {
+
+	}
+
 	// TODO
 
 }
