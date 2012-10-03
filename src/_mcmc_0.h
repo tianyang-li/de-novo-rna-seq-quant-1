@@ -796,7 +796,8 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
-		double * const vert_start_probs /* already set */) {
+		double * const vert_start_probs /* already set */,
+		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count) {
 
 	ulong num_graph_vert = num_vertices(graph.graph);
 
@@ -857,7 +858,8 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
-		double * const isof_del_probs /* this is already set */) {
+		double * const isof_del_probs /* this is already set */,
+		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count) {
 
 	ulong num_graph_vert = num_vertices(graph.graph);
 
@@ -910,7 +912,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng * const rn,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
-		unordered_map<Isoform, ulong, IsoformHash> &isof_lens) {
+		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
+		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count) {
 
 	try {
 
@@ -999,7 +1002,7 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 				return add_isof_ratio(graph_isoform, prop_graph_ratio,
 						graph_info, graph, graph_read, read_in_graph, rn,
 						action_prob, new_graph_isof, new_prop_ratio, isof_lens,
-						vert_start_probs);
+						vert_start_probs, rc_isof_count);
 			} catch (exception &e) {
 				cerr << e.what() << endl;
 				throw;
@@ -1011,7 +1014,7 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 				return del_isof_ratio(graph_isoform, prop_graph_ratio,
 						graph_info, graph, graph_read, read_in_graph, rn,
 						action_prob, new_graph_isof, new_prop_ratio, isof_lens,
-						isof_del_probs);
+						isof_del_probs, rc_isof_count);
 			} catch (exception &e) {
 				cerr << e.what() << endl;
 			}
@@ -1111,7 +1114,8 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 						graph_infos[chosen_graph_ind], graphs[chosen_graph_ind],
 						graph_reads[chosen_graph_ind], read_in_graph, rn,
 						new_graph_isof, new_prop_ratio,
-						graph_isof_lens[chosen_graph_ind]);
+						graph_isof_lens[chosen_graph_ind],
+						rc_isof_counts[chosen_graph_ind]);
 
 				double new_chosen_graph_portion = 1.0;
 				if (graph_num != 1) {
