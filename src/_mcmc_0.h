@@ -920,6 +920,8 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 	return model_graph_ratio;
 }
 
+// (partial) MCMC ratio for adding or deleting an isoform from
+// this graph
 template<class RNodeLoc>
 inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
@@ -929,6 +931,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
 		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count) {
+
+	double partial_mcmc_ratio;
 
 	try {
 
@@ -967,80 +971,89 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		}
 
 		if (add_isof_weight == 0 && del_isof_weight == 0) {
-			return 1.0;
-		}
-
-		enum Action {
-			ADD, DEL,
-		};
-
-		Action action;
-
-		double action_prob = 1.0;
-
-		if (add_isof_weight == 0) {
-
-			action = ADD;
-
+			partial_mcmc_ratio = 1;
 		} else {
 
-			if (del_isof_weight == 0) {
-				action = DEL;
+			enum Action {
+				ADD, DEL,
+			};
+
+			Action action;
+
+			double action_prob = 1.0;
+
+			if (add_isof_weight == 0) {
+
+				action = ADD;
+
 			} else {
 
-				double add_prob = add_isof_weight
-						/ (add_isof_weight + del_isof_weight);
-
-				if (gsl_rng_uniform(rn) <= add_prob) {
-
-					action = ADD;
-
-					action_prob = add_prob;
-
+				if (del_isof_weight == 0) {
+					action = DEL;
 				} else {
 
-					action = DEL;
-
-					action_prob = del_isof_weight
+					double add_prob = add_isof_weight
 							/ (add_isof_weight + del_isof_weight);
+
+					if (gsl_rng_uniform(rn) <= add_prob) {
+
+						action = ADD;
+
+						action_prob = add_prob;
+
+					} else {
+
+						action = DEL;
+
+						action_prob = del_isof_weight
+								/ (add_isof_weight + del_isof_weight);
+
+					}
 
 				}
 
 			}
 
+			switch (action) {
+
+			case ADD:
+				try {
+					partial_mcmc_ratio = add_isof_ratio(graph_isoform,
+							prop_graph_ratio, graph_info, graph, graph_read,
+							read_in_graph, rn, action_prob, new_graph_isof,
+							new_prop_ratio, isof_lens, vert_start_probs,
+							rc_isof_count);
+				} catch (exception &e) {
+					cerr << e.what() << endl;
+					throw;
+				}
+				break;
+
+			case DEL:
+				try {
+					partial_mcmc_ratio = del_isof_ratio(graph_isoform,
+							prop_graph_ratio, graph_info, graph, graph_read,
+							read_in_graph, rn, action_prob, new_graph_isof,
+							new_prop_ratio, isof_lens, isof_del_probs,
+							rc_isof_count);
+				} catch (exception &e) {
+					cerr << e.what() << endl;
+				}
+				break;
+
+			}
+
 		}
 
-		switch (action) {
-
-		case ADD:
-			try {
-				return add_isof_ratio(graph_isoform, prop_graph_ratio,
-						graph_info, graph, graph_read, read_in_graph, rn,
-						action_prob, new_graph_isof, new_prop_ratio, isof_lens,
-						vert_start_probs, rc_isof_count);
-			} catch (exception &e) {
-				cerr << e.what() << endl;
-				throw;
-			}
-			break;
-
-		case DEL:
-			try {
-				return del_isof_ratio(graph_isoform, prop_graph_ratio,
-						graph_info, graph, graph_read, read_in_graph, rn,
-						action_prob, new_graph_isof, new_prop_ratio, isof_lens,
-						isof_del_probs, rc_isof_count);
-			} catch (exception &e) {
-				cerr << e.what() << endl;
-			}
-			break;
-
-		}
+		delete[] vert_start_probs;
+		delete[] isof_del_probs;
 
 	} catch (exception &e) {
 		cerr << e.what() << endl;
 		throw;
 	}
+
+	return partial_mcmc_ratio;
 
 }
 
