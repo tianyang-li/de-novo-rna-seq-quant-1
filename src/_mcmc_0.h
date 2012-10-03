@@ -92,6 +92,7 @@ using _graph_seq_0::ReadGraphLoc;
 using _graph_seq_0::get_isof_len;
 using _graph_seq_0::IsoformHash;
 using std::exception;
+using _graph_seq_0::SeqConstraintHash;
 
 }
 
@@ -390,7 +391,8 @@ inline void isoform_MCMC_init(
 		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> const &graphs,
 		gsl_rng * const rn, vector<IsoformMap> &graph_isoforms,
 		vector<IsoformMap> &prop_graph_ratios /* each entry is an empty map */,
-		vector<unordered_map<Isoform, ulong, IsoformHash> > &graph_isof_lens) {
+		vector<unordered_map<Isoform, ulong, IsoformHash> > &graph_isof_lens,
+		vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> > &rc_isof_counts) {
 
 #ifdef DEBUG
 	cerr << "enter isoform_MCMC_init\n";
@@ -437,6 +439,45 @@ inline void isoform_MCMC_init(
 	} catch (exception &e) {
 		cerr << e.what() << endl;
 		throw;
+	}
+
+	try {
+
+		// set @rc_isof_counts
+		// count the number of isoforms that satisfy a
+		// sequence constraint for each sequence constraint
+
+		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+		vector<IsoformMap>::const_iterator graph_isof_iter =
+				graph_isoforms.begin();
+
+		for (vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> >::iterator i =
+				rc_isof_counts.begin(); i != rc_isof_counts.end();
+				++i, ++graph_iter, ++graph_isof_iter) {
+
+			for (vector<SeqConstraint>::const_iterator j =
+					graph_iter->read_constraints.begin();
+					j != graph_iter->read_constraints.end(); ++j) {
+
+				ulong rc_isof_count = 0;
+
+				for (IsoformMap::const_iterator k = graph_isof_iter->begin();
+						k != graph_isof_iter->end(); ++k) {
+
+					if (k->first == (k->first | (*j))) {
+						++rc_isof_count;
+					}
+
+				}
+
+				i->insert(make_pair(*j, rc_isof_count));
+
+			}
+
+		}
+
+	} catch (exception &e) {
+		cerr << e.what() << endl;
 	}
 
 	try {
@@ -1036,8 +1077,14 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 			vector<unordered_map<Isoform, ulong, IsoformHash> > graph_isof_lens(
 					graph_num);
 
+			// count the number of isoforms that satisfy a sequence
+			// constraint for each sequence constraint
+			vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> > rc_isof_counts(
+					graph_num);
+
 			isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs,
-					rn, graph_isoforms, prop_graph_ratios, graph_isof_lens);
+					rn, graph_isoforms, prop_graph_ratios, graph_isof_lens,
+					rc_isof_counts);
 
 			vector<vector<IsoformMap> > mcmc_results;
 
