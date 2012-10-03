@@ -762,7 +762,8 @@ void get_isof_del_info(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		double * const isof_del_probs /* filled with 0's */) {
+		double * const isof_del_probs /* filled with 0's */,
+		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count) {
 
 	// TODO
 
@@ -835,8 +836,22 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	double *new_isof_del_probs = new double[num_new_graph_isof];
 	fill(new_isof_del_probs, new_isof_del_probs + num_new_graph_isof, 0);
 
+	for (unordered_map<SeqConstraint, ulong, SeqConstraintHash>::iterator i =
+			rc_isof_count.begin(); i != rc_isof_count.end(); ++i) {
+		if (added_isof == (added_isof | i->first)) {
+			++i->second;
+		}
+	}
+
 	get_isof_del_info(new_graph_isof, new_prop_ratio, graph_info, graph,
-			graph_read, read_in_graph, new_isof_del_probs);
+			graph_read, read_in_graph, new_isof_del_probs, rc_isof_count);
+
+	for (unordered_map<SeqConstraint, ulong, SeqConstraintHash>::iterator i =
+			rc_isof_count.begin(); i != rc_isof_count.end(); ++i) {
+		if (added_isof == (added_isof | i->first)) {
+			--i->second;
+		}
+	}
 
 	// update @model_graph_ratio
 
@@ -944,7 +959,7 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		fill(isof_del_probs, isof_del_probs + graph_isoform.size(), 0);
 
 		get_isof_del_info(graph_isoform, prop_graph_ratio, graph_info, graph,
-				graph_read, read_in_graph, isof_del_probs);
+				graph_read, read_in_graph, isof_del_probs, rc_isof_count);
 
 		double del_isof_weight = 0;
 		for (ulong i = 0; i != graph_isoform.size(); ++i) {
