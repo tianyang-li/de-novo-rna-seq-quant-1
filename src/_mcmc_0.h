@@ -16,18 +16,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * code TODO:
- *
- *     * boost zip_iterator
- *
- *     * optimize code
- *
- *     * exceptions and better error messages
- *
- *     * GSL error handling
- */
-
 #ifndef _MCMC_0_H_
 #define _MCMC_0_H_
 
@@ -738,6 +726,17 @@ inline ulong choose_graph_to_mod(gsl_rng * const rn,
 	return chosen_graph_ind;
 }
 
+inline double dist_from_start_weight(ulong cur_vert, SpliceGraph const &graph) {
+
+	// dist from start weight
+	double dfs_w = 1.0;
+
+	// TODO
+
+	return dfs_w;
+
+}
+
 // get the probability distribution on the nodes
 // for the starting position of an isoform
 //
@@ -751,6 +750,12 @@ void get_vert_start_info(IsoformMap const &graph_isoform,
 
 	for (vector<DGVertex>::const_iterator i = graph.topo_sort.begin();
 			i != graph.topo_sort.end(); ++i) {
+
+		// weight of possible isoforms starting
+		// from vertex @i
+		double poss_isof_w = 0;
+
+		vert_start_probs[*i] = poss_isof_w * dist_from_start_weight(*i, graph);
 
 	}
 

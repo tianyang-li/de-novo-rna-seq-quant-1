@@ -6,3 +6,15 @@
     
     * CAGE
 
+* code
+    
+    * boost zip_iterator
+    
+    * error handling
+        
+        * exceptions
+        
+        * GSL error handling
+    
+    * optimizations
+
