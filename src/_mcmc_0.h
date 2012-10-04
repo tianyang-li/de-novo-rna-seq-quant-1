@@ -737,12 +737,29 @@ inline double dist_from_start_weight(ulong cur_vert, SpliceGraph const &graph) {
 
 }
 
+// given current isoform set @graph_isoform
+// get the weight for vertex @start_vert
+// that there will be isoforms added starting from
+// @start_vert
+template<class RNodeLoc>
+inline double get_possible_isoform_weight(IsoformMap const &graph_isoform,
+		GraphInfo const &graph_info, SpliceGraph const &graph,
+		GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, ulong start_vert) {
+
+	double poss_isof_w = 0;
+
+	// TODO
+
+	return poss_isof_w;
+}
+
 // get the probability distribution on the nodes
 // for the starting position of an isoform
 //
 // the weights are on the same scale as @get_isof_del_info
 template<class RNodeLoc>
-void get_vert_start_info(IsoformMap const &graph_isoform,
+inline void get_vert_start_info(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
@@ -753,13 +770,12 @@ void get_vert_start_info(IsoformMap const &graph_isoform,
 
 		// weight of possible isoforms starting
 		// from vertex @i
-		double poss_isof_w = 0;
+		double poss_isof_w = get_possible_isoform_weight(graph_isoform,
+				graph_info, graph, graph_read, read_in_graph, *i);
 
 		vert_start_probs[*i] = poss_isof_w * dist_from_start_weight(*i, graph);
 
 	}
-
-	// TODO
 
 }
 
@@ -768,7 +784,7 @@ void get_vert_start_info(IsoformMap const &graph_isoform,
 //
 // the weights are on the same scale as @get_vert_start_info
 template<class RNodeLoc>
-void get_isof_del_info(IsoformMap const &graph_isoform,
+inline void get_isof_del_info(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
@@ -783,7 +799,7 @@ void get_isof_del_info(IsoformMap const &graph_isoform,
 // return the probability of growing that isoform like
 // that
 template<class RNodeLoc>
-double grow_added_isof_prob(IsoformMap const &graph_isoform,
+inline double grow_added_isof_prob(IsoformMap const &graph_isoform,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng * const rn,
