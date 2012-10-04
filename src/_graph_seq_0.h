@@ -21,17 +21,6 @@
  * for working with sequences, graphs, etc.
  */
 
-/*
- * work TODO
- *
- *
- *     * handle these kinds of data
- *
- *         * RNA-PET
- *
- *         * RNA-Seq CAGE
- */
-
 #ifndef _GRAPH_SEQ_0_H_
 #define _GRAPH_SEQ_0_H_
 
@@ -64,6 +53,8 @@ using boost::out_edges;
 using std::cerr;
 using std::endl;
 using boost::print_graph;
+using boost::in_degree;
+
 }
 
 namespace _graph_seq_0 {
@@ -203,16 +194,28 @@ public:
 		std::reverse(topo_sort.begin(), topo_sort.end());
 
 		dist_from_starts.assign(num_vertices(graph), 0);
-		for (ulong i = 0 /* vertex */; i != num_vertices(graph); ++i) {
+		for (vector<DGVertex>::const_iterator i = topo_sort.begin();
+				i != topo_sort.end(); ++i) {
+
+			if (in_degree(*i, graph) != 0) {
+				break;
+			}
+
+			_set_dist_from_starts(*i);
 
 		}
+
 		// TODO: set @dist_from_starts
 
 #ifdef DEBUG
-		cerr << graph_id << endl;
+		cerr << "graph id: " << graph_id << endl;
 		print_graph(graph);
 #endif
 
+	}
+
+private:
+	inline void _set_dist_from_starts(ulong source_vert) {
 	}
 
 };
