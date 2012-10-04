@@ -54,6 +54,8 @@ using std::cerr;
 using std::endl;
 using boost::print_graph;
 using boost::in_degree;
+using boost::tie;
+using boost::out_edges;
 
 }
 
@@ -169,6 +171,16 @@ typedef boost::unordered_map<Isoform, double, IsoformHash> IsoformMap;
 
 class SpliceGraph {
 public:
+
+	// for @dist_from_starts
+	// the "dist_from_start" for a source
+	// vertex
+	static double const kSourceDistFromStart = 1.0;
+
+	// for @dist_from_starts
+	// distance between 2 vertices
+	static double const kVertDist = 1.0;
+
 	ulong graph_id;
 
 	vector<SeqConstraint> read_constraints;
@@ -194,6 +206,7 @@ public:
 		std::reverse(topo_sort.begin(), topo_sort.end());
 
 		dist_from_starts.assign(num_vertices(graph), 0);
+
 		for (vector<DGVertex>::const_iterator i = topo_sort.begin();
 				i != topo_sort.end(); ++i) {
 
@@ -201,11 +214,26 @@ public:
 				break;
 			}
 
-			_set_dist_from_starts(*i);
+			_set_dist_from_starts(*i, kSourceDistFromStart);
 
 		}
 
-		// TODO: set @dist_from_starts
+		for (ulong i = 0; i != num_vertices(graph); ++i) {
+
+			if (in_degree(i, graph) > 1) {
+				dist_from_starts[i] /= double(in_degree(i, graph));
+			}
+
+		}
+
+#ifdef DEBUG
+		// print out distance info
+		cerr << "distances from starts\n";
+		for (ulong i = 0; i != dist_from_starts.size(); ++i) {
+			cerr << i << ":" << dist_from_starts[i] << endl;
+		}
+		cerr << "######\n";
+#endif
 
 #ifdef DEBUG
 		cerr << "graph id: " << graph_id << endl;
@@ -215,7 +243,26 @@ public:
 	}
 
 private:
-	inline void _set_dist_from_starts(ulong source_vert) {
+	inline void _set_dist_from_starts(ulong cur_vert,
+			double dfs /* dist from start*/) {
+
+		if (dist_from_starts[cur_vert] == 0) {
+
+			dist_from_starts[cur_vert] = dfs;
+
+			DGOutEdgeIter out_i, out_end;
+			tie(out_i, out_end) = out_edges(cur_vert, graph);
+
+			while (out_i != out_end) {
+				_set_dist_from_starts(target(*out_i, graph), dfs + kVertDist);
+				++out_i;
+			}
+
+		} else {
+			// will be divided by in_degree later
+			dist_from_starts[cur_vert] += dfs;
+		}
+
 	}
 
 };
