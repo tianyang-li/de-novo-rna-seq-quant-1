@@ -793,6 +793,9 @@ inline void get_isof_del_info(IsoformMap const &graph_isoform,
 
 	// TODO
 
+	// TODO: correspondance between @graph_isoform
+	// and @isof_del_probs
+
 }
 
 // grow an isoform from a starting node
