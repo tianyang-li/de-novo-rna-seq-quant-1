@@ -779,6 +779,15 @@ inline void get_vert_start_info(IsoformMap const &graph_isoform,
 
 }
 
+inline bool can_remove_isoform(Isoform const &isoform, SpliceGraph const &graph,
+		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count) {
+
+	// TODO:
+
+	return true;
+
+}
+
 // get the probability distribution on the
 // isoforms for removing an isoform
 //
@@ -790,9 +799,22 @@ inline void get_isof_del_info(IsoformMap const &graph_isoform,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		double * const isof_del_probs /* filled with 0's */,
 		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count,
-		vector<IsoformMap::const_iterator> const &isof_del_probs_ind) {
+		vector<IsoformMap::const_iterator> &isof_del_probs_ind /* empty vector */) {
 
-	// TODO
+	ulong isof_del_prob_ind = 0;
+
+	for (IsoformMap::const_iterator i = graph_isoform.begin();
+			i != graph_isoform.end(); ++i, ++isof_del_prob_ind) {
+
+		if (can_remove_isoform(i->first, graph, rc_isof_count)) {
+
+			// TODO
+
+		}
+
+		isof_del_probs_ind.push_back(i);
+
+	}
 
 }
 
@@ -881,7 +903,6 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	}
 
 	vector<IsoformMap::const_iterator> new_isof_del_probs_ind;
-	set_isof_del_probs_ind(new_isof_del_probs_ind, new_graph_isof);
 
 	get_isof_del_info(new_graph_isof, new_prop_ratio, graph_info, graph,
 			graph_read, read_in_graph, new_isof_del_probs, rc_isof_count,
@@ -1005,7 +1026,6 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		fill(isof_del_probs, isof_del_probs + graph_isoform.size(), 0);
 
 		vector<IsoformMap::const_iterator> isof_del_probs_ind;
-		set_isof_del_probs_ind(isof_del_probs_ind, graph_isoform);
 
 		get_isof_del_info(graph_isoform, prop_graph_ratio, graph_info, graph,
 				graph_read, read_in_graph, isof_del_probs, rc_isof_count,
