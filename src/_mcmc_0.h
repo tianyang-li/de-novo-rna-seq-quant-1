@@ -790,12 +790,9 @@ inline void get_isof_del_info(IsoformMap const &graph_isoform,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		double * const isof_del_probs /* filled with 0's */,
 		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count,
-		unordered_map<ulong, IsoformMap::const_iterator> const &isof_del_probs_ind) {
+		vector<IsoformMap::const_iterator> const &isof_del_probs_ind) {
 
 	// TODO
-
-	// TODO: correspondance between @graph_isoform
-	// and @isof_del_probs
 
 }
 
@@ -817,14 +814,14 @@ inline double grow_added_isof_prob(IsoformMap const &graph_isoform,
 }
 
 inline void set_isof_del_probs_ind(
-		unordered_map<ulong, IsoformMap::const_iterator> &isof_del_probs_ind,
+		vector<IsoformMap::const_iterator> &isof_del_probs_ind,
 		IsoformMap const &graph_isoform) {
-	ulong ind = 0;
 
 	for (IsoformMap::const_iterator i = graph_isoform.begin();
-			i != graph_isoform.end(); ++i, ++ind) {
-		isof_del_probs_ind.insert(make_pair(ind, i));
+			i != graph_isoform.end(); ++i) {
+		isof_del_probs_ind.push_back(i);
 	}
+
 }
 
 // add an isoform and return the corresponding
@@ -884,7 +881,7 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		}
 	}
 
-	unordered_map<ulong, IsoformMap::const_iterator> new_isof_del_probs_ind;
+	vector<IsoformMap::const_iterator> new_isof_del_probs_ind;
 	set_isof_del_probs_ind(new_isof_del_probs_ind, new_graph_isof);
 
 	get_isof_del_info(new_graph_isof, new_prop_ratio, graph_info, graph,
@@ -899,6 +896,7 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	}
 
 	// update @model_graph_ratio
+	// TODO
 
 	delete[] vert_start_probs;
 
@@ -919,7 +917,8 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
 		double * const isof_del_probs /* this is already set */,
-		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count) {
+		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count,
+		vector<IsoformMap::const_iterator> const &isof_del_probs_ind) {
 
 	ulong num_graph_vert = num_vertices(graph.graph);
 
@@ -945,7 +944,7 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 	gsl_ran_discrete_free(isof_del_probs_gsl);
 
 	new_graph_isof = graph_isoform;
-	// TODO: get @new_graph_isof
+	new_graph_isof.erase(isof_del_probs_ind[isof_del]->first);
 
 	get_prop_graph_ratio(read_in_graph, graph_read, graph_info, graph,
 			new_graph_isof, new_prop_ratio, isof_lens);
@@ -957,6 +956,7 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 			graph_read, read_in_graph, new_vert_start_probs);
 
 	// update @model_graph_ratio
+	// TODO
 
 	delete[] new_vert_start_probs;
 
@@ -1007,7 +1007,7 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		double *isof_del_probs = new double[graph_isoform.size()];
 		fill(isof_del_probs, isof_del_probs + graph_isoform.size(), 0);
 
-		unordered_map<ulong, IsoformMap::const_iterator> isof_del_probs_ind;
+		vector<IsoformMap::const_iterator> isof_del_probs_ind;
 		set_isof_del_probs_ind(isof_del_probs_ind, graph_isoform);
 
 		get_isof_del_info(graph_isoform, prop_graph_ratio, graph_info, graph,
@@ -1084,7 +1084,7 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 							prop_graph_ratio, graph_info, graph, graph_read,
 							read_in_graph, rn, action_prob, new_graph_isof,
 							new_prop_ratio, isof_lens, isof_del_probs,
-							rc_isof_count);
+							rc_isof_count, isof_del_probs_ind);
 				} catch (exception &e) {
 					cerr << e.what() << endl;
 				}
