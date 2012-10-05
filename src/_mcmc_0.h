@@ -789,7 +789,8 @@ inline void get_isof_del_info(IsoformMap const &graph_isoform,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		double * const isof_del_probs /* filled with 0's */,
-		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count) {
+		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count,
+		unordered_map<ulong, IsoformMap::const_iterator> const &isof_del_probs_ind) {
 
 	// TODO
 
@@ -813,6 +814,17 @@ inline double grow_added_isof_prob(IsoformMap const &graph_isoform,
 	// TODO:
 
 	return grow_prob;
+}
+
+inline void set_isof_del_probs_ind(
+		unordered_map<ulong, IsoformMap::const_iterator> &isof_del_probs_ind,
+		IsoformMap const &graph_isoform) {
+	ulong ind = 0;
+
+	for (IsoformMap::const_iterator i = graph_isoform.begin();
+			i != graph_isoform.end(); ++i, ++ind) {
+		isof_del_probs_ind.insert(make_pair(ind, i));
+	}
 }
 
 // add an isoform and return the corresponding
@@ -872,8 +884,12 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		}
 	}
 
+	unordered_map<ulong, IsoformMap::const_iterator> new_isof_del_probs_ind;
+	set_isof_del_probs_ind(new_isof_del_probs_ind, new_graph_isof);
+
 	get_isof_del_info(new_graph_isof, new_prop_ratio, graph_info, graph,
-			graph_read, read_in_graph, new_isof_del_probs, rc_isof_count);
+			graph_read, read_in_graph, new_isof_del_probs, rc_isof_count,
+			new_isof_del_probs_ind);
 
 	for (unordered_map<SeqConstraint, ulong, SeqConstraintHash>::iterator i =
 			rc_isof_count.begin(); i != rc_isof_count.end(); ++i) {
@@ -991,8 +1007,12 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		double *isof_del_probs = new double[graph_isoform.size()];
 		fill(isof_del_probs, isof_del_probs + graph_isoform.size(), 0);
 
+		unordered_map<ulong, IsoformMap::const_iterator> isof_del_probs_ind;
+		set_isof_del_probs_ind(isof_del_probs_ind, graph_isoform);
+
 		get_isof_del_info(graph_isoform, prop_graph_ratio, graph_info, graph,
-				graph_read, read_in_graph, isof_del_probs, rc_isof_count);
+				graph_read, read_in_graph, isof_del_probs, rc_isof_count,
+				isof_del_probs_ind);
 
 		double del_isof_weight = 0;
 		for (ulong i = 0; i != graph_isoform.size(); ++i) {
