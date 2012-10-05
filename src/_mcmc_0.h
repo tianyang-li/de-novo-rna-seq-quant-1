@@ -831,7 +831,6 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng * const rn,
-		double action_prob,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
@@ -912,12 +911,10 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
 		SpliceGraph const &graph, GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, gsl_rng * const rn,
-		double action_prob,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
 		double * const isof_del_probs /* this is already set */,
-		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count,
 		vector<IsoformMap::const_iterator> const &isof_del_probs_ind) {
 
 	ulong num_graph_vert = num_vertices(graph.graph);
@@ -1069,9 +1066,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 				try {
 					partial_mcmc_ratio = add_isof_ratio(graph_isoform,
 							prop_graph_ratio, graph_info, graph, graph_read,
-							read_in_graph, rn, action_prob, new_graph_isof,
-							new_prop_ratio, isof_lens, vert_start_probs,
-							rc_isof_count);
+							read_in_graph, rn, new_graph_isof, new_prop_ratio,
+							isof_lens, vert_start_probs, rc_isof_count);
 				} catch (exception &e) {
 					cerr << e.what() << endl;
 					throw;
@@ -1082,15 +1078,16 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 				try {
 					partial_mcmc_ratio = del_isof_ratio(graph_isoform,
 							prop_graph_ratio, graph_info, graph, graph_read,
-							read_in_graph, rn, action_prob, new_graph_isof,
-							new_prop_ratio, isof_lens, isof_del_probs,
-							rc_isof_count, isof_del_probs_ind);
+							read_in_graph, rn, new_graph_isof, new_prop_ratio,
+							isof_lens, isof_del_probs, isof_del_probs_ind);
 				} catch (exception &e) {
 					cerr << e.what() << endl;
 				}
 				break;
 
 			}
+
+			partial_mcmc_ratio *= action_prob;
 
 		}
 
