@@ -736,6 +736,8 @@ inline ulong choose_graph_to_mod(gsl_rng * const rn,
 	return chosen_graph_ind;
 }
 
+// set the weight for a vertex
+// based on its @dist_from_start
 inline double dist_from_start_weight(ulong cur_vert, SpliceGraph const &graph) {
 
 	// dist from start weight
@@ -789,6 +791,8 @@ inline void get_vert_start_info(IsoformMap const &graph_isoform,
 
 }
 
+// check whether or not this @isoform can be removed
+// @graph_isoform
 inline bool can_remove_isoform(Isoform const &isoform,
 		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count) {
 
@@ -858,17 +862,6 @@ inline double grow_added_isof_prob(IsoformMap const &graph_isoform,
 	// TODO:
 
 	return grow_prob;
-}
-
-inline void set_isof_del_probs_ind(
-		vector<IsoformMap::const_iterator> &isof_del_probs_ind,
-		IsoformMap const &graph_isoform) {
-
-	for (IsoformMap::const_iterator i = graph_isoform.begin();
-			i != graph_isoform.end(); ++i) {
-		isof_del_probs_ind.push_back(i);
-	}
-
 }
 
 // add an isoform and return the corresponding
