@@ -86,13 +86,23 @@ using _graph_seq_0::SeqConstraintHash;
 
 namespace _mcmc_0 {
 
+#ifdef DEBUG
+class ReadConstraintError: public exception {
+public:
+	virtual char const * what() const throw () {
+		return "ReadConstraintError:\nRead constraint violated!\n";
+	}
+};
+#endif
+
 // when choosing discrete probabilities,
 // if something is 0 and gets chosen too many times,
 // this exception is thrown
 class ZeroProbTooManyTimes: public exception {
 public:
 	virtual char const * what() const throw () {
-		return "Something with 0 probability "
+		return "ZeroProbTooManyTimes:\n"
+				"Something with 0 probability "
 				"in a discrete distribution "
 				"has been chosen "
 				"too many times!\n";
@@ -779,10 +789,25 @@ inline void get_vert_start_info(IsoformMap const &graph_isoform,
 
 }
 
-inline bool can_remove_isoform(Isoform const &isoform, SpliceGraph const &graph,
+inline bool can_remove_isoform(Isoform const &isoform,
 		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count) {
 
-	// TODO:
+	for (unordered_map<SeqConstraint, ulong, SeqConstraintHash>::const_iterator i =
+			rc_isof_count.begin(); i != rc_isof_count.end(); ++i) {
+
+#ifdef DEBUG
+		if (i->second == 0) {
+			throw ReadConstraintError();
+		}
+#endif
+
+		if (isoform == (isoform | i->first)) {
+			if (i->second == 1) {
+				return false;
+			}
+		}
+
+	}
 
 	return true;
 
@@ -806,7 +831,7 @@ inline void get_isof_del_info(IsoformMap const &graph_isoform,
 	for (IsoformMap::const_iterator i = graph_isoform.begin();
 			i != graph_isoform.end(); ++i, ++isof_del_prob_ind) {
 
-		if (can_remove_isoform(i->first, graph, rc_isof_count)) {
+		if (can_remove_isoform(i->first, rc_isof_count)) {
 
 			// TODO
 
@@ -857,7 +882,7 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
 		double * const vert_start_probs /* already set */,
-		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count) {
+		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count /* this will not be updated here */) {
 
 	ulong num_graph_vert = num_vertices(graph.graph);
 
@@ -911,7 +936,15 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	for (unordered_map<SeqConstraint, ulong, SeqConstraintHash>::iterator i =
 			rc_isof_count.begin(); i != rc_isof_count.end(); ++i) {
 		if (added_isof == (added_isof | i->first)) {
+
+#ifdef DEBUG
+			if (i->second == 1) {
+				throw ReadConstraintError();
+			}
+#endif
+
 			--i->second;
+
 		}
 	}
 
