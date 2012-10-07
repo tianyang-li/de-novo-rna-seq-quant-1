@@ -101,6 +101,20 @@ inline void update_graph_weights<SingleNodeLoc>(
 
 }
 
+template<>
+inline double isof2del_weight<SingleNodeLoc>(Isoform const &isoform,
+		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
+		SpliceGraph const &graph, GraphReads const &graph_read,
+		vector<ReadInGraph<SingleNodeLoc> > const &read_in_graph) {
+
+	double isof2del_w = 0;
+
+	// TODO
+
+	return isof2del_w;
+
+}
+
 } // namespace _single_1
 
 #endif // _SINGLE_1_H_

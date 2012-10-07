@@ -817,6 +817,15 @@ inline bool can_remove_isoform(Isoform const &isoform,
 
 }
 
+// weight of an isoform if it's to be deleted
+// this isoform already makes @inline bool can_remove_isoform
+// return @true
+template<class RNodeLoc>
+inline double isof2del_weight(Isoform const &isoform,
+		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
+		SpliceGraph const &graph, GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph);
+
 // get the probability distribution on the
 // isoforms for removing an isoform
 //
@@ -837,7 +846,9 @@ inline void get_isof_del_info(IsoformMap const &graph_isoform,
 
 		if (can_remove_isoform(i->first, rc_isof_count)) {
 
-			// TODO
+			isof_del_probs[isof_del_prob_ind] = isof2del_weight(i->first,
+					prop_graph_ratio, graph_info, graph, graph_read,
+					read_in_graph);
 
 		}
 
