@@ -749,19 +749,40 @@ inline double dist_from_start_weight(ulong cur_vert, SpliceGraph const &graph) {
 
 }
 
+// do DFS setting the weight for an vertex
+// about whether isoforms can start from the vertex
+// for @get_possible_isoform_weigh
+template<class RNodeLoc>
+inline void get_possible_isoform_weigh_DFS(Isoform &search_isof,
+		double &poss_isof_w, IsoformMap const &prop_graph_ratio,
+		GraphInfo const &graph_info, SpliceGraph const &graph,
+		GraphReads const &graph_read,
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, ulong cur_vert) {
+
+	search_isof.set(cur_vert);
+
+	search_isof.reset(cur_vert);
+
+}
+
 // given current isoform set @graph_isoform
 // get the weight for vertex @start_vert
 // that there will be isoforms added starting from
 // @start_vert
+//
+// the weight are on the same scale as @isof2del_weight
 template<class RNodeLoc>
-inline double get_possible_isoform_weight(IsoformMap const &graph_isoform,
+inline double get_possible_isoform_weight(IsoformMap const &prop_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, ulong start_vert) {
 
 	double poss_isof_w = 0;
 
-	// TODO
+	Isoform search_isof(num_vertices(graph.graph));
+
+	get_possible_isoform_weigh_DFS(search_isof, poss_isof_w, prop_graph_ratio,
+			graph_info, graph, graph_read, read_in_graph, start_vert);
 
 	return poss_isof_w;
 }
@@ -771,9 +792,9 @@ inline double get_possible_isoform_weight(IsoformMap const &graph_isoform,
 //
 // the weights are on the same scale as @get_isof_del_info
 template<class RNodeLoc>
-inline void get_vert_start_info(IsoformMap const &graph_isoform,
-		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
-		SpliceGraph const &graph, GraphReads const &graph_read,
+inline void get_vert_start_info(IsoformMap const &prop_graph_ratio,
+		GraphInfo const &graph_info, SpliceGraph const &graph,
+		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		double * const vert_start_probs /* filled with 0's */) {
 
@@ -782,7 +803,7 @@ inline void get_vert_start_info(IsoformMap const &graph_isoform,
 
 		// weight of possible isoforms starting
 		// from vertex @i
-		double poss_isof_w = get_possible_isoform_weight(graph_isoform,
+		double poss_isof_w = get_possible_isoform_weight(prop_graph_ratio,
 				graph_info, graph, graph_read, read_in_graph, *i);
 
 		vert_start_probs[*i] = poss_isof_w * dist_from_start_weight(*i, graph);
@@ -820,6 +841,8 @@ inline bool can_remove_isoform(Isoform const &isoform,
 // weight of an isoform if it's to be deleted
 // this isoform already makes @inline bool can_remove_isoform
 // return @true
+//
+// weights are on the same scale as @get_possible_isoform_weight
 template<class RNodeLoc>
 inline double isof2del_weight(Isoform const &isoform,
 		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
@@ -831,9 +854,9 @@ inline double isof2del_weight(Isoform const &isoform,
 //
 // the weights are on the same scale as @get_vert_start_info
 template<class RNodeLoc>
-inline void get_isof_del_info(IsoformMap const &graph_isoform,
-		IsoformMap const &prop_graph_ratio, GraphInfo const &graph_info,
-		SpliceGraph const &graph, GraphReads const &graph_read,
+inline void get_isof_del_info(IsoformMap const &prop_graph_ratio,
+		GraphInfo const &graph_info, SpliceGraph const &graph,
+		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		double * const isof_del_probs /* filled with 0's */,
 		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count,
@@ -841,8 +864,8 @@ inline void get_isof_del_info(IsoformMap const &graph_isoform,
 
 	ulong isof_del_prob_ind = 0;
 
-	for (IsoformMap::const_iterator i = graph_isoform.begin();
-			i != graph_isoform.end(); ++i, ++isof_del_prob_ind) {
+	for (IsoformMap::const_iterator i = prop_graph_ratio.begin();
+			i != prop_graph_ratio.end(); ++i, ++isof_del_prob_ind) {
 
 		if (can_remove_isoform(i->first, rc_isof_count)) {
 
@@ -933,8 +956,8 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 
 	vector<IsoformMap::const_iterator> new_isof_del_probs_ind;
 
-	get_isof_del_info(new_graph_isof, new_prop_ratio, graph_info, graph,
-			graph_read, read_in_graph, new_isof_del_probs, rc_isof_count,
+	get_isof_del_info(new_prop_ratio, graph_info, graph, graph_read,
+			read_in_graph, new_isof_del_probs, rc_isof_count,
 			new_isof_del_probs_ind);
 
 	for (unordered_map<SeqConstraint, ulong, SeqConstraintHash>::iterator i =
@@ -1007,8 +1030,8 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 	double *new_vert_start_probs = new double[num_graph_vert];
 	fill(new_vert_start_probs, new_vert_start_probs + num_graph_vert, 0);
 
-	get_vert_start_info(new_graph_isof, new_prop_ratio, graph_info, graph,
-			graph_read, read_in_graph, new_vert_start_probs);
+	get_vert_start_info(new_prop_ratio, graph_info, graph, graph_read,
+			read_in_graph, new_vert_start_probs);
 
 	// update @model_graph_ratio
 	// TODO
@@ -1047,8 +1070,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		double *vert_start_probs = new double[num_vertices(graph.graph)];
 		fill(vert_start_probs, vert_start_probs + num_vertices(graph.graph), 0);
 
-		get_vert_start_info(graph_isoform, prop_graph_ratio, graph_info, graph,
-				graph_read, read_in_graph, vert_start_probs);
+		get_vert_start_info(prop_graph_ratio, graph_info, graph, graph_read,
+				read_in_graph, vert_start_probs);
 
 		// @_add_isof_weight / (@_add_isof_weight + @_del_isof_weight)
 		// is the probability of adding an isoform to the current set
@@ -1064,8 +1087,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 
 		vector<IsoformMap::const_iterator> isof_del_probs_ind;
 
-		get_isof_del_info(graph_isoform, prop_graph_ratio, graph_info, graph,
-				graph_read, read_in_graph, isof_del_probs, rc_isof_count,
+		get_isof_del_info(prop_graph_ratio, graph_info, graph, graph_read,
+				read_in_graph, isof_del_probs, rc_isof_count,
 				isof_del_probs_ind);
 
 		double del_isof_weight = 0;
