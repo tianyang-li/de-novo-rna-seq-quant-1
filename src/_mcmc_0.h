@@ -757,12 +757,40 @@ inline void get_possible_isoform_weigh_DFS(Isoform &search_isof,
 		double &poss_isof_w, IsoformMap const &prop_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, ulong cur_vert) {
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, ulong cur_vert,
+		bool &can_add_isof, vector<bool> &visited) {
 
-	search_isof.set(cur_vert);
+	if (!visited[cur_vert] /* not visited in DFS */
+			|| (visited[cur_vert] && !can_add_isof) /* visited, but hasn't added an isoform yet */) {
 
-	search_isof.reset(cur_vert);
+		search_isof.set(cur_vert);
 
+		if (!can_add_isof) {
+			if (prop_graph_ratio.find(search_isof) == prop_graph_ratio.end()) {
+				can_add_isof = true;
+			}
+		}
+
+		DGOutEdgeIter out_i, out_end;
+		tie(out_i, out_end) = out_edges(cur_vert, graph.graph);
+
+		while (out_i != out_end) {
+
+			get_possible_isoform_weigh_DFS(search_isof, poss_isof_w,
+					prop_graph_ratio, graph_info, graph, graph_read,
+					read_in_graph, target(*out_i, graph.graph), can_add_isof,
+					visited);
+
+			++out_i;
+		}
+
+		if (can_add_isof) {
+			// TODO: add weight
+		}
+
+		search_isof.reset(cur_vert);
+
+	}
 }
 
 // given current isoform set @graph_isoform
@@ -781,8 +809,16 @@ inline double get_possible_isoform_weight(IsoformMap const &prop_graph_ratio,
 
 	Isoform search_isof(num_vertices(graph.graph));
 
+	// set flag for search
+	// because when @can_id_isof is @false
+	// more search than a DFS is needed
+	bool can_add_isof = false;
+
+	vector<bool> visited(num_vertices(graph.graph), false);
+
 	get_possible_isoform_weigh_DFS(search_isof, poss_isof_w, prop_graph_ratio,
-			graph_info, graph, graph_read, read_in_graph, start_vert);
+			graph_info, graph, graph_read, read_in_graph, start_vert,
+			can_add_isof, visited);
 
 	return poss_isof_w;
 }
