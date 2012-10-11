@@ -289,6 +289,7 @@ inline void get_prop_graph_ratio(
 	// transcriptomes by RNA-seq. Nature Methods, 5(7):621–628, May 2008.
 
 	// TODO: change how weights are chosen?
+	// XXX: are weights correct?
 
 	double const kIsofInitWeight = 1.0;
 
@@ -625,7 +626,7 @@ inline void isoform_MCMC_init(
 		throw;
 	}
 
-	try {
+	try { // TODO
 
 		{
 			vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
@@ -651,6 +652,9 @@ inline void isoform_MCMC_init(
 
 			for (vector<double *>::iterator i = vec_isof_del_probs.begin();
 					i != vec_isof_del_probs.end(); ++i, ++graph_isof_iter) {
+
+				(*i) = new double[graph_isof_iter->size()];
+
 			}
 
 #ifdef DEBUG
@@ -750,6 +754,25 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 			++graph_read_iter;
 		}
 
+#ifdef DEBUG
+		if (cur_graph != graphs.size()) {
+			cerr << "cur_graph" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_info_iter != graph_infos.end()) {
+			cerr << "graph_info_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_iter != graphs.end()) {
+			cerr << "graph_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_read_iter != graph_reads.end()) {
+			cerr << "graph_read_iter" << endl;
+			throw IteratorEndError();
+		}
+#endif
+
 		graph_info_iter = graph_infos.begin();
 		graph_iter = graphs.begin();
 		graph_read_iter = graph_reads.begin();
@@ -785,6 +808,25 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 			++graph_info_iter;
 			++graph_read_iter;
 		}
+
+#ifdef DEBUG
+		if (cur_graph != graphs.size()) {
+			cerr << "cur_graph" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_info_iter != graph_infos.end()) {
+			cerr << "graph_info_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_iter != graphs.end()) {
+			cerr << "graph_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_read_iter != graph_reads.end()) {
+			cerr << "graph_read_iter" << endl;
+			throw IteratorEndError();
+		}
+#endif
 
 	} else {
 
