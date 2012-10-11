@@ -870,6 +870,25 @@ inline ulong choose_graph_to_mod(gsl_rng * const rn,
 		++graph_read_iter;
 	}
 
+#ifdef DEBUG
+	if (graph_weight_ind != graph_num) {
+		cerr << "graph_weight_ind" << endl;
+		throw IteratorEndError();
+	}
+	if (graph_iter != graphs.end()) {
+		cerr << "graph_iter" << endl;
+		throw IteratorEndError();
+	}
+	if (graph_isof_iter != graph_isoforms.end()) {
+		cerr << "graph_isof_iter" << endl;
+		throw IteratorEndError();
+	}
+	if (graph_read_iter != graph_reads.end()) {
+		cerr << "graph_read_iter" << endl;
+		throw IteratorEndError();
+	}
+#endif
+
 	gsl_ran_discrete_t *choose_graph = gsl_ran_discrete_preproc(graph_num,
 			graph_weights);
 
@@ -1058,6 +1077,13 @@ inline void get_isof_del_info(IsoformMap const &prop_graph_ratio,
 		isof_del_probs_ind.push_back(i);
 
 	}
+
+#ifdef DEBUG
+	if (isof_del_prob_ind != prop_graph_ratio.size()) {
+		cerr << "isof_del_prob_ind" << endl;
+		throw IteratorEndError();
+	}
+#endif
 
 }
 
