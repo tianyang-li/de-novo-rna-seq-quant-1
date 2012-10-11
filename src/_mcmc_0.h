@@ -490,6 +490,17 @@ inline void isoform_MCMC_init(
 
 		}
 
+#ifdef DEBUG
+		if (graph_iter != graphs.end()) {
+			cerr << "graph_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_isof_iter != graph_isoforms.end()) {
+			cerr << "graph_isof_iter" << endl;
+			throw IteratorEndError();
+		}
+#endif
+
 	} catch (exception &e) {
 		cerr << e.what() << endl;
 	}
@@ -537,6 +548,17 @@ inline void isoform_MCMC_init(
 
 			}
 
+#ifdef DEBUG
+			if (graph_ind != graphs.size()) {
+				cerr << "graph_ind" << endl;
+				throw IteratorEndError();
+			}
+			if (isof_exp_ind != isofs_size) {
+				cerr << "isof_exp_ind" << endl;
+				throw IteratorEndError();
+			}
+#endif
+
 			delete[] dir_theta;
 
 		} else {
@@ -580,6 +602,22 @@ inline void isoform_MCMC_init(
 			cerr << "graph_isof_iter" << endl;
 			throw IteratorEndError();
 		}
+		if (graph_iter != graphs.end()) {
+			cerr << "graph_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_info_iter != graph_infos.end()) {
+			cerr << "graph_info_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_read_iter != graph_reads.end()) {
+			cerr << "graph_read_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (isof_lens_iter != graph_isof_lens.end()) {
+			cerr << "isof_lens_iter" << endl;
+			throw IteratorEndError();
+		}
 #endif
 
 	} catch (exception &e) {
@@ -590,9 +628,37 @@ inline void isoform_MCMC_init(
 	try {
 
 		{
+			vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+
 			for (vector<double *>::iterator i = vec_vert_start_probs.begin();
-					i != vec_vert_start_probs.end(); ++i) {
+					i != vec_vert_start_probs.end(); ++i, ++graph_iter) {
+
+				(*i) = new double[num_vertices(graph_iter->graph)];
+
 			}
+
+#ifdef DEBUG
+			if (graph_iter != graphs.end()) {
+				cerr << "graph_iter" << endl;
+				throw IteratorEndError();
+			}
+#endif
+		}
+
+		{
+			vector<IsoformMap>::const_iterator graph_isof_iter =
+					graph_isoforms.begin();
+
+			for (vector<double *>::iterator i = vec_isof_del_probs.begin();
+					i != vec_isof_del_probs.end(); ++i, ++graph_isof_iter) {
+			}
+
+#ifdef DEBUG
+			if (graph_isof_iter != graph_isoforms.end()) {
+				cerr << "graph_isof_iter" << endl;
+				throw IteratorEndError();
+			}
+#endif
 		}
 
 	} catch (exception &e) {
