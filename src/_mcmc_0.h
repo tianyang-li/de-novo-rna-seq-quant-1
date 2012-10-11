@@ -100,6 +100,14 @@ public:
 		return "IteratorEndError:\n iterator didn't reach end as expected!\n";
 	}
 };
+
+class SwitchNotAllowedError: public exception {
+public:
+	virtual char const * what() const throw () {
+		return "SwitchNotAllowedError:\n"
+				"switch branch shouldn't have been taken!\n";
+	}
+};
 #endif
 
 // when choosing discrete probabilities,
@@ -693,7 +701,7 @@ inline void get_dir_graph_weights(vector<GraphInfo> const &graph_infos,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
 		vector<GraphReads> const &graph_reads,
 		double * const dir_graph_weights) {
-	// TODO: test this
+	// XXX: are the weights correct?
 
 #ifdef DEBUG
 	cerr << "enter get_dir_graph_weights\n";
@@ -1249,6 +1257,10 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 	return model_graph_ratio;
 }
 
+enum GraphAction {
+	ADD, DEL, NOTHING,
+};
+
 // (partial) MCMC ratio for adding or deleting an isoform from
 // this graph
 template<class RNodeLoc>
@@ -1259,7 +1271,10 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
-		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count) {
+		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count,
+		double * const vert_start_probs, double * const isof_del_probs,
+		double * &new_vert_start_probs, double * &new_isof_del_probs,
+		GraphAction &action) {
 
 	double partial_mcmc_ratio;
 
@@ -1273,9 +1288,6 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 			graph_expr_val += i->second;
 		}
 
-		double *vert_start_probs = new double[num_vertices(graph.graph)];
-		fill(vert_start_probs, vert_start_probs + num_vertices(graph.graph), 0);
-
 		get_vert_start_info(prop_graph_ratio, graph_info, graph, graph_read,
 				read_in_graph, vert_start_probs);
 
@@ -1286,31 +1298,26 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 			add_isof_weight += vert_start_probs[i];
 		}
 
-		// @_del_isof_weight / (@_add_isof_weight + @_del_isof_weight)
-		// is the probability of deleting an isoform from the current set
-		double *isof_del_probs = new double[graph_isoform.size()];
-		fill(isof_del_probs, isof_del_probs + graph_isoform.size(), 0);
-
 		vector<IsoformMap::const_iterator> isof_del_probs_ind;
 
 		get_isof_del_info(prop_graph_ratio, graph_info, graph, graph_read,
 				read_in_graph, isof_del_probs, rc_isof_count,
 				isof_del_probs_ind);
 
+		// @_del_isof_weight / (@_add_isof_weight + @_del_isof_weight)
+		// is the probability of deleting an isoform from the current set
 		double del_isof_weight = 0;
 		for (ulong i = 0; i != graph_isoform.size(); ++i) {
 			del_isof_weight += isof_del_probs[i];
 		}
 
 		if (add_isof_weight == 0 && del_isof_weight == 0) {
+
 			partial_mcmc_ratio = 1;
+
+			action = NOTHING;
+
 		} else {
-
-			enum Action {
-				ADD, DEL,
-			};
-
-			Action action;
 
 			double action_prob = 1.0;
 
@@ -1369,6 +1376,12 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 				} catch (exception &e) {
 					cerr << e.what() << endl;
 				}
+				break;
+
+			default:
+#ifdef DEBUG
+				throw SwitchNotAllowedError();
+#endif
 				break;
 
 			}
@@ -1446,6 +1459,9 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 					graph_num);
 
 			vector<double *> vec_vert_start_probs(graph_num);
+
+			// @_del_isof_weight / (@_add_isof_weight + @_del_isof_weight)
+			// is the probability of deleting an isoform from the current set
 			vector<double *> vec_isof_del_probs(graph_num);
 
 			isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs,
@@ -1473,6 +1489,8 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 				double *new_vert_start_probs;
 				double *new_isof_del_probs;
 
+				GraphAction action;
+
 				// the ratio of adding or deleting an isoform
 				double model_graph_ratio = update_chosen_graph_isoform(
 						graph_isoforms[chosen_graph_ind],
@@ -1481,7 +1499,10 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 						graph_reads[chosen_graph_ind], read_in_graph, rn,
 						new_graph_isof, new_prop_ratio,
 						graph_isof_lens[chosen_graph_ind],
-						rc_isof_counts[chosen_graph_ind]);
+						rc_isof_counts[chosen_graph_ind],
+						vec_vert_start_probs[chosen_graph_ind],
+						vec_isof_del_probs[chosen_graph_ind],
+						new_vert_start_probs, new_isof_del_probs, action);
 
 				double new_chosen_graph_portion = 1.0;
 				if (graph_num != 1) {
