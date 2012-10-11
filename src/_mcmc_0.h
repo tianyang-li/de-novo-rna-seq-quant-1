@@ -93,6 +93,13 @@ public:
 		return "ReadConstraintError:\nRead constraint violated!\n";
 	}
 };
+
+class IteratorEndError: public exception {
+public:
+	virtual char const * what() const throw () {
+		return "IteratorEndError:\n iterator didn't reach end as expected!\n";
+	}
+};
 #endif
 
 // when choosing discrete probabilities,
@@ -390,7 +397,9 @@ inline void isoform_MCMC_init(
 		gsl_rng * const rn, vector<IsoformMap> &graph_isoforms,
 		vector<IsoformMap> &prop_graph_ratios /* each entry is an empty map */,
 		vector<unordered_map<Isoform, ulong, IsoformHash> > &graph_isof_lens,
-		vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> > &rc_isof_counts) {
+		vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> > &rc_isof_counts,
+		vector<double *> &vec_vert_start_probs,
+		vector<double *> &vec_isof_del_probs) {
 
 #ifdef DEBUG
 	cerr << "enter isoform_MCMC_init\n";
@@ -433,6 +442,13 @@ inline void isoform_MCMC_init(
 			}
 
 		}
+
+#ifdef DEBUG
+		if (isof_set_iter != graph_isoforms.end()) {
+			cerr << "isof_set_iter" << endl;
+			throw IteratorEndError();
+		}
+#endif
 
 	} catch (exception &e) {
 		cerr << e.what() << endl;
@@ -557,6 +573,26 @@ inline void isoform_MCMC_init(
 					*graph_info_iter, *graph_iter, *graph_isof_iter, *i,
 					*isof_lens_iter);
 
+		}
+
+#ifdef DEBUG
+		if (graph_isof_iter != graph_isoforms.end()) {
+			cerr << "graph_isof_iter" << endl;
+			throw IteratorEndError();
+		}
+#endif
+
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+		throw;
+	}
+
+	try {
+
+		{
+			for (vector<double *>::iterator i = vec_vert_start_probs.begin();
+					i != vec_vert_start_probs.end(); ++i) {
+			}
 		}
 
 	} catch (exception &e) {
@@ -1275,9 +1311,12 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 			vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> > rc_isof_counts(
 					graph_num);
 
+			vector<double *> vec_vert_start_probs(graph_num);
+			vector<double *> vec_isof_del_probs(graph_num);
+
 			isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs,
 					rn, graph_isoforms, prop_graph_ratios, graph_isof_lens,
-					rc_isof_counts);
+					rc_isof_counts, vec_vert_start_probs, vec_isof_del_probs);
 
 			vector<vector<IsoformMap> > mcmc_results;
 
@@ -1296,6 +1335,9 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 				// if accepted @prop_graph_ratio ->
 				IsoformMap new_prop_ratio;
+
+				double *new_vert_start_probs;
+				double *new_isof_del_probs;
 
 				// the ratio of adding or deleting an isoform
 				double model_graph_ratio = update_chosen_graph_isoform(
@@ -1338,6 +1380,16 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 			delete[] graph_weights;
 
 			gsl_rng_free(rn);
+
+			for (vector<double *>::iterator i = vec_vert_start_probs.begin();
+					i != vec_vert_start_probs.begin(); ++i) {
+				delete[] *i;
+			}
+
+			for (vector<double *>::iterator i = vec_isof_del_probs.begin();
+					i != vec_isof_del_probs.end(); ++i) {
+				delete[] *i;
+			}
 
 		} catch (exception &e) {
 			cerr << e.what() << endl;
