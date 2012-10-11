@@ -1123,7 +1123,8 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
 		double * const vert_start_probs /* already set */,
-		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count /* this will not be updated here */) {
+		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count /* this will not be updated here */,
+		double * &new_isof_del_probs /* memory not yet allocated */) {
 
 	ulong num_graph_vert = num_vertices(graph.graph);
 
@@ -1156,10 +1157,6 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 
 	get_prop_graph_ratio(read_in_graph, graph_read, graph_info, graph,
 			new_graph_isof, new_prop_ratio, isof_lens);
-
-	ulong num_new_graph_isof = new_graph_isof.size();
-	double *new_isof_del_probs = new double[num_new_graph_isof];
-	fill(new_isof_del_probs, new_isof_del_probs + num_new_graph_isof, 0);
 
 	for (unordered_map<SeqConstraint, ulong, SeqConstraintHash>::iterator i =
 			rc_isof_count.begin(); i != rc_isof_count.end(); ++i) {
@@ -1210,7 +1207,8 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
 		double * const isof_del_probs /* this is already set */,
-		vector<IsoformMap::const_iterator> const &isof_del_probs_ind) {
+		vector<IsoformMap::const_iterator> const &isof_del_probs_ind,
+		double * &new_vert_start_probs /* memory not yet allocated */) {
 
 	ulong num_graph_vert = num_vertices(graph.graph);
 
@@ -1240,9 +1238,6 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 
 	get_prop_graph_ratio(read_in_graph, graph_read, graph_info, graph,
 			new_graph_isof, new_prop_ratio, isof_lens);
-
-	double *new_vert_start_probs = new double[num_graph_vert];
-	fill(new_vert_start_probs, new_vert_start_probs + num_graph_vert, 0);
 
 	get_vert_start_info(new_prop_ratio, graph_info, graph, graph_read,
 			read_in_graph, new_vert_start_probs);
@@ -1360,7 +1355,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 					partial_mcmc_ratio = add_isof_ratio(graph_isoform,
 							prop_graph_ratio, graph_info, graph, graph_read,
 							read_in_graph, rn, new_graph_isof, new_prop_ratio,
-							isof_lens, vert_start_probs, rc_isof_count);
+							isof_lens, vert_start_probs, rc_isof_count,
+							new_isof_del_probs);
 				} catch (exception &e) {
 					cerr << e.what() << endl;
 					throw;
@@ -1372,7 +1368,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 					partial_mcmc_ratio = del_isof_ratio(graph_isoform,
 							prop_graph_ratio, graph_info, graph, graph_read,
 							read_in_graph, rn, new_graph_isof, new_prop_ratio,
-							isof_lens, isof_del_probs, isof_del_probs_ind);
+							isof_lens, isof_del_probs, isof_del_probs_ind,
+							new_vert_start_probs);
 				} catch (exception &e) {
 					cerr << e.what() << endl;
 				}
@@ -1523,6 +1520,8 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 					update_graph_weights(graph_infos, graphs, read_in_graph,
 							graph_reads, graph_weights, graph_isoforms);
+
+					// TODO: @probs memory management
 
 					if (graph_num != 1) {
 
