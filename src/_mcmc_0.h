@@ -89,21 +89,21 @@ namespace _mcmc_0 {
 #ifdef DEBUG
 class ReadConstraintError: public exception {
 public:
-	virtual char const * what() const throw () {
+	inline virtual char const * what() const throw () {
 		return "ReadConstraintError:\nRead constraint violated!\n";
 	}
 };
 
 class IteratorEndError: public exception {
 public:
-	virtual char const * what() const throw () {
+	inline virtual char const * what() const throw () {
 		return "IteratorEndError:\n iterator didn't reach end as expected!\n";
 	}
 };
 
 class SwitchNotAllowedError: public exception {
 public:
-	virtual char const * what() const throw () {
+	inline virtual char const * what() const throw () {
 		return "SwitchNotAllowedError:\n"
 				"switch branch shouldn't have been taken!\n";
 	}
