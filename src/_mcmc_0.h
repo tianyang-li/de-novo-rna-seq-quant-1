@@ -414,297 +414,6 @@ inline void get_prop_graph_ratio(
 
 }
 
-template<class RNodeLoc>
-inline void isoform_MCMC_init(
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		vector<GraphReads> const &graph_reads,
-		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> const &graphs,
-		gsl_rng * const rn, vector<IsoformMap> &graph_isoforms,
-		vector<IsoformMap> &prop_graph_ratios /* each entry is an empty map */,
-		vector<unordered_map<Isoform, ulong, IsoformHash> > &graph_isof_lens,
-		vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> > &rc_isof_counts,
-		vector<double *> &vec_vert_start_probs,
-		vector<IsofDelProbs> &vec_isof_del_probs) {
-
-#ifdef DEBUG
-	cerr << "enter isoform_MCMC_init\n";
-#endif
-
-	try {
-		// get isoforms that satisfy the read constraints
-
-		vector<IsoformMap>::iterator isof_set_iter = graph_isoforms.begin();
-
-		for (vector<SpliceGraph>::const_iterator i = graphs.begin();
-				i != graphs.end(); ++i, ++isof_set_iter) {
-
-			ulong rc_size = i->read_constraints.size();
-
-			// 1 - unsatisfied
-			// 0 - satisfied
-			dynamic_bitset<> satisfied_rc(rc_size);
-			satisfied_rc.set();
-
-			while (satisfied_rc.any()) {
-				ulong un_rc = 0; // un-satisfied read constraint index
-				while (satisfied_rc[un_rc] == false) {
-					++un_rc;
-				}
-				satisfied_rc[un_rc] = false;
-
-				Isoform isof(boost::num_vertices(i->graph));
-				rand_rc_isof(*i, isof, un_rc, rn);
-				isof_set_iter->insert(make_pair(isof, 0.0L));
-
-				for (ulong j = 0; j != rc_size; ++j) {
-					if (satisfied_rc[j] == true) {
-						if (isof == (isof | i->read_constraints[j])) {
-							satisfied_rc[j] = false;
-						}
-					}
-				}
-
-			}
-
-		}
-
-#ifdef DEBUG
-		if (isof_set_iter != graph_isoforms.end()) {
-			cerr << "isof_set_iter" << endl;
-			throw IteratorEndError();
-		}
-#endif
-
-	} catch (exception &e) {
-		cerr << e.what() << endl;
-		throw;
-	}
-
-	try {
-
-		// set @rc_isof_counts
-		// count the number of isoforms that satisfy a
-		// sequence constraint for each sequence constraint
-
-		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
-		vector<IsoformMap>::const_iterator graph_isof_iter =
-				graph_isoforms.begin();
-
-		for (vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> >::iterator i =
-				rc_isof_counts.begin(); i != rc_isof_counts.end();
-				++i, ++graph_iter, ++graph_isof_iter) {
-
-			for (vector<SeqConstraint>::const_iterator j =
-					graph_iter->read_constraints.begin();
-					j != graph_iter->read_constraints.end(); ++j) {
-
-				ulong rc_isof_count = 0;
-
-				for (IsoformMap::const_iterator k = graph_isof_iter->begin();
-						k != graph_isof_iter->end(); ++k) {
-
-					if (k->first == (k->first | (*j))) {
-						++rc_isof_count;
-					}
-
-				}
-
-				i->insert(make_pair(*j, rc_isof_count));
-
-			}
-
-		}
-
-#ifdef DEBUG
-		if (graph_iter != graphs.end()) {
-			cerr << "graph_iter" << endl;
-			throw IteratorEndError();
-		}
-		if (graph_isof_iter != graph_isoforms.end()) {
-			cerr << "graph_isof_iter" << endl;
-			throw IteratorEndError();
-		}
-#endif
-
-	} catch (exception &e) {
-		cerr << e.what() << endl;
-	}
-
-	try {
-
-		// assign random expression levels according
-		// to a dirichlet distribution
-
-		ulong isofs_size = 0;
-		for (vector<IsoformMap>::const_iterator isof_set_iter =
-				graph_isoforms.begin(); isof_set_iter != graph_isoforms.end();
-				++isof_set_iter) {
-			isofs_size += isof_set_iter->size();
-		}
-
-		if (isofs_size != 1) {
-
-			double *dir_alpha = new double[isofs_size];
-
-			fill(dir_alpha, dir_alpha + isofs_size, 1);
-
-			double *dir_theta = new double[isofs_size];
-
-			gsl_ran_dirichlet(rn, isofs_size, dir_alpha, dir_theta);
-
-			delete[] dir_alpha;
-
-			ulong isof_exp_ind = 0;
-			ulong graph_ind = 0;
-
-			for (vector<IsoformMap>::iterator isof_set_iter =
-					graph_isoforms.begin();
-					isof_set_iter != graph_isoforms.end();
-					++isof_set_iter, ++graph_ind) {
-
-				for (IsoformMap::iterator cur_isof = isof_set_iter->begin();
-						cur_isof != isof_set_iter->end(); ++cur_isof) {
-
-					cur_isof->second = dir_theta[isof_exp_ind];
-
-					++isof_exp_ind;
-
-				}
-
-			}
-
-#ifdef DEBUG
-			if (graph_ind != graphs.size()) {
-				cerr << "graph_ind" << endl;
-				throw IteratorEndError();
-			}
-			if (isof_exp_ind != isofs_size) {
-				cerr << "isof_exp_ind" << endl;
-				throw IteratorEndError();
-			}
-#endif
-
-			delete[] dir_theta;
-
-		} else {
-
-			// special case when there's only 1 isoform
-
-			graph_isoforms[0].begin()->second = 1.0;
-
-		}
-
-	} catch (exception &e) {
-		cerr << e.what() << endl;
-		throw;
-	}
-
-	try {
-		// get proposal ratios for graphs to
-		// use in proposal distributions
-
-		vector<IsoformMap>::const_iterator graph_isof_iter =
-				graph_isoforms.begin();
-		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
-		vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
-		vector<GraphReads>::const_iterator graph_read_iter =
-				graph_reads.begin();
-		vector<unordered_map<Isoform, ulong, IsoformHash> >::iterator isof_lens_iter =
-				graph_isof_lens.begin();
-
-		for (vector<IsoformMap>::iterator i = prop_graph_ratios.begin();
-				i != prop_graph_ratios.end();
-				++i, ++graph_iter, ++graph_isof_iter, ++graph_info_iter, ++graph_read_iter, ++isof_lens_iter) {
-
-			get_prop_graph_ratio(read_in_graph, *graph_read_iter,
-					*graph_info_iter, *graph_iter, *graph_isof_iter, *i,
-					*isof_lens_iter);
-
-		}
-
-#ifdef DEBUG
-		if (graph_isof_iter != graph_isoforms.end()) {
-			cerr << "graph_isof_iter" << endl;
-			throw IteratorEndError();
-		}
-		if (graph_iter != graphs.end()) {
-			cerr << "graph_iter" << endl;
-			throw IteratorEndError();
-		}
-		if (graph_info_iter != graph_infos.end()) {
-			cerr << "graph_info_iter" << endl;
-			throw IteratorEndError();
-		}
-		if (graph_read_iter != graph_reads.end()) {
-			cerr << "graph_read_iter" << endl;
-			throw IteratorEndError();
-		}
-		if (isof_lens_iter != graph_isof_lens.end()) {
-			cerr << "isof_lens_iter" << endl;
-			throw IteratorEndError();
-		}
-#endif
-
-	} catch (exception &e) {
-		cerr << e.what() << endl;
-		throw;
-	}
-
-	try { // TODO
-
-		{
-			vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
-
-			for (vector<double *>::iterator i = vec_vert_start_probs.begin();
-					i != vec_vert_start_probs.end(); ++i, ++graph_iter) {
-
-				(*i) = new double[num_vertices(graph_iter->graph)];
-
-			}
-
-#ifdef DEBUG
-			if (graph_iter != graphs.end()) {
-				cerr << "graph_iter" << endl;
-				throw IteratorEndError();
-			}
-#endif
-		}
-
-		{
-			vector<IsoformMap>::const_iterator graph_isof_iter =
-					graph_isoforms.begin();
-
-			for (vector<IsofDelProbs>::iterator i = vec_isof_del_probs.begin();
-					i != vec_isof_del_probs.end(); ++i, ++graph_isof_iter) {
-
-				i->alloc_probs(graph_isof_iter->size());
-
-				for (IsoformMap::const_iterator j = graph_isof_iter->begin();
-						j != graph_isof_iter->end(); ++j) {
-					i->ind.push_back(j);
-				}
-
-			}
-
-#ifdef DEBUG
-			if (graph_isof_iter != graph_isoforms.end()) {
-				cerr << "graph_isof_iter" << endl;
-				throw IteratorEndError();
-			}
-#endif
-		}
-
-	} catch (exception &e) {
-		cerr << e.what() << endl;
-		throw;
-	}
-
-#ifdef DEBUG
-	cerr << "exit isoform_MCMC_init\n";
-#endif
-
-}
-
 // get graph weights for choosing
 // which graph to modify
 template<class RNodeLoc>
@@ -1435,6 +1144,301 @@ inline void upadte_rc_isof_count(
 #endif
 		break;
 	}
+}
+
+template<class RNodeLoc>
+inline void isoform_MCMC_init(
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+		vector<GraphReads> const &graph_reads,
+		vector<GraphInfo> const &graph_infos, vector<SpliceGraph> const &graphs,
+		gsl_rng * const rn, vector<IsoformMap> &graph_isoforms,
+		vector<IsoformMap> &prop_graph_ratios /* each entry is an empty map */,
+		vector<unordered_map<Isoform, ulong, IsoformHash> > &graph_isof_lens,
+		vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> > &rc_isof_counts,
+		vector<double *> &vec_vert_start_probs,
+		vector<IsofDelProbs> &vec_isof_del_probs) {
+
+#ifdef DEBUG
+	cerr << "enter isoform_MCMC_init\n";
+#endif
+
+	try {
+		// get isoforms that satisfy the read constraints
+
+		vector<IsoformMap>::iterator isof_set_iter = graph_isoforms.begin();
+
+		for (vector<SpliceGraph>::const_iterator i = graphs.begin();
+				i != graphs.end(); ++i, ++isof_set_iter) {
+
+			ulong rc_size = i->read_constraints.size();
+
+			// 1 - unsatisfied
+			// 0 - satisfied
+			dynamic_bitset<> satisfied_rc(rc_size);
+			satisfied_rc.set();
+
+			while (satisfied_rc.any()) {
+				ulong un_rc = 0; // un-satisfied read constraint index
+				while (satisfied_rc[un_rc] == false) {
+					++un_rc;
+				}
+				satisfied_rc[un_rc] = false;
+
+				Isoform isof(boost::num_vertices(i->graph));
+				rand_rc_isof(*i, isof, un_rc, rn);
+				isof_set_iter->insert(make_pair(isof, 0.0L));
+
+				for (ulong j = 0; j != rc_size; ++j) {
+					if (satisfied_rc[j] == true) {
+						if (isof == (isof | i->read_constraints[j])) {
+							satisfied_rc[j] = false;
+						}
+					}
+				}
+
+			}
+
+		}
+
+#ifdef DEBUG
+		if (isof_set_iter != graph_isoforms.end()) {
+			cerr << "isof_set_iter" << endl;
+			throw IteratorEndError();
+		}
+#endif
+
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+		throw;
+	}
+
+	try {
+
+		// set @rc_isof_counts
+		// count the number of isoforms that satisfy a
+		// sequence constraint for each sequence constraint
+
+		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+		vector<IsoformMap>::const_iterator graph_isof_iter =
+				graph_isoforms.begin();
+
+		for (vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> >::iterator i =
+				rc_isof_counts.begin(); i != rc_isof_counts.end();
+				++i, ++graph_iter, ++graph_isof_iter) {
+
+			for (vector<SeqConstraint>::const_iterator j =
+					graph_iter->read_constraints.begin();
+					j != graph_iter->read_constraints.end(); ++j) {
+
+				ulong rc_isof_count = 0;
+
+				for (IsoformMap::const_iterator k = graph_isof_iter->begin();
+						k != graph_isof_iter->end(); ++k) {
+
+					if (k->first == (k->first | (*j))) {
+						++rc_isof_count;
+					}
+
+				}
+
+				i->insert(make_pair(*j, rc_isof_count));
+
+			}
+
+		}
+
+#ifdef DEBUG
+		if (graph_iter != graphs.end()) {
+			cerr << "graph_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_isof_iter != graph_isoforms.end()) {
+			cerr << "graph_isof_iter" << endl;
+			throw IteratorEndError();
+		}
+#endif
+
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+	}
+
+	try {
+
+		// assign random expression levels according
+		// to a dirichlet distribution
+
+		ulong isofs_size = 0;
+		for (vector<IsoformMap>::const_iterator isof_set_iter =
+				graph_isoforms.begin(); isof_set_iter != graph_isoforms.end();
+				++isof_set_iter) {
+			isofs_size += isof_set_iter->size();
+		}
+
+		if (isofs_size != 1) {
+
+			double *dir_alpha = new double[isofs_size];
+
+			fill(dir_alpha, dir_alpha + isofs_size, 1);
+
+			double *dir_theta = new double[isofs_size];
+
+			gsl_ran_dirichlet(rn, isofs_size, dir_alpha, dir_theta);
+
+			delete[] dir_alpha;
+
+			ulong isof_exp_ind = 0;
+			ulong graph_ind = 0;
+
+			for (vector<IsoformMap>::iterator isof_set_iter =
+					graph_isoforms.begin();
+					isof_set_iter != graph_isoforms.end();
+					++isof_set_iter, ++graph_ind) {
+
+				for (IsoformMap::iterator cur_isof = isof_set_iter->begin();
+						cur_isof != isof_set_iter->end(); ++cur_isof) {
+
+					cur_isof->second = dir_theta[isof_exp_ind];
+
+					++isof_exp_ind;
+
+				}
+
+			}
+
+#ifdef DEBUG
+			if (graph_ind != graphs.size()) {
+				cerr << "graph_ind" << endl;
+				throw IteratorEndError();
+			}
+			if (isof_exp_ind != isofs_size) {
+				cerr << "isof_exp_ind" << endl;
+				throw IteratorEndError();
+			}
+#endif
+
+			delete[] dir_theta;
+
+		} else {
+
+			// special case when there's only 1 isoform
+
+			graph_isoforms[0].begin()->second = 1.0;
+
+		}
+
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+		throw;
+	}
+
+	try {
+		// get proposal ratios for graphs to
+		// use in proposal distributions
+
+		vector<IsoformMap>::const_iterator graph_isof_iter =
+				graph_isoforms.begin();
+		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+		vector<GraphInfo>::const_iterator graph_info_iter = graph_infos.begin();
+		vector<GraphReads>::const_iterator graph_read_iter =
+				graph_reads.begin();
+		vector<unordered_map<Isoform, ulong, IsoformHash> >::iterator isof_lens_iter =
+				graph_isof_lens.begin();
+
+		for (vector<IsoformMap>::iterator i = prop_graph_ratios.begin();
+				i != prop_graph_ratios.end();
+				++i, ++graph_iter, ++graph_isof_iter, ++graph_info_iter, ++graph_read_iter, ++isof_lens_iter) {
+
+			get_prop_graph_ratio(read_in_graph, *graph_read_iter,
+					*graph_info_iter, *graph_iter, *graph_isof_iter, *i,
+					*isof_lens_iter);
+
+		}
+
+#ifdef DEBUG
+		if (graph_isof_iter != graph_isoforms.end()) {
+			cerr << "graph_isof_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_iter != graphs.end()) {
+			cerr << "graph_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_info_iter != graph_infos.end()) {
+			cerr << "graph_info_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_read_iter != graph_reads.end()) {
+			cerr << "graph_read_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (isof_lens_iter != graph_isof_lens.end()) {
+			cerr << "isof_lens_iter" << endl;
+			throw IteratorEndError();
+		}
+#endif
+
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+		throw;
+	}
+
+	try { // TODO
+
+		{
+			vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+
+			for (vector<double *>::iterator i = vec_vert_start_probs.begin();
+					i != vec_vert_start_probs.end(); ++i, ++graph_iter) {
+
+				(*i) = new double[num_vertices(graph_iter->graph)];
+
+				// TODO: start info
+
+			}
+
+#ifdef DEBUG
+			if (graph_iter != graphs.end()) {
+				cerr << "graph_iter" << endl;
+				throw IteratorEndError();
+			}
+#endif
+		}
+
+		{
+			vector<IsoformMap>::const_iterator graph_isof_iter =
+					graph_isoforms.begin();
+
+			for (vector<IsofDelProbs>::iterator i = vec_isof_del_probs.begin();
+					i != vec_isof_del_probs.end(); ++i, ++graph_isof_iter) {
+
+				i->alloc_probs(graph_isof_iter->size());
+
+				for (IsoformMap::const_iterator j = graph_isof_iter->begin();
+						j != graph_isof_iter->end(); ++j) {
+					i->ind.push_back(j);
+				}
+
+				// TODO: del info
+
+			}
+
+#ifdef DEBUG
+			if (graph_isof_iter != graph_isoforms.end()) {
+				cerr << "graph_isof_iter" << endl;
+				throw IteratorEndError();
+			}
+#endif
+		}
+
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+		throw;
+	}
+
+#ifdef DEBUG
+	cerr << "exit isoform_MCMC_init\n";
+#endif
+
 }
 
 template<class RNodeLoc>
