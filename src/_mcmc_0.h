@@ -140,6 +140,22 @@ private:
 	gsl_rng * const rn;
 };
 
+class IsofDelProbs {
+public:
+
+	double *probs;
+	vector<IsoformMap::const_iterator> ind;
+
+	inline void alloc_probs(ulong size) {
+		probs = new double[size];
+	}
+
+	inline void del_probs() {
+		delete[] probs;
+	}
+
+};
+
 // given read constraint
 // and graph, get a random isoform
 // that satisfies the constraint
@@ -408,7 +424,7 @@ inline void isoform_MCMC_init(
 		vector<unordered_map<Isoform, ulong, IsoformHash> > &graph_isof_lens,
 		vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> > &rc_isof_counts,
 		vector<double *> &vec_vert_start_probs,
-		vector<double *> &vec_isof_del_probs) {
+		vector<IsofDelProbs> &vec_isof_del_probs) {
 
 #ifdef DEBUG
 	cerr << "enter isoform_MCMC_init\n";
@@ -658,10 +674,15 @@ inline void isoform_MCMC_init(
 			vector<IsoformMap>::const_iterator graph_isof_iter =
 					graph_isoforms.begin();
 
-			for (vector<double *>::iterator i = vec_isof_del_probs.begin();
+			for (vector<IsofDelProbs>::iterator i = vec_isof_del_probs.begin();
 					i != vec_isof_del_probs.end(); ++i, ++graph_isof_iter) {
 
-				(*i) = new double[graph_isof_iter->size()];
+				i->alloc_probs(graph_isof_iter->size());
+
+				for (IsoformMap::const_iterator j = graph_isof_iter->begin();
+						j != graph_isof_iter->end(); ++j) {
+					i->ind.push_back(j);
+				}
 
 			}
 
@@ -1065,9 +1086,8 @@ inline void get_isof_del_info(IsoformMap const &prop_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		double * const isof_del_probs /* filled with 0's */,
-		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count,
-		vector<IsoformMap::const_iterator> &isof_del_probs_ind /* empty vector */) {
+		IsofDelProbs &isof_del_probs /* filled with 0's */,
+		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count) {
 
 	ulong isof_del_prob_ind = 0;
 
@@ -1076,13 +1096,13 @@ inline void get_isof_del_info(IsoformMap const &prop_graph_ratio,
 
 		if (can_remove_isoform(i->first, rc_isof_count)) {
 
-			isof_del_probs[isof_del_prob_ind] = isof2del_weight(i->first,
+			isof_del_probs.probs[isof_del_prob_ind] = isof2del_weight(i->first,
 					prop_graph_ratio, graph_info, graph, graph_read,
 					read_in_graph);
 
 		}
 
-		isof_del_probs_ind.push_back(i);
+		isof_del_probs.ind.push_back(i);
 
 	}
 
@@ -1124,7 +1144,7 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
 		double * const vert_start_probs /* already set */,
 		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count /* this will not be updated here */,
-		double * &new_isof_del_probs /* memory not yet allocated */,
+		IsofDelProbs &new_isof_del_probs /* memory not yet allocated */,
 		Isoform &added_isof) {
 
 	ulong num_graph_vert = num_vertices(graph.graph);
@@ -1158,8 +1178,9 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 			new_graph_isof, new_prop_ratio, isof_lens);
 
 	ulong num_new_graph_isof = new_graph_isof.size();
-	new_isof_del_probs = new double[num_new_graph_isof];
-	fill(new_isof_del_probs, new_isof_del_probs + num_new_graph_isof, 0);
+	new_isof_del_probs.alloc_probs(num_new_graph_isof);
+	fill(new_isof_del_probs.probs,
+			new_isof_del_probs.probs + num_new_graph_isof, 0);
 
 	for (unordered_map<SeqConstraint, ulong, SeqConstraintHash>::iterator i =
 			rc_isof_count.begin(); i != rc_isof_count.end(); ++i) {
@@ -1210,8 +1231,7 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 		IsoformMap &new_graph_isof /* empty, if accepted @graph_isoform <- */,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
-		double * const isof_del_probs /* this is already set */,
-		vector<IsoformMap::const_iterator> const &isof_del_probs_ind,
+		IsofDelProbs const &isof_del_probs /* this is already set */,
 		double * &new_vert_start_probs /* memory not yet allocated */,
 		Isoform &del_isoform /* isoform to delete */) {
 
@@ -1222,12 +1242,12 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 	ulong num_graph_isoform = graph_isoform.size();
 
 	gsl_ran_discrete_t *isof_del_probs_gsl = gsl_ran_discrete_preproc(
-			num_graph_isoform, isof_del_probs);
+			num_graph_isoform, isof_del_probs.probs);
 
 	ulong isof_del = gsl_ran_discrete(rn, isof_del_probs_gsl);
 	{
 		ulong chose0prob_times = 0;
-		while (isof_del_probs[isof_del] == 0) {
+		while (isof_del_probs.probs[isof_del] == 0) {
 			if (chose0prob_times == ZeroProbTooManyTimes::kMaxZeroProbTimes) {
 				throw ZeroProbTooManyTimes();
 			}
@@ -1238,7 +1258,7 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 
 	gsl_ran_discrete_free(isof_del_probs_gsl);
 
-	del_isoform = isof_del_probs_ind[isof_del]->first;
+	del_isoform = isof_del_probs.ind[isof_del]->first;
 
 	new_graph_isof = graph_isoform;
 	new_graph_isof.erase(del_isoform);
@@ -1255,9 +1275,11 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 	// update @model_graph_ratio
 	// TODO
 
+	// TODO: remove this
 	delete[] new_vert_start_probs;
 
-	delete[] isof_del_probs;
+	// TODO: remove this
+	//delete[] isof_del_probs;
 
 	return model_graph_ratio;
 }
@@ -1277,8 +1299,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		IsoformMap &new_prop_ratio /* empty, if accepted @prop_graph_ratio <- */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
 		unordered_map<SeqConstraint, ulong, SeqConstraintHash> &rc_isof_count,
-		double * const vert_start_probs, double * const isof_del_probs,
-		double * &new_vert_start_probs, double * &new_isof_del_probs,
+		double * const vert_start_probs, IsofDelProbs const &isof_del_probs,
+		double * &new_vert_start_probs, IsofDelProbs &new_isof_del_probs,
 		GraphAction &action,
 		Isoform &isof_mod /* added or deleted isoform, all 0's */) {
 
@@ -1304,17 +1326,14 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 			add_isof_weight += vert_start_probs[i];
 		}
 
-		vector<IsoformMap::const_iterator> isof_del_probs_ind;
-
 		get_isof_del_info(prop_graph_ratio, graph_info, graph, graph_read,
-				read_in_graph, isof_del_probs, rc_isof_count,
-				isof_del_probs_ind);
+				read_in_graph, isof_del_probs, rc_isof_count);
 
 		// @_del_isof_weight / (@_add_isof_weight + @_del_isof_weight)
 		// is the probability of deleting an isoform from the current set
 		double del_isof_weight = 0;
 		for (ulong i = 0; i != graph_isoform.size(); ++i) {
-			del_isof_weight += isof_del_probs[i];
+			del_isof_weight += isof_del_probs.probs[i];
 		}
 
 		if (add_isof_weight == 0 && del_isof_weight == 0) {
@@ -1379,8 +1398,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 					partial_mcmc_ratio = del_isof_ratio(graph_isoform,
 							prop_graph_ratio, graph_info, graph, graph_read,
 							read_in_graph, rn, new_graph_isof, new_prop_ratio,
-							isof_lens, isof_del_probs, isof_del_probs_ind,
-							new_vert_start_probs, isof_mod);
+							isof_lens, isof_del_probs, new_vert_start_probs,
+							isof_mod);
 				} catch (exception &e) {
 					cerr << e.what() << endl;
 				}
@@ -1486,7 +1505,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 			// @_del_isof_weight / (@_add_isof_weight + @_del_isof_weight)
 			// is the probability of deleting an isoform from the current set
-			vector<double *> vec_isof_del_probs(graph_num);
+			vector<IsofDelProbs> vec_isof_del_probs(graph_num);
 
 			// XXX: add a vector of
 			// @isof_del_probs_ind
@@ -1515,7 +1534,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 				// XXX: test for memory leak
 				double *new_vert_start_probs;
-				double *new_isof_del_probs;
+				IsofDelProbs new_isof_del_probs;
 
 				GraphAction action;
 
@@ -1574,9 +1593,9 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 								graph_reads[chosen_graph_ind], read_in_graph,
 								vec_vert_start_probs[chosen_graph_ind]);
 
-						delete[] vec_isof_del_probs[chosen_graph_ind];
-						vec_isof_del_probs[chosen_graph_ind] =
-								new_isof_del_probs;
+						vec_isof_del_probs[chosen_graph_ind].del_probs();
+						vec_isof_del_probs[chosen_graph_ind].probs =
+								new_isof_del_probs.probs;
 
 						break;
 
@@ -1586,9 +1605,9 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 						vec_vert_start_probs[chosen_graph_ind] =
 								new_vert_start_probs;
 
-						delete[] vec_isof_del_probs[chosen_graph_ind];
-						vec_isof_del_probs[chosen_graph_ind] =
-								new double[new_graph_isof.size()];
+						vec_isof_del_probs[chosen_graph_ind].del_probs();
+						vec_isof_del_probs[chosen_graph_ind].alloc_probs(
+								new_graph_isof.size());
 						// XXX: get @del_info
 
 						break;
@@ -1606,7 +1625,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 					switch (action) {
 
 					case ADD:
-						delete[] new_isof_del_probs;
+						new_isof_del_probs.del_probs();
 						break;
 
 					case DEL:
@@ -1630,9 +1649,9 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 				delete[] *i;
 			}
 
-			for (vector<double *>::iterator i = vec_isof_del_probs.begin();
+			for (vector<IsofDelProbs>::iterator i = vec_isof_del_probs.begin();
 					i != vec_isof_del_probs.end(); ++i) {
-				delete[] *i;
+				i->del_probs();
 			}
 
 		} catch (exception &e) {
