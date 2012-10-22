@@ -1305,22 +1305,12 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 			graph_expr_val += i->second;
 		}
 
-		/* not needed?
-		 get_vert_start_info(prop_graph_ratio, graph_info, graph, graph_read,
-		 read_in_graph, vert_start_probs);
-		 */
-
 		// @_add_isof_weight / (@_add_isof_weight + @_del_isof_weight)
 		// is the probability of adding an isoform to the current set
 		double add_isof_weight = 0;
 		for (ulong i = 0; i != num_vertices(graph.graph); ++i) {
 			add_isof_weight += vert_start_probs[i];
 		}
-
-		/* not needed?
-		 get_isof_del_info(prop_graph_ratio, graph_info, graph, graph_read,
-		 read_in_graph, isof_del_probs, rc_isof_count);
-		 */
 
 		// @_del_isof_weight / (@_add_isof_weight + @_del_isof_weight)
 		// is the probability of deleting an isoform from the current set
