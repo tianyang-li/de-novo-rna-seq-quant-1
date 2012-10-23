@@ -1382,23 +1382,43 @@ inline void isoform_MCMC_init(
 		throw;
 	}
 
-	try { // TODO
+	try {
 
 		{
 			vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+			vector<GraphInfo>::const_iterator graph_info_iter =
+					graph_infos.begin();
+			vector<IsoformMap>::const_iterator prop_ratio_iter =
+					prop_graph_ratios.begin();
+			vector<GraphReads>::const_iterator graph_read_iter =
+					graph_reads.begin();
 
 			for (vector<double *>::iterator i = vec_vert_start_probs.begin();
-					i != vec_vert_start_probs.end(); ++i, ++graph_iter) {
+					i != vec_vert_start_probs.end();
+					++i, ++graph_iter, ++graph_info_iter, ++prop_ratio_iter, ++graph_read_iter) {
 
 				(*i) = new double[num_vertices(graph_iter->graph)];
 
-				// TODO: start info
+				get_vert_start_info(*prop_ratio_iter, *graph_info_iter,
+						*graph_iter, *graph_read_iter, read_in_graph, *i);
 
 			}
 
 #ifdef DEBUG
 			if (graph_iter != graphs.end()) {
 				cerr << "graph_iter" << endl;
+				throw IteratorEndError();
+			}
+			if (graph_info_iter != graph_infos.end()) {
+				cerr << "graph_info_iter" << endl;
+				throw IteratorEndError();
+			}
+			if (prop_ratio_iter != prop_graph_ratios.end()) {
+				cerr << "prop_ratio_iter" << endl;
+				throw IteratorEndError();
+			}
+			if (graph_read_iter != graph_reads.end()) {
+				cerr << "graph_read_iter" << endl;
 				throw IteratorEndError();
 			}
 #endif
