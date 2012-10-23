@@ -1458,7 +1458,7 @@ inline void isoform_MCMC_init(
 
 			for (vector<IsofDelProbs>::iterator i = vec_isof_del_probs.begin();
 					i != vec_isof_del_probs.end();
-					++i, ++prop_ratio_iter, ++graph_iter, ++graph_info_iter, ++graph_read_iter, rc_isof_count_iter) {
+					++i, ++prop_ratio_iter, ++graph_iter, ++graph_info_iter, ++graph_read_iter, ++rc_isof_count_iter) {
 
 				i->alloc_probs(prop_ratio_iter->size());
 				fill(i->probs, i->probs + prop_ratio_iter->size(), 0);
