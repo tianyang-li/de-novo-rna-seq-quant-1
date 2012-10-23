@@ -144,6 +144,8 @@ class IsofDelProbs {
 public:
 
 	double *probs;
+
+	// iterators from @prop_graph_ratio
 	vector<IsoformMap::const_iterator> ind;
 
 	inline void alloc_probs(ulong size) {
@@ -1425,6 +1427,7 @@ inline void isoform_MCMC_init(
 		}
 
 		{
+			// TODO: prop graph ratio
 			vector<IsoformMap>::const_iterator graph_isof_iter =
 					graph_isoforms.begin();
 
@@ -1439,6 +1442,12 @@ inline void isoform_MCMC_init(
 				}
 
 				// TODO: del info
+				get_isof_del_info(IsoformMap const &prop_graph_ratio,
+						GraphInfo const &graph_info, SpliceGraph const &graph,
+						GraphReads const &graph_read,
+						vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+						IsofDelProbs &isof_del_probs /* filled with 0's */,
+						unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count)
 
 			}
 
