@@ -143,6 +143,25 @@ private:
 class IsofDelProbs {
 public:
 
+	IsofDelProbs() {
+	}
+
+	~IsofDelProbs() {
+	}
+
+	IsofDelProbs(IsofDelProbs const &x) :
+			probs(x.probs), ind(x.ind) {
+	}
+
+	IsofDelProbs &operator=(IsofDelProbs const &x) {
+		// manage @probs memory first
+		if (this != &x) {
+			probs = x.probs;
+			ind = x.ind;
+		}
+		return *this;
+	}
+
 	double *probs;
 
 	// iterators from @prop_graph_ratio
@@ -797,7 +816,7 @@ inline void get_isof_del_info(IsoformMap const &prop_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		IsofDelProbs &isof_del_probs /* filled with 0's */,
+		IsofDelProbs &isof_del_probs /* filled with 0's, @ind empty */,
 		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count) {
 
 	ulong isof_del_prob_ind = 0;
@@ -1631,8 +1650,8 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 								vec_vert_start_probs[chosen_graph_ind]);
 
 						vec_isof_del_probs[chosen_graph_ind].del_probs();
-						vec_isof_del_probs[chosen_graph_ind].probs =
-								new_isof_del_probs.probs;
+						vec_isof_del_probs[chosen_graph_ind] =
+								new_isof_del_probs;
 
 						break;
 
