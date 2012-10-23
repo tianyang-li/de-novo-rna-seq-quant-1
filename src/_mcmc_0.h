@@ -1427,33 +1427,54 @@ inline void isoform_MCMC_init(
 		}
 
 		{
-			// TODO: prop graph ratio
-			vector<IsoformMap>::const_iterator graph_isof_iter =
-					graph_isoforms.begin();
+			vector<IsoformMap>::const_iterator prop_ratio_iter =
+					prop_graph_ratios.begin();
+			vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+			vector<GraphInfo>::const_iterator graph_info_iter =
+					graph_infos.begin();
+			vector<GraphReads>::const_iterator graph_read_iter =
+					graph_reads.begin();
+			vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> >::const_iterator rc_isof_count_iter =
+					rc_isof_counts.begin();
 
 			for (vector<IsofDelProbs>::iterator i = vec_isof_del_probs.begin();
-					i != vec_isof_del_probs.end(); ++i, ++graph_isof_iter) {
+					i != vec_isof_del_probs.end();
+					++i, ++prop_ratio_iter, ++graph_iter, ++graph_info_iter, ++graph_read_iter, rc_isof_count_iter) {
 
-				i->alloc_probs(graph_isof_iter->size());
+				i->alloc_probs(prop_ratio_iter->size());
+				fill(i->probs, i->probs + prop_ratio_iter->size(), 0);
 
-				for (IsoformMap::const_iterator j = graph_isof_iter->begin();
-						j != graph_isof_iter->end(); ++j) {
+				for (IsoformMap::const_iterator j = prop_ratio_iter->begin();
+						j != prop_ratio_iter->end(); ++j) {
 					i->ind.push_back(j);
 				}
 
 				// TODO: del info
-				get_isof_del_info(IsoformMap const &prop_graph_ratio,
-						GraphInfo const &graph_info, SpliceGraph const &graph,
-						GraphReads const &graph_read,
-						vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-						IsofDelProbs &isof_del_probs /* filled with 0's */,
-						unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count)
+				get_isof_del_info(*prop_ratio_iter, *graph_info_iter,
+						*graph_iter, *graph_read_iter, read_in_graph, *i,
+						*rc_isof_count_iter);
 
 			}
 
 #ifdef DEBUG
-			if (graph_isof_iter != graph_isoforms.end()) {
-				cerr << "graph_isof_iter" << endl;
+			if (graph_iter != graphs.end()) {
+				cerr << "graph_iter" << endl;
+				throw IteratorEndError();
+			}
+			if (graph_info_iter != graph_infos.end()) {
+				cerr << "graph_info_iter" << endl;
+				throw IteratorEndError();
+			}
+			if (prop_ratio_iter != prop_graph_ratios.end()) {
+				cerr << "prop_ratio_iter" << endl;
+				throw IteratorEndError();
+			}
+			if (graph_read_iter != graph_reads.end()) {
+				cerr << "graph_read_iter" << endl;
+				throw IteratorEndError();
+			}
+			if (rc_isof_count_iter != rc_isof_counts.end()) {
+				cerr << "rc_isof_count_iter" << endl;
 				throw IteratorEndError();
 			}
 #endif
