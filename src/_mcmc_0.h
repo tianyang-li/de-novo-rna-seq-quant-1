@@ -105,7 +105,7 @@ class SwitchNotAllowedError: public exception {
 public:
 	inline virtual char const * what() const throw () {
 		return "SwitchNotAllowedError:\n"
-				"switch branch shouldn't have been taken!\n";
+		"switch branch shouldn't have been taken!\n";
 	}
 };
 #endif
@@ -918,9 +918,6 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 			++i->second;
 		}
 	}
-
-	// XXX: move it out
-	vector<IsoformMap::const_iterator> new_isof_del_probs_ind;
 
 	get_isof_del_info(new_prop_ratio, graph_info, graph, graph_read,
 			read_in_graph, new_isof_del_probs, rc_isof_count);
