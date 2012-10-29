@@ -13,5 +13,7 @@ The version of Trinity used here is
 In order to build this tool, the latest stable release 
 of [Cython](http://cython.org/) is required.
 
+***
+
 For more information, you can contact me at [tmy1018@gmail.com](mailto:tmy1018@gmail.com).
 
