@@ -13,5 +13,11 @@ The version of Trinity used here is
 In order to build this tool, the latest stable release 
 of [Cython](http://cython.org/) is required.
 
-For more information, you can contact me at [tmy1018@gmail.com](mailto:tmy1018@gmail.com).
+***
+
+For more information, you can contact me at [ty@li-tianyang.com](mailto:ty@li-tianyang.com).
+
+***
+
+This project attempts to improve previous methods based on the observations from [https://github.com/tianyang-li/human-rna-seq-analysis-0](https://github.com/tianyang-li/human-rna-seq-analysis-0).
 
