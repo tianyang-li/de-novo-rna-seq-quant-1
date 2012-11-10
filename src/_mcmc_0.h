@@ -105,7 +105,7 @@ class SwitchNotAllowedError: public exception {
 public:
 	inline virtual char const * what() const throw () {
 		return "SwitchNotAllowedError:\n"
-		"switch branch shouldn't have been taken!\n";
+				"switch branch shouldn't have been taken!\n";
 	}
 };
 #endif
@@ -1402,6 +1402,8 @@ inline void isoform_MCMC_init(
 
 	try {
 
+		// set weight for possible isoform start positions
+
 		{
 			vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
 			vector<GraphInfo>::const_iterator graph_info_iter =
@@ -1441,6 +1443,8 @@ inline void isoform_MCMC_init(
 			}
 #endif
 		}
+
+		// set weight for deleting isoforms
 
 		{
 			vector<IsoformMap>::const_iterator prop_ratio_iter =
@@ -1662,6 +1666,13 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 						vec_isof_del_probs[chosen_graph_ind].alloc_probs(
 								new_graph_isof.size());
 						// XXX: get @del_info
+
+						get_isof_del_info(IsoformMap const &prop_graph_ratio,
+								GraphInfo const &graph_info, SpliceGraph const &graph,
+								GraphReads const &graph_read,
+								vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+								IsofDelProbs &isof_del_probs /* filled with 0's, @ind empty */,
+								unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count)
 
 						break;
 
