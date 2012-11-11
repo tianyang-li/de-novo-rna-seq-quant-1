@@ -105,7 +105,7 @@ class SwitchNotAllowedError: public exception {
 public:
 	inline virtual char const * what() const throw () {
 		return "SwitchNotAllowedError:\n"
-		"switch branch shouldn't have been taken!\n";
+				"switch branch shouldn't have been taken!\n";
 	}
 };
 #endif
@@ -162,19 +162,36 @@ public:
 		return *this;
 	}
 
-	double *probs;
+	inline void alloc_probs(IsoformMap const &graph_isoform) {
+		probs = new double[graph_isoform.size()];
+		fill(probs, probs + graph_isoform.size(), 0);
 
-	// iterators from @prop_graph_ratio
-	vector<IsoformMap::const_iterator> ind;
+		ind.resize(graph_isoform.size());
 
-	inline void alloc_probs(ulong size) {
-		probs = new double[size];
-		fill(probs, probs + size, 0);
+		IsoformMap::const_iterator graph_isof_iter = graph_isoform.begin();
+
+		for (vector<IsoformMap::const_iterator>::iterator i = ind.begin();
+				i != ind.end(); ++i, ++graph_isof_iter) {
+			(*i) = graph_isof_iter;
+		}
+
+#ifdef DEBUG
+		if (graph_isof_iter != graph_isoform.end()) {
+			cerr << "graph_isof_iter" << endl;
+			throw IteratorEndError();
+		}
+#endif
+
 	}
 
 	inline void del_probs() {
 		delete[] probs;
 	}
+
+	double *probs;
+
+	// iterators from @prop_graph_ratio
+	vector<IsoformMap::const_iterator> ind;
 
 };
 
@@ -908,10 +925,9 @@ inline double add_isof_ratio(IsoformMap const &graph_isoform,
 	get_prop_graph_ratio(read_in_graph, graph_read, graph_info, graph,
 			new_graph_isof, new_prop_ratio, isof_lens);
 
-	ulong num_new_graph_isof = new_graph_isof.size();
-	new_isof_del_probs.alloc_probs(num_new_graph_isof);
+	new_isof_del_probs.alloc_probs(new_graph_isof);
 	fill(new_isof_del_probs.probs,
-			new_isof_del_probs.probs + num_new_graph_isof, 0);
+			new_isof_del_probs.probs + new_graph_isof.size(), 0);
 
 	for (unordered_map<SeqConstraint, ulong, SeqConstraintHash>::iterator i =
 			rc_isof_count.begin(); i != rc_isof_count.end(); ++i) {
@@ -1462,7 +1478,7 @@ inline void isoform_MCMC_init(
 					i != vec_isof_del_probs.end();
 					++i, ++prop_ratio_iter, ++graph_iter, ++graph_info_iter, ++graph_read_iter, ++rc_isof_count_iter) {
 
-				i->alloc_probs(prop_ratio_iter->size());
+				i->alloc_probs(*prop_ratio_iter);
 				fill(i->probs, i->probs + prop_ratio_iter->size(), 0);
 
 				for (IsoformMap::const_iterator j = prop_ratio_iter->begin();
@@ -1663,8 +1679,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 						vec_isof_del_probs[chosen_graph_ind].del_probs();
 						vec_isof_del_probs[chosen_graph_ind].alloc_probs(
-								new_graph_isof.size());
-						// XXX: get @del_info
+								new_graph_isof);
 
 						get_isof_del_info(new_prop_ratio,
 								graph_infos[chosen_graph_ind],
