@@ -105,7 +105,7 @@ class SwitchNotAllowedError: public exception {
 public:
 	inline virtual char const * what() const throw () {
 		return "SwitchNotAllowedError:\n"
-				"switch branch shouldn't have been taken!\n";
+		"switch branch shouldn't have been taken!\n";
 	}
 };
 #endif
@@ -1634,7 +1634,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 					update_graph_weights(graph_infos, graphs, read_in_graph,
 							graph_reads, graph_weights, graph_isoforms);
 
-					// TODO: @probs memory management
+					// update @probs
 					switch (action) {
 
 					case ADD:
@@ -1667,17 +1667,31 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 								new_graph_isof.size());
 						// XXX: get @del_info
 
-						get_isof_del_info(IsoformMap const &prop_graph_ratio,
-								GraphInfo const &graph_info, SpliceGraph const &graph,
-								GraphReads const &graph_read,
-								vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-								IsofDelProbs &isof_del_probs /* filled with 0's, @ind empty */,
-								unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count)
+					get_isof_del_info(IsoformMap const &prop_graph_ratio,
+							GraphInfo const &graph_info, SpliceGraph const &graph,
+							GraphReads const &graph_read,
+							vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
+							IsofDelProbs &isof_del_probs /* filled with 0's, @ind empty */,
+							unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count)
 
+					break;
+
+					default:
+						break;
+					}
+
+					// update @prop_graph_ratios
+					switch (action) {
+
+					case ADD:
+					case DEL:
+						graph_isoforms[chosen_graph_ind] = new_graph_isof;
+						prop_graph_ratios[chosen_graph_ind] = new_prop_ratio;
 						break;
 
 					default:
 						break;
+
 					}
 
 					if (graph_num != 1) {
