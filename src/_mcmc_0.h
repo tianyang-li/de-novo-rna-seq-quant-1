@@ -1567,6 +1567,9 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 			// for the isoforms
 			vector<IsoformMap> prop_graph_ratios(graph_num);
 
+			// XXX: might it be better to merge
+			// @graph_isoforms and @prop_graph_ratios?
+
 			vector<unordered_map<Isoform, ulong, IsoformHash> > graph_isof_lens(
 					graph_num);
 
