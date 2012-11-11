@@ -17,6 +17,8 @@
 
 
 """
+read in BLAT's PSL file
+
 matches - Number of bases that match that aren't repeats
 misMatches - Number of bases that don't match
 repMatches - Number of bases that match but are part of repeats
