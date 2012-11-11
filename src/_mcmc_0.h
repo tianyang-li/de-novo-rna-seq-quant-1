@@ -169,6 +169,7 @@ public:
 
 	inline void alloc_probs(ulong size) {
 		probs = new double[size];
+		fill(probs, probs + size, 0);
 	}
 
 	inline void del_probs() {
@@ -816,7 +817,7 @@ inline void get_isof_del_info(IsoformMap const &prop_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		IsofDelProbs &isof_del_probs /* filled with 0's, @ind empty */,
+		IsofDelProbs &isof_del_probs /* filled with 0's */,
 		unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count) {
 
 	ulong isof_del_prob_ind = 0;
@@ -1629,8 +1630,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 				if (gsl_rng_uniform(rn) <= min(1.0, model_graph_ratio)) {
 					// update to accepted state
 
-					// TODO
-
 					update_graph_weights(graph_infos, graphs, read_in_graph,
 							graph_reads, graph_weights, graph_isoforms);
 
@@ -1667,14 +1666,14 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 								new_graph_isof.size());
 						// XXX: get @del_info
 
-					get_isof_del_info(IsoformMap const &prop_graph_ratio,
-							GraphInfo const &graph_info, SpliceGraph const &graph,
-							GraphReads const &graph_read,
-							vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-							IsofDelProbs &isof_del_probs /* filled with 0's, @ind empty */,
-							unordered_map<SeqConstraint, ulong, SeqConstraintHash> const &rc_isof_count)
+						get_isof_del_info(new_prop_ratio,
+								graph_infos[chosen_graph_ind],
+								graphs[chosen_graph_ind],
+								graph_reads[chosen_graph_ind], read_in_graph,
+								vec_isof_del_probs[chosen_graph_ind],
+								rc_isof_counts[chosen_graph_ind]);
 
-					break;
+						break;
 
 					default:
 						break;
@@ -1693,7 +1692,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 						break;
 
 					}
-
+					// TODO
 					if (graph_num != 1) {
 
 					}
