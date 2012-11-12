@@ -1584,9 +1584,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 			// is the probability of deleting an isoform from the current set
 			vector<IsofDelProbs> vec_isof_del_probs(graph_num);
 
-			// XXX: add a vector of
-			// @isof_del_probs_ind
-
 			isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs,
 					rn, graph_isoforms, prop_graph_ratios, graph_isof_lens,
 					rc_isof_counts, vec_vert_start_probs, vec_isof_del_probs);
