@@ -1697,7 +1697,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 						break;
 					}
 
-					// update @prop_graph_ratios
+					// update @prop_graph_ratios @graph_isoforms
 					switch (action) {
 
 					case ADD:
