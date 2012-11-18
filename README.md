@@ -13,6 +13,8 @@ The version of Trinity used here is
 In order to build this tool, the latest stable release 
 of [Cython](http://cython.org/) is required.
 
+Utilities from [https://github.com/tianyang-li/misc-bioinfo-0](https://github.com/tianyang-li/misc-bioinfo-0) are used for data preprocessing. 
+
 ***
 
 For more information, you can contact me at [ty@li-tianyang.com](mailto:ty@li-tianyang.com).
