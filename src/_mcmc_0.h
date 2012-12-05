@@ -1596,6 +1596,8 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 			for (ulong runs = 0; runs != max_run; ++runs) {
 
+				// XXX: test for memory leak
+
 				ulong chosen_graph_ind = choose_graph_to_mod(rn, graphs,
 						graph_isoforms, graph_reads, read_in_graph,
 						graph_weights);
@@ -1606,7 +1608,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 				// if accepted @prop_graph_ratio ->
 				IsoformMap new_prop_ratio;
 
-				// XXX: test for memory leak
 				double *new_vert_start_probs;
 				IsofDelProbs new_isof_del_probs;
 
