@@ -1,7 +1,7 @@
 de-novo-rna-seq-quant-1
 =======================
 
-![Alt model](/README/model.svg "The model")
+![Alt model](https://github.com/tianyang-li/de-novo-rna-seq-quant-1/README/model.svg "The model")
 
 This is a tool used for Bayesian de novo transcript reconstruction and abundance estimation from RNA-Seq data.
 
