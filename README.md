@@ -1,8 +1,6 @@
 de-novo-rna-seq-quant-1
 =======================
 
-![The model](https://github.com/tianyang-li/de-novo-rna-seq-quant-1/raw/master/README/model.png)
-
 This is a tool used for Bayesian de novo transcript reconstruction and abundance estimation from RNA-Seq data.
 
 This program uses sequence graphs (splicing graphs) produced by  [Trinity](http://trinityrnaseq.sourceforge.net/).
