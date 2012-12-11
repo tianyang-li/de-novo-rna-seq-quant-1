@@ -105,7 +105,7 @@ class SwitchNotAllowedError: public exception {
 public:
 	inline virtual char const * what() const throw () {
 		return "SwitchNotAllowedError:\n"
-		"switch branch shouldn't have been taken!\n";
+				"switch branch shouldn't have been taken!\n";
 	}
 };
 #endif
@@ -693,7 +693,7 @@ inline double dist_from_start_weight(ulong cur_vert, SpliceGraph const &graph) {
 // about whether isoforms can start from the vertex
 // for @get_possible_isoform_weigh
 template<class RNodeLoc>
-inline void get_possible_isoform_weigh_DFS(Isoform &search_isof,
+inline void get_possible_isoform_weight_DFS(Isoform &search_isof,
 		double &poss_isof_w, IsoformMap const &prop_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
@@ -716,7 +716,7 @@ inline void get_possible_isoform_weigh_DFS(Isoform &search_isof,
 
 		while (out_i != out_end) {
 
-			get_possible_isoform_weigh_DFS(search_isof, poss_isof_w,
+			get_possible_isoform_weight_DFS(search_isof, poss_isof_w,
 					prop_graph_ratio, graph_info, graph, graph_read,
 					read_in_graph, target(*out_i, graph.graph), can_add_isof,
 					visited);
@@ -756,7 +756,7 @@ inline double get_possible_isoform_weight(IsoformMap const &prop_graph_ratio,
 
 	vector<bool> visited(num_vertices(graph.graph), false);
 
-	get_possible_isoform_weigh_DFS(search_isof, poss_isof_w, prop_graph_ratio,
+	get_possible_isoform_weight_DFS(search_isof, poss_isof_w, prop_graph_ratio,
 			graph_info, graph, graph_read, read_in_graph, start_vert,
 			can_add_isof, visited);
 
