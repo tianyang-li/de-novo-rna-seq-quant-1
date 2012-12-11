@@ -747,6 +747,8 @@ inline double get_possible_isoform_weight(IsoformMap const &prop_graph_ratio,
 
 	double poss_isof_w = 0;
 
+	// TODO: do not use DFS here??
+
 	Isoform search_isof(num_vertices(graph.graph));
 
 	// set flag for search
