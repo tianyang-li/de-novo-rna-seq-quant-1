@@ -21,6 +21,6 @@ This project attempts to improve previous methods based on observations from [ht
 
 ***
 
-This project is done under the supervision of [Dr. Xuegong Zhang](http://bioinfo.au.tsinghua.edu.cn/member/xzhang/XZhang_English.htm) and [Dr. Rui Jiang](http://bioinfo.au.tsinghua.edu.cn/member/ruijiang/english/index.html).
+This project is done under the supervision of [Dr. Xuegong Zhang](http://bioinfo.au.tsinghua.edu.cn/member/xzhang/XZhang_English.htm) and [Dr. Rui Jiang](http://bioinfo.au.tsinghua.edu.cn/member/ruijiang/english/index.html) at Tsinghua.
 
 
