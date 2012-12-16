@@ -19,4 +19,8 @@ For more information, you can contact me at [ty@li-tianyang.com](mailto:ty@li-ti
 
 This project attempts to improve previous methods based on observations from [https://github.com/tianyang-li/human-rna-seq-analysis-0](https://github.com/tianyang-li/human-rna-seq-analysis-0).
 
+***
+
+This project is done under the supervision of [Dr. Xuegong Zhang](http://bioinfo.au.tsinghua.edu.cn/member/xzhang/XZhang_English.htm) and [Dr. Rui Jiang](http://bioinfo.au.tsinghua.edu.cn/member/ruijiang/english/index.html).
+
 
