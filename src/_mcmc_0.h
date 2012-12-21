@@ -105,7 +105,7 @@ class SwitchNotAllowedError: public exception {
 public:
 	inline virtual char const * what() const throw () {
 		return "SwitchNotAllowedError:\n"
-				"switch branch shouldn't have been taken!\n";
+		"switch branch shouldn't have been taken!\n";
 	}
 };
 #endif
@@ -344,6 +344,8 @@ inline void get_prop_graph_ratio(
 		SpliceGraph const &graph, IsoformMap const &graph_isoform,
 		IsoformMap &prop_graph_ratio /* empty map */,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens) {
+
+	// doing a full convex optimization as in Cufflinks is too expensive (?)
 
 	// rescue method
 	//
