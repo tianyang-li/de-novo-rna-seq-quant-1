@@ -705,9 +705,6 @@ inline double get_possible_isoform_weight(IsoformMap const &prop_graph_ratio,
 
 	double poss_isof_w = 0;
 
-	// "almost perfect" solution is hard to do here
-	// do a "good enough" one
-
 	// TODO
 
 	return poss_isof_w;
