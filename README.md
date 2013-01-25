@@ -13,6 +13,8 @@ This program requires
 
 * Utilities from [https://github.com/tianyang-li/misc-bioinfo-0](https://github.com/tianyang-li/misc-bioinfo-0) 
 
+* [https://github.com/tianyang-li/rna-seq-len-est-0](https://github.com/tianyang-li/rna-seq-len-est-0)
+
 ***
 
 For more information, you can contact me at [ty@li-tianyang.com](mailto:ty@li-tianyang.com).
