@@ -105,7 +105,7 @@ class SwitchNotAllowedError: public exception {
 public:
 	inline virtual char const * what() const throw () {
 		return "SwitchNotAllowedError:\n"
-		"switch branch shouldn't have been taken!\n";
+				"switch branch shouldn't have been taken!\n";
 	}
 };
 #endif
