@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <utility>
 #include <iostream>
+#include <exception>
 #include <boost/functional/hash.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -56,6 +57,7 @@ using boost::print_graph;
 using boost::in_degree;
 using boost::tie;
 using boost::out_edges;
+using std::exception;
 
 }
 
@@ -203,45 +205,56 @@ public:
 	vector<ulong> vert_isof_counts; // XXX: is ulong too small?
 
 	inline void setup() {
-		boost::transitive_closure(graph, tc);
+		try {
+			boost::transitive_closure(graph, tc);
 
-		boost::topological_sort(graph, std::back_inserter(topo_sort));
-		std::reverse(topo_sort.begin(), topo_sort.end());
+			boost::topological_sort(graph, std::back_inserter(topo_sort));
+			std::reverse(topo_sort.begin(), topo_sort.end());
 
-		dist_from_starts.assign(num_vertices(graph), 0);
+			dist_from_starts.assign(num_vertices(graph), 0);
 
-		for (vector<DGVertex>::const_iterator i = topo_sort.begin();
-				i != topo_sort.end(); ++i) {
+			// count vert_isof_counts, similar to Floyd-Warshall
+			vert_isof_counts.assign(num_vertices(graph), 0);
 
-			if (in_degree(*i, graph) != 0) {
-				break;
+			//TODO:
+
+			for (vector<DGVertex>::const_iterator i = topo_sort.begin();
+					i != topo_sort.end(); ++i) {
+
+				if (in_degree(*i, graph) != 0) {
+					break;
+				}
+
+				_set_dist_from_starts(*i, kSourceDistFromStart);
+
 			}
 
-			_set_dist_from_starts(*i, kSourceDistFromStart);
+			for (ulong i = 0; i != num_vertices(graph); ++i) {
 
-		}
+				if (in_degree(i, graph) > 1) {
+					dist_from_starts[i] /= double(in_degree(i, graph));
+				}
 
-		for (ulong i = 0; i != num_vertices(graph); ++i) {
-
-			if (in_degree(i, graph) > 1) {
-				dist_from_starts[i] /= double(in_degree(i, graph));
 			}
-
-		}
 
 #ifdef DEBUG
-		// print out distance info
-		cerr << "distances from starts\n";
-		for (ulong i = 0; i != dist_from_starts.size(); ++i) {
-			cerr << i << ":" << dist_from_starts[i] << endl;
-		}
-		cerr << "######\n";
+			// print out distance info
+			cerr << "distances from starts\n";
+			for (ulong i = 0; i != dist_from_starts.size(); ++i) {
+				cerr << i << ":" << dist_from_starts[i] << endl;
+			}
+			cerr << "######\n";
 #endif
 
 #ifdef DEBUG
-		cerr << "graph id: " << graph_id << endl;
-		print_graph(graph);
+			cerr << "graph id: " << graph_id << endl;
+			print_graph(graph);
 #endif
+
+		} catch (exception &e) {
+			cerr << e.what() << endl;
+			throw;
+		}
 
 	}
 

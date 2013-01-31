@@ -1471,14 +1471,6 @@ inline void isoform_MCMC_init(
 		throw;
 	}
 
-	try {
-		// similar to Floyd-Warshall, count number of isoforms
-
-	} catch (exception &e) {
-		cerr << e.what() << endl;
-		throw;
-	}
-
 #ifdef DEBUG
 	cerr << "exit isoform_MCMC_init\n";
 #endif
