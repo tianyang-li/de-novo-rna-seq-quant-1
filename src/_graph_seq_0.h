@@ -86,6 +86,7 @@ public:
 	vector<ulong> edges;
 };
 
+// graph info from python (act as glue)
 class PyGraph {
 public:
 	PyGraph() {
@@ -169,6 +170,7 @@ typedef boost::graph_traits<DirectedGraph>::edge_descriptor DGEdge;
 // stores isoform and its corresponding expression level
 typedef boost::unordered_map<Isoform, double, IsoformHash> IsoformMap;
 
+// graph used in actual calculation
 class SpliceGraph {
 public:
 
@@ -192,12 +194,13 @@ public:
 	// TODO: get stuff out of MCMC results
 	vector<IsoformMap> mcmc_results;
 
-	vector<ulong> start_nodes;
-
 	// "distance" of each node from a
 	// source vertex, can be a mixture of
 	// distances
 	vector<double> dist_from_starts;
+
+	// number of isoforms that can start from a node
+	vector<ulong> vert_isof_counts; // XXX: is ulong too small?
 
 	inline void setup() {
 		boost::transitive_closure(graph, tc);
