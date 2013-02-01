@@ -206,8 +206,9 @@ public:
 	// distances
 	vector<double> dist_from_starts;
 
+	typedef ulong IsofCount; // XXX: is ulong too small?
 	// number of isoforms that can start from a node
-	vector<ulong> vert_isof_counts; // XXX: is ulong too small?
+	vector<IsofCount> vert_isof_counts;
 
 	inline void setup() {
 		try {
@@ -219,25 +220,6 @@ public:
 			ulong vert_num = num_vertices(graph);
 
 			dist_from_starts.assign(vert_num, 0);
-
-			// count vert_isof_counts, similar to Floyd-Warshall
-			vert_isof_counts.assign(vert_num, 0);
-
-			vector<vector<ulong> > from_to_isof_counts(vert_num,
-					vector<ulong>(vert_num, 0));
-
-			{
-				vector<ulong>::iterator vert_isof_counts_iter =
-						vert_isof_counts.begin();
-
-#ifdef DEBUG
-				if (vert_isof_counts_iter != vert_isof_counts.end()) {
-					cerr << "vert_isof_counts_iter" << endl;
-					throw IteratorEndError();
-				}
-#endif
-			}
-			//TODO:
 
 			for (vector<DGVertex>::const_iterator i = topo_sort.begin();
 					i != topo_sort.end(); ++i) {
@@ -258,6 +240,8 @@ public:
 
 			}
 
+			_count_vert_isof();
+
 #ifdef DEBUG
 			// print out distance info
 			cerr << "distances from starts\n";
@@ -265,9 +249,7 @@ public:
 				cerr << i << ":" << dist_from_starts[i] << endl;
 			}
 			cerr << "######\n";
-#endif
 
-#ifdef DEBUG
 			cerr << "graph id: " << graph_id << endl;
 			print_graph(graph);
 #endif
@@ -280,6 +262,39 @@ public:
 	}
 
 private:
+	inline void _count_vert_isof() {
+		// count vert_isof_counts, similar to Floyd-Warshall
+
+		ulong vert_num = num_vertices(graph);
+
+		vector<vector<IsofCount> > from_to_isof_counts(vert_num,
+				vector<IsofCount>(vert_num, 0));
+
+		//TODO:
+
+		vert_isof_counts.assign(vert_num, 0);
+
+		vector<IsofCount>::iterator vert_isof_counts_iter =
+				vert_isof_counts.begin();
+
+		for (vector<vector<IsofCount> >::const_iterator i =
+				from_to_isof_counts.begin(); i != from_to_isof_counts.end();
+				++i, ++vert_isof_counts_iter) {
+			for (vector<IsofCount>::const_iterator j = i->begin();
+					j != i->end(); ++j) {
+				(*vert_isof_counts_iter) += (*j);
+			}
+		}
+
+#ifdef DEBUG
+		if (vert_isof_counts_iter != vert_isof_counts.end()) {
+			cerr << "vert_isof_counts_iter" << endl;
+			throw IteratorEndError();
+		}
+#endif
+
+	}
+
 	inline void _set_dist_from_starts(ulong cur_vert,
 			double dfs /* dist from start*/) {
 
