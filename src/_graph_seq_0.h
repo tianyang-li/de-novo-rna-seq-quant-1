@@ -44,6 +44,7 @@
 #include <boost/unordered_map.hpp>
 
 #include "_misc_0.h"
+#include "_err_0.h"
 
 namespace _graph_seq_0 {
 
@@ -58,6 +59,10 @@ using boost::in_degree;
 using boost::tie;
 using boost::out_edges;
 using std::exception;
+
+#ifdef DEBUG
+using _err_0::IteratorEndError;
+#endif
 
 }
 
@@ -211,11 +216,27 @@ public:
 			boost::topological_sort(graph, std::back_inserter(topo_sort));
 			std::reverse(topo_sort.begin(), topo_sort.end());
 
-			dist_from_starts.assign(num_vertices(graph), 0);
+			ulong vert_num = num_vertices(graph);
+
+			dist_from_starts.assign(vert_num, 0);
 
 			// count vert_isof_counts, similar to Floyd-Warshall
-			vert_isof_counts.assign(num_vertices(graph), 0);
+			vert_isof_counts.assign(vert_num, 0);
 
+			vector<vector<ulong> > from_to_isof_counts(vert_num,
+					vector<ulong>(vert_num, 0));
+
+			{
+				vector<ulong>::iterator vert_isof_counts_iter =
+						vert_isof_counts.begin();
+
+#ifdef DEBUG
+				if (vert_isof_counts_iter != vert_isof_counts.end()) {
+					cerr << "vert_isof_counts_iter" << endl;
+					throw IteratorEndError();
+				}
+#endif
+			}
 			//TODO:
 
 			for (vector<DGVertex>::const_iterator i = topo_sort.begin();

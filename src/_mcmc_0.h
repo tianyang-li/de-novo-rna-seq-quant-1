@@ -38,6 +38,7 @@
 
 #include "_graph_seq_0.h"
 #include "_misc_0.h"
+#include "_err_0.h"
 
 namespace _mcmc_0 {
 
@@ -82,6 +83,10 @@ using _graph_seq_0::IsoformHash;
 using std::exception;
 using _graph_seq_0::SeqConstraintHash;
 
+#ifdef DEBUG
+using _err_0::IteratorEndError;
+#endif
+
 }
 
 namespace _mcmc_0 {
@@ -91,13 +96,6 @@ class ReadConstraintError: public exception {
 public:
 	inline virtual char const * what() const throw () {
 		return "ReadConstraintError:\nRead constraint violated!\n";
-	}
-};
-
-class IteratorEndError: public exception {
-public:
-	inline virtual char const * what() const throw () {
-		return "IteratorEndError:\n iterator didn't reach end as expected!\n";
 	}
 };
 
