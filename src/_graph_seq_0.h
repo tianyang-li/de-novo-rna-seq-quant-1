@@ -243,7 +243,7 @@ public:
 			_count_vert_isof();
 
 #ifdef DEBUG
-			// print out distance info
+			cerr << "########\n";
 			cerr << "distances from starts\n";
 			for (ulong i = 0; i != dist_from_starts.size(); ++i) {
 				cerr << i << ":" << dist_from_starts[i] << endl;
@@ -252,6 +252,15 @@ public:
 
 			cerr << "graph id: " << graph_id << endl;
 			print_graph(graph);
+
+			cerr << "########\n";
+			cerr << "topological sort\n";
+			for (vector<ulong>::const_iterator i = topo_sort.begin();
+					i != topo_sort.end(); ++i) {
+				cerr << *i << "\t";
+			}
+			cerr << endl;
+			cerr << "########\n";
 #endif
 
 		} catch (exception &e) {
@@ -269,6 +278,18 @@ private:
 
 		vector<vector<IsofCount> > from_to_isof_counts(vert_num,
 				vector<IsofCount>(vert_num, 0));
+
+		for (ulong cur_start_ind = 0; cur_start_ind != topo_sort.size();
+				++cur_start_ind) {
+			// current starting vertex is topo_sort[cur_start]
+
+			ulong cur_start = topo_sort[cur_start_ind];
+
+			from_to_isof_counts[cur_start][cur_start] = 1;
+
+			for (ulong i = cur_start_ind + 1; i != topo_sort.size(); ++i) {
+			}
+		}
 
 		//TODO:
 
