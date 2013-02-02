@@ -283,55 +283,26 @@ private:
 
 		ulong vert_num = num_vertices(graph);
 
-		vector<vector<IsofCount> > from_to_isof_counts(vert_num,
-				vector<IsofCount>(vert_num, 0));
-
-		for (ulong cur_start_ind = 0; cur_start_ind != topo_sort.size();
-				++cur_start_ind) {
-			// current starting vertex is topo_sort[cur_start]
-
-			ulong cur_start = topo_sort[cur_start_ind];
-
-			from_to_isof_counts[cur_start][cur_start] = 1;
-
-			for (ulong i = cur_start_ind + 1; i != topo_sort.size(); ++i) {
-
-				ulong cur_reached = topo_sort[i];
-
-				DGInEdgeIter in_i, in_end;
-				for (tie(in_i, in_end) = boost::in_edges(cur_reached, graph);
-						in_i != in_end; ++in_i) {
-
-					// edge: src_i -> cur_reached
-					ulong src_i = boost::source(*in_i, graph);
-
-					from_to_isof_counts[cur_start][cur_reached] +=
-							from_to_isof_counts[cur_start][src_i];
-
-				}
-			}
-		}
-
 		vert_isof_counts.assign(vert_num, 0);
 
-		vector<IsofCount>::iterator vert_isof_counts_iter =
-				vert_isof_counts.begin();
+		for (vector<ulong>::const_reverse_iterator cur_start_iter =
+				topo_sort.rbegin(); cur_start_iter != topo_sort.rend();
+				++cur_start_iter) {
 
-		for (vector<vector<IsofCount> >::const_iterator i =
-				from_to_isof_counts.begin(); i != from_to_isof_counts.end();
-				++i, ++vert_isof_counts_iter) {
-			for (vector<IsofCount>::const_iterator j = i->begin();
-					j != i->end(); ++j) {
-				(*vert_isof_counts_iter) += (*j);
+			vert_isof_counts[*cur_start_iter] += 1;
+
+			DGOutEdgeIter out_i, out_end;
+
+			for (tie(out_i, out_end) = boost::out_edges(*cur_start_iter, graph);
+					out_i != out_end; ++out_i) {
+
+				// edge: *cur_start_iter -> targ
+				ulong targ = boost::target(*out_i, graph);
+
+				vert_isof_counts[*cur_start_iter] += vert_isof_counts[targ];
 			}
-		}
 
-#ifdef DEBUG
-		if (vert_isof_counts_iter != vert_isof_counts.end()) {
-			cerr << "vert_isof_counts_iter" << endl;
-			throw IteratorEndError();
 		}
-#endif
 
 	}
 
