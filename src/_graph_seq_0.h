@@ -261,6 +261,13 @@ public:
 			}
 			cerr << endl;
 			cerr << "########\n";
+
+			cerr << "number of isoforms starting from a vertex\n";
+			for (ulong i = 0; i != vert_isof_counts.size(); ++i) {
+				cerr << i << ":" << vert_isof_counts[i] << endl;
+			}
+
+			cerr << "########\n";
 #endif
 
 		} catch (exception &e) {
@@ -288,10 +295,22 @@ private:
 			from_to_isof_counts[cur_start][cur_start] = 1;
 
 			for (ulong i = cur_start_ind + 1; i != topo_sort.size(); ++i) {
+
+				ulong cur_reached = topo_sort[i];
+
+				DGInEdgeIter in_i, in_end;
+				for (tie(in_i, in_end) = boost::in_edges(cur_reached, graph);
+						in_i != in_end; ++in_i) {
+
+					// edge: src_i -> cur_reached
+					ulong src_i = boost::source(*in_i, graph);
+
+					from_to_isof_counts[cur_start][cur_reached] +=
+							from_to_isof_counts[cur_start][src_i];
+
+				}
 			}
 		}
-
-		//TODO:
 
 		vert_isof_counts.assign(vert_num, 0);
 
