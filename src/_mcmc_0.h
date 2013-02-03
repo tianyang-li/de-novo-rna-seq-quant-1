@@ -193,13 +193,6 @@ public:
 
 };
 
-// an isoform's information in MCMC
-class IsofInfo {
-public:
-};
-
-typedef unordered_map<Isoform, IsofInfo, IsoformHash> IsofInfoMap;
-
 // given read constraint
 // and graph, get a random isoform
 // that satisfies the constraint
