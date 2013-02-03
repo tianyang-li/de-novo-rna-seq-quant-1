@@ -193,6 +193,13 @@ public:
 
 };
 
+// an isoform's information in MCMC
+class IsofInfo {
+public:
+};
+
+typedef unordered_map<Isoform, IsofInfo, IsoformHash> IsofInfoMap;
+
 // given read constraint
 // and graph, get a random isoform
 // that satisfies the constraint
@@ -703,7 +710,7 @@ inline double get_possible_isoform_weight(IsoformMap const &prop_graph_ratio,
 
 	double poss_isof_w = 0;
 
-	// similar to Floyd-Warshall
+	// similar to SpliceGraph::_count_vert_isof()
 
 	// TODO
 
