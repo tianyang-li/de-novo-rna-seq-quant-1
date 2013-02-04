@@ -699,7 +699,8 @@ template<class RNodeLoc>
 inline double get_possible_isoform_weight(IsoformMap const &prop_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
-		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, ulong start_vert) {
+		vector<ReadInGraph<RNodeLoc> > const &read_in_graph, ulong start_vert,
+		vector<SpliceGraph::IsofCount> const &graph_vert_isof_count) {
 
 	double poss_isof_w = 0;
 
@@ -719,7 +720,8 @@ inline void get_vert_start_info(IsoformMap const &prop_graph_ratio,
 		GraphInfo const &graph_info, SpliceGraph const &graph,
 		GraphReads const &graph_read,
 		vector<ReadInGraph<RNodeLoc> > const &read_in_graph,
-		double * const vert_start_probs /* filled with 0's */) {
+		double * const vert_start_probs /* filled with 0's */,
+		vector<SpliceGraph::IsofCount> const &graph_vert_isof_count) {
 
 	for (vector<DGVertex>::const_iterator i = graph.topo_sort.begin();
 			i != graph.topo_sort.end(); ++i) {
@@ -727,7 +729,8 @@ inline void get_vert_start_info(IsoformMap const &prop_graph_ratio,
 		// weight of possible isoforms starting
 		// from vertex @i
 		double poss_isof_w = get_possible_isoform_weight(prop_graph_ratio,
-				graph_info, graph, graph_read, read_in_graph, *i);
+				graph_info, graph, graph_read, read_in_graph, *i,
+				graph_vert_isof_count);
 
 		vert_start_probs[*i] = poss_isof_w * dist_from_start_weight(*i, graph);
 
@@ -919,7 +922,8 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 		unordered_map<Isoform, ulong, IsoformHash> &isof_lens,
 		IsofDelProbs const &isof_del_probs /* this is already set */,
 		double * &new_vert_start_probs /* memory not yet allocated */,
-		Isoform &del_isoform /* isoform to delete */) {
+		Isoform &del_isoform /* isoform to delete */,
+		vector<SpliceGraph::IsofCount> const &graph_vert_isof_count) {
 
 	ulong num_graph_vert = num_vertices(graph.graph);
 
@@ -956,7 +960,7 @@ inline double del_isof_ratio(IsoformMap const &graph_isoform,
 	fill(new_vert_start_probs, new_vert_start_probs + num_graph_vert, 0);
 
 	get_vert_start_info(new_prop_ratio, graph_info, graph, graph_read,
-			read_in_graph, new_vert_start_probs);
+			read_in_graph, new_vert_start_probs, graph_vert_isof_count);
 
 	// update @model_graph_ratio
 	// TODO
@@ -982,7 +986,8 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 		double * const vert_start_probs, IsofDelProbs const &isof_del_probs,
 		double * &new_vert_start_probs, IsofDelProbs &new_isof_del_probs,
 		GraphAction &action,
-		Isoform &isof_mod /* added or deleted isoform, all 0's */) {
+		Isoform &isof_mod /* added or deleted isoform, all 0's */,
+		vector<SpliceGraph::IsofCount> const &graph_vert_isof_count) {
 
 	double partial_mcmc_ratio;
 
@@ -1073,7 +1078,7 @@ inline double update_chosen_graph_isoform(IsoformMap const &graph_isoform,
 							prop_graph_ratio, graph_info, graph, graph_read,
 							read_in_graph, rn, new_graph_isof, new_prop_ratio,
 							isof_lens, isof_del_probs, new_vert_start_probs,
-							isof_mod);
+							isof_mod, graph_vert_isof_count);
 				} catch (exception &e) {
 					cerr << e.what() << endl;
 				}
@@ -1235,12 +1240,7 @@ inline void isoform_MCMC_init(
 					j != isof_set_iter->end(); ++j) {
 				cerr << j->first << endl;
 			}
-			cerr << "#########\nhere are the isoform counts\n";
-			for (vector<SpliceGraph::IsofCount>::const_iterator j = i->begin();
-					j != i->end(); ++j) {
-				cerr << j - i->begin() << ":" << *j << "\t";
-			}
-			cerr << "\n#########" << endl;
+			cerr << "#########" << endl;
 #endif
 
 		}
@@ -1443,19 +1443,26 @@ inline void isoform_MCMC_init(
 					prop_graph_ratios.begin();
 			vector<GraphReads>::const_iterator graph_read_iter =
 					graph_reads.begin();
+			vector<vector<SpliceGraph::IsofCount> >::const_iterator graph_vert_isof_count_iter =
+					graph_vert_isof_counts.begin();
 
 			for (vector<double *>::iterator i = vec_vert_start_probs.begin();
 					i != vec_vert_start_probs.end();
-					++i, ++graph_iter, ++graph_info_iter, ++prop_ratio_iter, ++graph_read_iter) {
+					++i, ++graph_iter, ++graph_info_iter, ++prop_ratio_iter, ++graph_read_iter, ++graph_vert_isof_count_iter) {
 
 				(*i) = new double[num_vertices(graph_iter->graph)];
 
 				get_vert_start_info(*prop_ratio_iter, *graph_info_iter,
-						*graph_iter, *graph_read_iter, read_in_graph, *i);
+						*graph_iter, *graph_read_iter, read_in_graph, *i,
+						*graph_vert_isof_count_iter);
 
 			}
 
 #ifdef DEBUG
+			if (graph_vert_isof_count_iter != graph_vert_isof_counts.end()) {
+				cerr << "graph_vert_isof_count_iter" << endl;
+				throw IteratorEndError();
+			}
 			if (graph_iter != graphs.end()) {
 				cerr << "graph_iter" << endl;
 				throw IteratorEndError();
@@ -1647,7 +1654,7 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 						vec_vert_start_probs[chosen_graph_ind],
 						vec_isof_del_probs[chosen_graph_ind],
 						new_vert_start_probs, new_isof_del_probs, action,
-						isof_mod);
+						isof_mod, graph_vert_isof_counts[chosen_graph_ind]);
 
 				double new_chosen_graph_portion = 1.0;
 				if (graph_num != 1) {
@@ -1681,7 +1688,8 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 								graph_infos[chosen_graph_ind],
 								graphs[chosen_graph_ind],
 								graph_reads[chosen_graph_ind], read_in_graph,
-								vec_vert_start_probs[chosen_graph_ind]);
+								vec_vert_start_probs[chosen_graph_ind],
+								graph_vert_isof_counts[chosen_graph_ind]);
 
 						vec_isof_del_probs[chosen_graph_ind].del_probs();
 						vec_isof_del_probs[chosen_graph_ind] =
