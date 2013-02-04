@@ -351,7 +351,7 @@ inline void get_prop_graph_ratio(
 	// and Barbara Wold. Mapping and quantifying mammalian
 	// transcriptomes by RNA-seq. Nature Methods, 5(7):621–628, May 2008.
 
-	// TODO: change how weights are chosen?
+	// XXX: change how weights are chosen?
 	// XXX: are weights correct?
 
 	double const kIsofInitWeight = 1.0;
@@ -1198,7 +1198,8 @@ inline void isoform_MCMC_init(
 	try {
 		// count the number of isoforms starting from each vertex
 
-		vector<IsoformMap>::iterator isof_set_iter = graph_isoforms.begin();
+		vector<IsoformMap>::const_iterator isof_set_iter =
+				graph_isoforms.begin();
 		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
 
 		for (vector<vector<SpliceGraph::IsofCount> >::iterator i =
@@ -1206,7 +1207,42 @@ inline void isoform_MCMC_init(
 				i != graph_vert_isof_counts.end();
 				++i, ++isof_set_iter, ++graph_iter) {
 
-			// TODO
+			i->assign(num_vertices(graph_iter->graph), 0);
+
+			for (IsoformMap::const_iterator j = isof_set_iter->begin();
+					j != isof_set_iter->end(); ++j) {
+
+				vector<ulong>::const_iterator k = graph_iter->topo_sort.begin();
+
+				while (!j->first[*k]) {
+					++k;
+#ifdef DEBUG
+					if (k == graph_iter->topo_sort.end()) {
+						cerr
+								<< "vector<ulong>::const_iterator k = graph_iter->topo_sort.begin();"
+								<< endl;
+						throw IteratorEndError();
+					}
+#endif
+				}
+
+				(*i)[*k] += 1;
+			}
+
+#ifdef DEBUG
+			cerr << "########\nthese are the isoforms\n";
+			for (IsoformMap::const_iterator j = isof_set_iter->begin();
+					j != isof_set_iter->end(); ++j) {
+				cerr << j->first << endl;
+			}
+			cerr << "#########\nhere are the isoform counts\n";
+			for (vector<SpliceGraph::IsofCount>::const_iterator j = i->begin();
+					j != i->end(); ++j) {
+				cerr << j - i->begin() << ":" << *j << "\t";
+			}
+			cerr << "\n#########" << endl;
+#endif
+
 		}
 
 #ifdef DEBUG
