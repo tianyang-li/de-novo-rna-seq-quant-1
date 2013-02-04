@@ -1138,7 +1138,8 @@ inline void isoform_MCMC_init(
 		vector<unordered_map<Isoform, ulong, IsoformHash> > &graph_isof_lens,
 		vector<unordered_map<SeqConstraint, ulong, SeqConstraintHash> > &rc_isof_counts,
 		vector<double *> &vec_vert_start_probs,
-		vector<IsofDelProbs> &vec_isof_del_probs) {
+		vector<IsofDelProbs> &vec_isof_del_probs,
+		vector<vector<SpliceGraph::IsofCount> > &graph_vert_isof_counts) {
 
 #ifdef DEBUG
 	cerr << "enter isoform_MCMC_init\n";
@@ -1185,6 +1186,36 @@ inline void isoform_MCMC_init(
 #ifdef DEBUG
 		if (isof_set_iter != graph_isoforms.end()) {
 			cerr << "isof_set_iter" << endl;
+			throw IteratorEndError();
+		}
+#endif
+
+	} catch (exception &e) {
+		cerr << e.what() << endl;
+		throw;
+	}
+
+	try {
+		// count the number of isoforms starting from each vertex
+
+		vector<IsoformMap>::iterator isof_set_iter = graph_isoforms.begin();
+		vector<SpliceGraph>::const_iterator graph_iter = graphs.begin();
+
+		for (vector<vector<SpliceGraph::IsofCount> >::iterator i =
+				graph_vert_isof_counts.begin();
+				i != graph_vert_isof_counts.end();
+				++i, ++isof_set_iter, ++graph_iter) {
+
+			// TODO
+		}
+
+#ifdef DEBUG
+		if (isof_set_iter != graph_isoforms.end()) {
+			cerr << "isof_set_iter" << endl;
+			throw IteratorEndError();
+		}
+		if (graph_iter != graphs.end()) {
+			cerr << "graph_iter" << endl;
 			throw IteratorEndError();
 		}
 #endif
@@ -1531,9 +1562,14 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 			// is the probability of deleting an isoform from the current set
 			vector<IsofDelProbs> vec_isof_del_probs(graph_num);
 
+			// for each graph, count the number of isoforms starting from each vertex
+			vector<vector<SpliceGraph::IsofCount> > graph_vert_isof_counts(
+					graph_num);
+
 			isoform_MCMC_init(read_in_graph, graph_reads, graph_infos, graphs,
 					rn, graph_isoforms, prop_graph_ratios, graph_isof_lens,
-					rc_isof_counts, vec_vert_start_probs, vec_isof_del_probs);
+					rc_isof_counts, vec_vert_start_probs, vec_isof_del_probs,
+					graph_vert_isof_counts);
 
 			vector<vector<IsoformMap> > mcmc_results;
 
@@ -1562,8 +1598,6 @@ inline void isoform_main(vector<GraphInfo> const &graph_infos,
 
 				// the isoform added or deleted
 				Isoform isof_mod(num_vertices(graphs[chosen_graph_ind].graph));
-
-				vector<IsoformMap::const_iterator> new_isof_del_probs_ind;
 
 				// the ratio of adding or deleting an isoform
 				double model_graph_ratio = update_chosen_graph_isoform(
