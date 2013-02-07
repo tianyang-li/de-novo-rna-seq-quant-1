@@ -706,6 +706,11 @@ inline double get_possible_isoform_weight(IsoformMap const &prop_graph_ratio,
 
 	// similar to SpliceGraph::_count_vert_isof()
 
+	if (graph_vert_isof_count[start_vert]
+			== graph.vert_isof_counts[start_vert]) {
+		return 0;
+	}
+
 	// TODO
 
 	return poss_isof_w;
