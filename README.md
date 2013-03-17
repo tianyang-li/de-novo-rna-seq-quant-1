@@ -1,7 +1,7 @@
 de-novo-rna-seq-quant-1
 =======================
 
-This is a tool used for Bayesian de novo transcript reconstruction and abundance estimation from RNA-Seq data.
+*De novo* transcript reconstruction and abundance estimation in eukaryotic RNA-Seq data analysis
 
 This program requires
 
